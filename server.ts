@@ -120,6 +120,63 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok", appName: "Isekai Worlds", timestamp: new Date().toISOString() });
 });
 
+// Cloud Sync endpoints for Mobile & PC synchronization
+const cleanSyncKey = (key: string) => {
+  return (key || "").trim().toLowerCase().replace(/[^a-z0-9_-]/g, "");
+};
+
+app.post("/api/sync/save", (req, res) => {
+  try {
+    const { syncKey, profile, settings, amvPlaylist, activeSeconds } = req.body;
+    const cleanKey = cleanSyncKey(syncKey);
+    if (!cleanKey) {
+      return res.status(400).json({ error: "Invalid syncKey. Use letters, numbers, hyphens or underscores." });
+    }
+
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+
+    const syncFile = path.join(DATA_DIR, `sync-${cleanKey}.json`);
+    const payload = {
+      syncKey: cleanKey,
+      profile: profile || null,
+      settings: settings || null,
+      amvPlaylist: amvPlaylist || null,
+      activeSeconds: typeof activeSeconds === "number" ? activeSeconds : null,
+      lastSynced: new Date().toISOString()
+    };
+
+    fs.writeFileSync(syncFile, JSON.stringify(payload, null, 2), "utf-8");
+    res.json({ success: true, message: `State synced successfully for '${cleanKey}'`, lastSynced: payload.lastSynced });
+  } catch (error: any) {
+    console.error("Cloud sync save error:", error);
+    res.status(500).json({ error: "Failed to save cloud sync state", details: error.message });
+  }
+});
+
+app.get("/api/sync/load", (req, res) => {
+  try {
+    const syncKey = req.query.syncKey as string;
+    const cleanKey = cleanSyncKey(syncKey);
+    if (!cleanKey) {
+      return res.status(400).json({ error: "Invalid syncKey" });
+    }
+
+    const syncFile = path.join(DATA_DIR, `sync-${cleanKey}.json`);
+    if (fs.existsSync(syncFile)) {
+      const content = fs.readFileSync(syncFile, "utf-8");
+      const parsed = JSON.parse(content);
+      return res.json({ success: true, data: parsed });
+    } else {
+      return res.status(404).json({ success: false, error: "Sync data not found for this key" });
+    }
+  } catch (error: any) {
+    console.error("Cloud sync load error:", error);
+    res.status(500).json({ error: "Failed to load cloud sync state", details: error.message });
+  }
+});
+
 // 2. AI Language Translation Route using Gemini
 app.post("/api/translate", async (req, res) => {
   try {

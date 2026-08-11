@@ -224,6 +224,154 @@ export default function App() {
     }, 800);
   };
 
+  // Cloud Sync state and handlers
+  const [syncKey, setSyncKey] = useState<string>(() => {
+    try {
+      return localStorage.getItem("isekai_sync_key") || "";
+    } catch {
+      return "";
+    }
+  });
+
+  const [lastSyncedTime, setLastSyncedTime] = useState<string>(() => {
+    try {
+      return localStorage.getItem("isekai_last_synced") || "";
+    } catch {
+      return "";
+    }
+  });
+
+  const handleCloudSave = async (key: string): Promise<{ success: boolean; message: string; lastSynced?: string }> => {
+    const cleanKey = key.trim().toLowerCase().replace(/[^a-z0-9_-]/g, "");
+    if (!cleanKey) {
+      return { success: false, message: "Invalid key format." };
+    }
+
+    try {
+      // Read custom AMV playlist from localStorage directly
+      let amvPlaylist = [];
+      try {
+        const savedPlaylist = localStorage.getItem("isekai_amv_playlist");
+        if (savedPlaylist) amvPlaylist = JSON.parse(savedPlaylist);
+      } catch (e) {
+        console.warn("Failed to read AMV playlist for cloud sync:", e);
+      }
+
+      const res = await fetch("/api/sync/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          syncKey: cleanKey,
+          profile,
+          settings,
+          amvPlaylist,
+          activeSeconds
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        localStorage.setItem("isekai_sync_key", cleanKey);
+        localStorage.setItem("isekai_last_synced", data.lastSynced);
+        setSyncKey(cleanKey);
+        setLastSyncedTime(data.lastSynced);
+        return { success: true, message: data.message, lastSynced: data.lastSynced };
+      } else {
+        return { success: false, message: data.error || "Failed to save state to server." };
+      }
+    } catch (err: any) {
+      console.error("Cloud sync save fetch error:", err);
+      return { success: false, message: err.message || "Network error occurred." };
+    }
+  };
+
+  const handleCloudLoad = async (key: string): Promise<{ success: boolean; error?: string }> => {
+    const cleanKey = key.trim().toLowerCase().replace(/[^a-z0-9_-]/g, "");
+    if (!cleanKey) {
+      return { success: false, error: "Invalid key format." };
+    }
+
+    try {
+      const res = await fetch(`/api/sync/load?syncKey=${encodeURIComponent(cleanKey)}`);
+      const resJson = await res.json();
+
+      if (res.ok && resJson.success && resJson.data) {
+        const payload = resJson.data;
+
+        // Apply to localStorage
+        if (payload.profile) {
+          localStorage.setItem("isekai_user_profile", JSON.stringify(payload.profile));
+          setProfile(payload.profile);
+        }
+        if (payload.settings) {
+          localStorage.setItem("isekai_app_settings", JSON.stringify(payload.settings));
+          setSettings(payload.settings);
+        }
+        if (payload.amvPlaylist) {
+          localStorage.setItem("isekai_amv_playlist", JSON.stringify(payload.amvPlaylist));
+        }
+        if (typeof payload.activeSeconds === "number") {
+          localStorage.setItem("isekai_active_seconds", payload.activeSeconds.toString());
+          setActiveSeconds(payload.activeSeconds);
+        }
+
+        localStorage.setItem("isekai_sync_key", cleanKey);
+        localStorage.setItem("isekai_last_synced", payload.lastSynced || new Date().toISOString());
+        setSyncKey(cleanKey);
+        setLastSyncedTime(payload.lastSynced || new Date().toISOString());
+
+        return { success: true };
+      } else {
+        return { success: false, error: resJson.error || "No sync data found for this key." };
+      }
+    } catch (err: any) {
+      console.error("Cloud sync load fetch error:", err);
+      return { success: false, error: err.message || "Network error occurred." };
+    }
+  };
+
+  // On mount, auto-sync from cloud if a sync key exists
+  useEffect(() => {
+    const savedSyncKey = localStorage.getItem("isekai_sync_key");
+    if (savedSyncKey) {
+      fetch(`/api/sync/load?syncKey=${encodeURIComponent(savedSyncKey)}`)
+        .then((res) => res.json())
+        .then((resJson) => {
+          if (resJson.success && resJson.data) {
+            const payload = resJson.data;
+            if (payload.profile) {
+              setProfile(payload.profile);
+              localStorage.setItem("isekai_user_profile", JSON.stringify(payload.profile));
+            }
+            if (payload.settings) {
+              setSettings(payload.settings);
+              localStorage.setItem("isekai_app_settings", JSON.stringify(payload.settings));
+            }
+            if (typeof payload.activeSeconds === "number") {
+              setActiveSeconds(payload.activeSeconds);
+              localStorage.setItem("isekai_active_seconds", payload.activeSeconds.toString());
+            }
+            if (payload.lastSynced) {
+              setLastSyncedTime(payload.lastSynced);
+              localStorage.setItem("isekai_last_synced", payload.lastSynced);
+            }
+            console.log("Auto-synced successfully from cloud on mount!");
+          }
+        })
+        .catch((err) => console.warn("Auto-sync on mount failed:", err));
+    }
+  }, []);
+
+  // Whenever profile or settings changes, auto-save to cloud if a sync key is set (debounced)
+  useEffect(() => {
+    if (syncKey) {
+      const timer = setTimeout(() => {
+        handleCloudSave(syncKey);
+      }, 2000); // 2s debounce to avoid excessive writes
+      return () => clearTimeout(timer);
+    }
+  }, [profile, settings]);
+
   const updateProfile = (updates: Partial<UserProfile>) => {
     setProfile((prev) => {
       const updated = { ...prev, ...updates };
@@ -427,6 +575,11 @@ export default function App() {
         settings={settings}
         updateSettings={updateSettings}
         clearCache={clearCache}
+        syncKey={syncKey}
+        setSyncKey={setSyncKey}
+        lastSyncedTime={lastSyncedTime}
+        onCloudSave={handleCloudSave}
+        onCloudLoad={handleCloudLoad}
       />
 
       {/* Daily Missions & Rewards Modal */}

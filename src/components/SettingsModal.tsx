@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { AppSettings, LanguageCode } from "../types";
 import { SUPPORTED_LANGUAGES, getTranslation } from "../utils/i18n";
 import { sfx } from "../utils/sfx";
@@ -14,7 +14,10 @@ import {
   Check,
   Moon,
   Sparkles,
-  Gamepad2
+  Gamepad2,
+  Cloud,
+  Upload,
+  Download
 } from "lucide-react";
 
 interface SettingsModalProps {
@@ -23,6 +26,11 @@ interface SettingsModalProps {
   settings: AppSettings;
   updateSettings: (newSettings: Partial<AppSettings>) => void;
   clearCache: () => void;
+  syncKey?: string;
+  setSyncKey?: (val: string) => void;
+  lastSyncedTime?: string;
+  onCloudSave?: (key: string) => Promise<{ success: boolean; message: string; lastSynced?: string }>;
+  onCloudLoad?: (key: string) => Promise<{ success: boolean; error?: string }>;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -31,12 +39,68 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   settings,
   updateSettings,
   clearCache,
+  syncKey = "",
+  setSyncKey,
+  lastSyncedTime = "",
+  onCloudSave,
+  onCloudLoad,
 }) => {
+  const [localSyncKey, setLocalSyncKey] = useState(syncKey);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
   if (!isOpen) return null;
+
+  const handleSave = async () => {
+    if (!localSyncKey.trim()) return;
+    sfx.playClick();
+    setIsSyncing(true);
+    setSyncStatus(null);
+    try {
+      if (onCloudSave) {
+        const res = await onCloudSave(localSyncKey);
+        if (res.success) {
+          setSyncStatus({ type: "success", message: res.message });
+          if (setSyncKey) setSyncKey(localSyncKey);
+        } else {
+          setSyncStatus({ type: "error", message: res.message });
+        }
+      }
+    } catch {
+      setSyncStatus({ type: "error", message: "An unexpected error occurred during sync." });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const handleLoad = async () => {
+    if (!localSyncKey.trim()) return;
+    sfx.playWarp();
+    setIsSyncing(true);
+    setSyncStatus(null);
+    try {
+      if (onCloudLoad) {
+        const res = await onCloudLoad(localSyncKey);
+        if (res.success) {
+          setSyncStatus({ type: "success", message: "State synchronized! Reloading page to apply changes..." });
+          if (setSyncKey) setSyncKey(localSyncKey);
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        } else {
+          setSyncStatus({ type: "error", message: res.error || "Sync data not found." });
+        }
+      }
+    } catch {
+      setSyncStatus({ type: "error", message: "An unexpected error occurred during restore." });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xl">
-      <div className="relative max-w-lg w-full bg-slate-900 border border-indigo-500/30 rounded-3xl p-6 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+      <div className="relative max-w-lg w-full bg-slate-900 border border-indigo-500/30 rounded-3xl p-6 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-800 pb-4">
           <div className="flex items-center gap-2">
@@ -58,6 +122,66 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
         {/* Options List */}
         <div className="space-y-4 text-xs font-mono">
+          {/* Cloud Sync & PC-Mobile Synchronization */}
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/40 via-slate-950 to-indigo-950/40 border border-purple-500/30 space-y-3">
+            <div className="flex items-center gap-2">
+              <Cloud className="w-5 h-5 text-purple-400 animate-pulse" />
+              <div className="space-y-0.5">
+                <span className="text-slate-200 font-bold block">PC & Mobile Cloud Sync</span>
+                <span className="text-slate-400 text-[10px]">Synchronize settings, profiles, and AMV playlists instantly</span>
+              </div>
+            </div>
+
+            <div className="space-y-2 pt-1">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase">Your Custom Sync Key</label>
+                <input
+                  type="text"
+                  placeholder="Enter a unique code (e.g. isekai-mdv)"
+                  value={localSyncKey}
+                  onChange={(e) => setLocalSyncKey(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors"
+                />
+              </div>
+
+              {syncStatus && (
+                <div className={`text-[11px] font-mono p-2.5 rounded-xl border ${
+                  syncStatus.type === "success" 
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                    : "bg-rose-500/10 border-rose-500/30 text-rose-300"
+                }`}>
+                  {syncStatus.message}
+                </div>
+              )}
+
+              {lastSyncedTime && (
+                <div className="text-[10px] text-slate-500 font-mono text-right">
+                  Last Synced: {new Date(lastSyncedTime).toLocaleString()}
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={isSyncing || !localSyncKey.trim()}
+                  className="py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold uppercase flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer"
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>{isSyncing ? "Saving..." : "Backup to Cloud"}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleLoad}
+                  disabled={isSyncing || !localSyncKey.trim()}
+                  className="py-2.5 bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-slate-300 border border-slate-800 hover:border-slate-700 rounded-xl text-xs font-bold uppercase flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>{isSyncing ? "Loading..." : "Restore State"}</span>
+                </button>
+              </div>
+            </div>
+          </div>
           {/* Language Selection */}
           <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
             <div className="flex items-center justify-between">

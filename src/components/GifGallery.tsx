@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { AnimeGif } from "../types";
 import { sfx } from "../utils/sfx";
+import { fetchGifsApi } from "../utils/api";
 import {
   Film,
   Search,
@@ -164,26 +165,21 @@ export const GifGallery: React.FC = () => {
     }
 
     try {
-      const res = await fetch(`/api/gifs?q=${encodeURIComponent(queryStr)}&page=${pageNum}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.gifs && data.gifs.length > 0) {
-          if (append) {
-            setGifs((prev) => {
-              const existingIds = new Set(prev.map((g) => g.id));
-              const newItems = data.gifs.filter((g: AnimeGif) => !existingIds.has(g.id));
-              return [...prev, ...newItems];
-            });
-          } else {
-            setGifs(data.gifs);
-          }
-          setHasMorePages(data.hasMore !== false);
+      const result = await fetchGifsApi(queryStr, pageNum);
+      if (result.gifs && result.gifs.length > 0) {
+        if (append) {
+          setGifs((prev) => {
+            const existingIds = new Set(prev.map((g) => g.id));
+            const newItems = result.gifs.filter((g: AnimeGif) => !existingIds.has(g.id));
+            return [...prev, ...newItems];
+          });
         } else {
-          if (!append) setGifs(FALLBACK_GIFS);
-          setHasMorePages(false);
+          setGifs(result.gifs);
         }
+        setHasMorePages(result.hasMore);
       } else {
         if (!append) setGifs(FALLBACK_GIFS);
+        setHasMorePages(false);
       }
     } catch (err) {
       console.error("Error fetching GIFs:", err);

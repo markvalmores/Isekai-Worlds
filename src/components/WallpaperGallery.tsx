@@ -3,6 +3,7 @@ import { AnimeWallpaper, UserProfile } from "../types";
 import { CommentSection } from "./CommentSection";
 import { InteractiveZoomPanImage } from "./InteractiveZoomPanImage";
 import { sfx } from "../utils/sfx";
+import { fetchWallpapersApi } from "../utils/api";
 import {
   Image as ImageIcon,
   Search,
@@ -122,19 +123,18 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
         setLoading(true);
       }
 
-      const res = await fetch(`/api/wallpapers?category=${cat}&page=${pageNum}&q=${encodeURIComponent(queryStr)}`);
-      const data = await res.json();
+      const wallpapersList = await fetchWallpapersApi(cat, pageNum, queryStr);
 
-      if (data.wallpapers && data.wallpapers.length > 0) {
+      if (wallpapersList && wallpapersList.length > 0) {
         if (append) {
           // Filter out duplicates by id
           setWallpapers((prev) => {
             const existingIds = new Set(prev.map((w) => w.id));
-            const newOnes = data.wallpapers.filter((w: AnimeWallpaper) => !existingIds.has(w.id));
+            const newOnes = wallpapersList.filter((w: AnimeWallpaper) => !existingIds.has(w.id));
             return [...prev, ...newOnes];
           });
         } else {
-          setWallpapers(data.wallpapers);
+          setWallpapers(wallpapersList);
         }
         setHasMorePages(true);
       } else if (!append) {

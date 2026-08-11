@@ -30,6 +30,7 @@ import {
   CheckCircle2
 } from "lucide-react";
 import { sfx } from "../utils/sfx";
+import { fetchAmvPlaylistApi, cleanPlaylistId } from "../utils/api";
 
 interface AMVVideo {
   id: string; // youtube id or mal video id
@@ -297,18 +298,14 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
     const fetchLivePlaylist = async () => {
       setIsPlaylistLoading(true);
       try {
-        const res = await fetch(`/api/amv/playlist?playlistId=${encodeURIComponent(playlistId)}`);
-        if (res.ok) {
-          const json = await res.json();
-          if (json.videos && Array.isArray(json.videos) && json.videos.length > 0) {
-            const vibes: Array<"hype" | "epic" | "sad" | "chill"> = ["epic", "hype", "sad", "chill"];
-            const mapped: AMVVideo[] = json.videos.map((vid: any, idx: number) => ({
-              ...vid,
-              vibe: vibes[idx % vibes.length]
-            }));
-            setCuratedVideos(mapped);
-            setSelectedVideo(mapped[0]);
-          }
+        const cleanedId = cleanPlaylistId(playlistId);
+        if (cleanedId !== playlistId) {
+          setPlaylistId(cleanedId);
+        }
+        const videos = await fetchAmvPlaylistApi(cleanedId);
+        if (videos && videos.length > 0) {
+          setCuratedVideos(videos as any);
+          setSelectedVideo(videos[0] as any);
         }
       } catch (err) {
         console.error("Failed to load live playlist:", err);

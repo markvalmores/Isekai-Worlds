@@ -127,7 +127,7 @@ const cleanSyncKey = (key: string) => {
 
 app.post("/api/sync/save", (req, res) => {
   try {
-    const { syncKey, profile, settings, amvPlaylist, activeSeconds } = req.body;
+    const { syncKey, profile, settings, amvPlaylist, amvPlaylistId, activeSeconds } = req.body;
     const cleanKey = cleanSyncKey(syncKey);
     if (!cleanKey) {
       return res.status(400).json({ error: "Invalid syncKey. Use letters, numbers, hyphens or underscores." });
@@ -143,6 +143,7 @@ app.post("/api/sync/save", (req, res) => {
       profile: profile || null,
       settings: settings || null,
       amvPlaylist: amvPlaylist || null,
+      amvPlaylistId: amvPlaylistId || null,
       activeSeconds: typeof activeSeconds === "number" ? activeSeconds : null,
       lastSynced: new Date().toISOString()
     };

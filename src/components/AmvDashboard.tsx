@@ -193,7 +193,12 @@ const CURATED_AMVS: AMVVideo[] = [
   }
 ];
 
-export function RadioGagaAMV() {
+interface RadioGagaAMVProps {
+  onCloudSave?: (key: string) => Promise<any>;
+  syncKey?: string;
+}
+
+export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
   const [activeTab, setActiveTab] = useState<"curated" | "popular" | "recent" | "my-playlist" | "ai-match">("curated");
   const [vibeFilter, setVibeFilter] = useState<"hype" | "epic" | "sad" | "chill" | "all">("all");
   const [selectedVideo, setSelectedVideo] = useState<AMVVideo>(CURATED_AMVS[0]);
@@ -214,8 +219,22 @@ export function RadioGagaAMV() {
 
   // Live playlist states
   const [curatedVideos, setCuratedVideos] = useState<AMVVideo[]>(CURATED_AMVS);
-  const [playlistId, setPlaylistId] = useState("PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu");
+  const [playlistId, setPlaylistId] = useState(() => {
+    return localStorage.getItem("isekai_amv_playlist_id") || "PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu";
+  });
   const [isPlaylistLoading, setIsPlaylistLoading] = useState(false);
+
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    localStorage.setItem("isekai_amv_playlist_id", playlistId);
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (onCloudSave && syncKey) {
+      onCloudSave(syncKey);
+    }
+  }, [playlistId, onCloudSave, syncKey]);
 
   // Playlist state
   const [myPlaylist, setMyPlaylist] = useState<AMVVideo[]>(() => {
@@ -234,6 +253,9 @@ export function RadioGagaAMV() {
   const savePlaylist = (list: AMVVideo[]) => {
     setMyPlaylist(list);
     localStorage.setItem("isekai_amv_playlist", JSON.stringify(list));
+    if (onCloudSave && syncKey) {
+      onCloudSave(syncKey);
+    }
   };
 
   // Video verification checker layer

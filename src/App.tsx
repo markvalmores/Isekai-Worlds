@@ -257,6 +257,9 @@ export default function App() {
         console.warn("Failed to read AMV playlist for cloud sync:", e);
       }
 
+      // Read custom AMV playlist ID
+      const amvPlaylistId = localStorage.getItem("isekai_amv_playlist_id") || "PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu";
+
       const res = await fetch("/api/sync/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -265,6 +268,7 @@ export default function App() {
           profile,
           settings,
           amvPlaylist,
+          amvPlaylistId,
           activeSeconds
         })
       });
@@ -310,6 +314,9 @@ export default function App() {
         if (payload.amvPlaylist) {
           localStorage.setItem("isekai_amv_playlist", JSON.stringify(payload.amvPlaylist));
         }
+        if (payload.amvPlaylistId) {
+          localStorage.setItem("isekai_amv_playlist_id", payload.amvPlaylistId);
+        }
         if (typeof payload.activeSeconds === "number") {
           localStorage.setItem("isekai_active_seconds", payload.activeSeconds.toString());
           setActiveSeconds(payload.activeSeconds);
@@ -346,6 +353,9 @@ export default function App() {
             if (payload.settings) {
               setSettings(payload.settings);
               localStorage.setItem("isekai_app_settings", JSON.stringify(payload.settings));
+            }
+            if (payload.amvPlaylistId) {
+              localStorage.setItem("isekai_amv_playlist_id", payload.amvPlaylistId);
             }
             if (typeof payload.activeSeconds === "number") {
               setActiveSeconds(payload.activeSeconds);
@@ -537,7 +547,7 @@ export default function App() {
         )}
 
         {currentPage === "amv" && (
-          <RadioGagaAMV />
+          <RadioGagaAMV onCloudSave={handleCloudSave} syncKey={syncKey} />
         )}
 
         {currentPage === "games" && (

@@ -1,0 +1,6 @@
+{
+  "name": "Isekai Worlds",
+  "description": "The ultimate Isekai anime multiverse platform featuring live anime feeds, HD wallpapers & GIFs, customizable profile dashboard, global active session leaderboards, AI multi-language translation, Smart TV / Console remote controller navigation, VR portal mode, and simulated hardware GPU/CPU RTX path tracing visualizers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

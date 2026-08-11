@@ -1,0 +1,345 @@
+import React from "react";
+import { PageView, LanguageCode, UserProfile, AppSettings } from "../types";
+import { SUPPORTED_LANGUAGES, getTranslation } from "../utils/i18n";
+import { sfx } from "../utils/sfx";
+import {
+  Sparkles,
+  Globe,
+  Tv,
+  Eye,
+  Settings,
+  Cpu,
+  Trophy,
+  Image as ImageIcon,
+  Film,
+  Tv2,
+  UserCheck,
+  Zap,
+  Volume2,
+  VolumeX,
+  Compass,
+  Coins,
+  Crown,
+  Heart,
+  RefreshCw,
+  Gift,
+  Radio,
+  Gamepad2,
+  HardDrive,
+  Layers
+} from "lucide-react";
+
+interface HeaderProps {
+  currentPage: PageView;
+  setCurrentPage: (page: PageView) => void;
+  activeSeconds: number;
+  userRank: number;
+  profile: UserProfile;
+  settings: AppSettings;
+  updateSettings: (newSettings: Partial<AppSettings>) => void;
+  openSettingsModal: () => void;
+  openMissionsModal: () => void;
+  openDonationsModal: () => void;
+  liveActiveUsers?: number;
+  liveTotalVisits?: number;
+}
+
+export const Header: React.FC<HeaderProps> = ({
+  currentPage,
+  setCurrentPage,
+  activeSeconds,
+  userRank,
+  profile,
+  settings,
+  updateSettings,
+  openSettingsModal,
+  openMissionsModal,
+  openDonationsModal,
+  liveActiveUsers = 1,
+  liveTotalVisits = 1,
+}) => {
+  const formatTime = (totalSecs: number) => {
+    const hrs = Math.floor(totalSecs / 3600);
+    const mins = Math.floor((totalSecs % 3600) / 60);
+    const secs = totalSecs % 60;
+    if (hrs > 0) {
+      return `${hrs}h ${mins}m ${secs}s`;
+    }
+    return `${mins}m ${secs}s`;
+  };
+
+  const navItems: { id: PageView; labelKey: string; icon: React.ReactNode }[] = [
+    { id: "home", labelKey: "home", icon: <Compass className="w-4 h-4" /> },
+    { id: "wallpapers", labelKey: "wallpapers", icon: <ImageIcon className="w-4 h-4" /> },
+    { id: "gifs", labelKey: "gifs", icon: <Film className="w-4 h-4" /> },
+    { id: "media", labelKey: "media", icon: <Tv2 className="w-4 h-4" /> },
+    { id: "watch", labelKey: "watch", icon: <Tv className="w-4 h-4" /> },
+    { id: "radio", labelKey: "radio", icon: <Radio className="w-4 h-4" /> },
+    { id: "amv", labelKey: "amv", icon: <Sparkles className="w-4 h-4 text-rose-500" /> },
+    { id: "games", labelKey: "games", icon: <Gamepad2 className="w-4 h-4 text-emerald-400" /> },
+    { id: "roms", labelKey: "roms", icon: <HardDrive className="w-4 h-4 text-purple-400" /> },
+    { id: "cards", labelKey: "cards", icon: <Layers className="w-4 h-4 text-amber-400 animate-pulse" /> },
+    { id: "leaderboard", labelKey: "leaderboard", icon: <Trophy className="w-4 h-4" /> },
+    { id: "profile", labelKey: "profile", icon: <UserCheck className="w-4 h-4" /> },
+    { id: "vr", labelKey: "vr", icon: <Eye className="w-4 h-4" /> },
+    { id: "hardware", labelKey: "hardware", icon: <Cpu className="w-4 h-4" /> },
+  ];
+
+  const handleNavClick = (page: PageView) => {
+    sfx.playClick();
+    setCurrentPage(page);
+  };
+
+  const isGold = settings.isGoldMode;
+
+  return (
+    <header className={`sticky top-0 z-40 backdrop-blur-xl transition-all duration-500 border-b ${
+      isGold
+        ? "bg-slate-950/90 border-amber-500/50 shadow-[0_4px_30px_rgba(245,158,11,0.25)]"
+        : "bg-slate-950/80 border-indigo-500/20 shadow-[0_4px_30px_rgba(79,70,229,0.15)]"
+    }`}>
+      {/* Top Notification / Specs Bar */}
+      <div className={`text-xs px-3 sm:px-4 py-1.5 flex flex-wrap items-center justify-between gap-2 border-b transition-all ${
+        isGold
+          ? "bg-gradient-to-r from-amber-950/80 via-yellow-950/80 to-amber-950/80 border-amber-500/30 text-amber-200"
+          : "bg-gradient-to-r from-blue-900/60 via-purple-900/60 to-red-900/60 border-purple-500/10 text-slate-300"
+      }`}>
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[11px] sm:text-xs">
+          <span className="inline-flex items-center gap-1.5 text-emerald-400 font-mono font-bold bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0"></span>
+            <span>{liveActiveUsers} Active Right Now</span>
+          </span>
+
+          <span className="inline-flex items-center gap-1 text-cyan-300 font-mono font-semibold bg-cyan-950/40 border border-cyan-500/20 px-2 py-0.5 rounded-full">
+            <Eye className="w-3 h-3 text-cyan-400 shrink-0" />
+            <span>{liveTotalVisits} Total Visits</span>
+          </span>
+
+          <span className="hidden md:inline text-slate-500">|</span>
+          <span className="hidden md:inline font-mono text-purple-300">
+            {getTranslation(settings.language, "timeLogged")} <strong className="text-white">{formatTime(activeSeconds)}</strong>
+          </span>
+          <span className="hidden sm:inline text-slate-500">|</span>
+          <span className="font-mono text-amber-300">
+            {getTranslation(settings.language, "rank")} <strong className="text-amber-400">#{userRank > 0 ? userRank : "100+"}</strong>
+          </span>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[11px] sm:text-xs font-mono">
+          {/* Daily Missions & Coins Button */}
+          <button
+            onClick={() => {
+              sfx.playClick();
+              openMissionsModal();
+            }}
+            className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-300 hover:scale-105 transition-all font-bold"
+            title="Daily Missions & Earn Isekai Coins"
+          >
+            <Coins className="w-3.5 h-3.5 text-amber-400 animate-bounce" />
+            <span>{settings.isekaiCoins} Coins</span>
+            <Gift className="w-3 h-3 text-yellow-300" />
+          </button>
+
+          {/* Support / Donations Button */}
+          <button
+            onClick={() => {
+              sfx.playClick();
+              openDonationsModal();
+            }}
+            className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-500/20 border border-rose-400/50 text-rose-300 hover:scale-105 transition-all font-bold"
+            title="Donate & View Credits"
+          >
+            <Heart className="w-3.5 h-3.5 text-rose-400 fill-rose-500/30" />
+            <span className="hidden sm:inline">Donate & Credits</span>
+          </button>
+
+          {/* Auto Reload & Fix Button */}
+          <button
+            onClick={() => {
+              sfx.playBadgeUnlock();
+              window.location.reload();
+            }}
+            className="hover:text-emerald-400 transition-colors flex items-center gap-1 text-emerald-300 font-bold"
+            title="Auto Reload & Self-Heal App"
+          >
+            <RefreshCw className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="hidden md:inline">Auto Fix</span>
+          </button>
+
+          {/* Sound Toggle */}
+          <button
+            onClick={() => {
+              sfx.playClick();
+              updateSettings({ sfxEnabled: !settings.sfxEnabled });
+            }}
+            className="hover:text-white transition-colors flex items-center gap-1"
+            title="Toggle Interface SFX"
+          >
+            {settings.sfxEnabled ? <Volume2 className="w-3.5 h-3.5 text-indigo-400" /> : <VolumeX className="w-3.5 h-3.5 text-slate-500" />}
+            <span className="hidden lg:inline">{settings.sfxEnabled ? "SFX On" : "Mute"}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Main Navigation Row */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-4">
+        {/* Brand Logo with Gold / Rainbow Gradient */}
+        <div
+          onClick={() => handleNavClick("home")}
+          className="cursor-pointer group flex items-center gap-2 sm:gap-3 select-none shrink-0"
+        >
+          <div className={`relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl p-[2px] shadow-lg transition-all duration-300 ${
+            isGold
+              ? "bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-600 shadow-amber-500/50"
+              : "bg-gradient-to-tr from-blue-600 via-purple-600 to-red-600 shadow-purple-500/30 group-hover:shadow-rose-500/50"
+          }`}>
+            <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center overflow-hidden relative">
+              <span className={`text-base sm:text-lg font-black bg-clip-text text-transparent transform group-hover:scale-110 transition-transform ${
+                isGold
+                  ? "bg-gradient-to-br from-amber-300 via-yellow-200 to-amber-500"
+                  : "bg-gradient-to-br from-blue-400 via-purple-300 to-red-400"
+              }`}>
+                IW
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/20 via-yellow-500/20 to-amber-500/20 animate-pulse"></div>
+            </div>
+          </div>
+
+          <div className="flex flex-col min-w-0">
+            <h1 className={`text-sm sm:text-lg lg:text-xl font-black tracking-wider uppercase bg-clip-text text-transparent flex items-center gap-1 truncate ${
+              isGold
+                ? "bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-500 drop-shadow-[0_2px_10px_rgba(245,158,11,0.5)]"
+                : "bg-gradient-to-r from-blue-400 via-purple-300 to-red-400 drop-shadow-[0_2px_10px_rgba(168,85,247,0.3)]"
+            }`}>
+              <span>Isekai Worlds</span> {isGold && <Crown className="w-3.5 h-3.5 text-amber-400 inline shrink-0" />}
+            </h1>
+            <span className={`text-[9px] sm:text-[10px] font-mono tracking-widest uppercase -mt-0.5 truncate ${
+              isGold ? "text-amber-300" : "text-indigo-300"
+            }`}>
+              {isGold ? "Gold Portal" : "Anime Multiverse"}
+            </span>
+          </div>
+        </div>
+
+        {/* Desktop Navigation Links */}
+        <nav className={`hidden xl:flex items-center gap-1 p-1.5 rounded-2xl border ${
+          isGold
+            ? "bg-amber-950/40 border-amber-500/30"
+            : "bg-slate-900/60 border-indigo-500/20"
+        }`}>
+          {navItems.map((item) => {
+            const isActive = currentPage === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleNavClick(item.id)}
+                onMouseEnter={() => sfx.playHover()}
+                className={`flex items-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 select-none ${
+                  isActive
+                    ? isGold
+                      ? "bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-bold shadow-md shadow-amber-900/50 scale-[1.02]"
+                      : "bg-gradient-to-r from-blue-600 via-violet-600 to-red-600 text-white shadow-md shadow-purple-900/50 scale-[1.02]"
+                    : "text-slate-300 hover:text-white hover:bg-slate-800/80"
+                }`}
+              >
+                {item.icon}
+                <span>{getTranslation(settings.language, item.labelKey)}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* User Actions & Settings */}
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          {/* Gold Mode Indicator Toggle */}
+          <button
+            onClick={() => {
+              sfx.playWarp();
+              updateSettings({ isGoldMode: !settings.isGoldMode });
+            }}
+            className={`p-1.5 sm:p-2 rounded-xl border font-mono text-xs font-bold flex items-center gap-1.5 transition-all ${
+              isGold
+                ? "bg-amber-400 text-slate-950 border-amber-300 shadow-lg shadow-amber-500/30"
+                : "bg-slate-900 text-slate-400 border-indigo-500/30 hover:text-amber-300"
+            }`}
+            title="Toggle Gold Premium Mode"
+          >
+            <Crown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 shrink-0" />
+            <span className="hidden md:inline">{isGold ? "Gold ON" : "Gold"}</span>
+          </button>
+
+          {/* Quick Language Selector */}
+          <div className="relative group shrink-0">
+            <select
+              value={settings.language}
+              onChange={(e) => {
+                sfx.playClick();
+                updateSettings({ language: e.target.value as LanguageCode });
+              }}
+              className="appearance-none bg-slate-900/80 hover:bg-slate-800 text-[11px] sm:text-xs text-slate-200 border border-purple-500/30 rounded-xl px-2.5 sm:px-3 py-1.5 sm:py-2 pr-7 sm:pr-8 font-mono cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all max-w-[95px] sm:max-w-[130px] truncate"
+            >
+              {SUPPORTED_LANGUAGES.map((lang) => (
+                <option key={lang.code} value={lang.code} className="bg-slate-900 text-white">
+                  {lang.flag} {lang.nativeName}
+                </option>
+              ))}
+            </select>
+            <Globe className="w-3.5 h-3.5 text-purple-400 absolute right-2 sm:right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+
+          {/* User Profile Pill */}
+          <button
+            onClick={() => handleNavClick("profile")}
+            className="flex items-center gap-2 bg-slate-900/80 hover:bg-slate-800 p-1 sm:p-1.5 pr-2.5 sm:pr-3 rounded-2xl border border-indigo-500/30 hover:border-indigo-400 transition-all shrink-0"
+            title="Open Profile Dashboard"
+          >
+            <img
+              src={profile.avatarUrl}
+              alt={profile.username}
+              className={`w-6 h-6 sm:w-7 sm:h-7 rounded-xl object-cover ring-2 ${isGold ? "ring-amber-400" : "ring-purple-500/40"}`}
+            />
+            <span className="hidden md:inline text-xs font-bold text-slate-200 truncate max-w-[70px] lg:max-w-[90px]">
+              {profile.username}
+            </span>
+          </button>
+
+          {/* System Settings Button */}
+          <button
+            onClick={() => {
+              sfx.playClick();
+              openSettingsModal();
+            }}
+            className="p-1.5 sm:p-2 bg-slate-900/80 hover:bg-indigo-900/50 text-slate-300 hover:text-white rounded-xl border border-indigo-500/30 transition-all shrink-0"
+            title="Open Settings"
+          >
+            <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-300" />
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile & Handheld Secondary Nav Pill Bar */}
+      <div className="xl:hidden bg-slate-950/90 px-3 py-2 border-t border-indigo-500/10 overflow-x-auto no-scrollbar flex items-center gap-2">
+        {navItems.map((item) => {
+          const isActive = currentPage === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => handleNavClick(item.id)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                isActive
+                  ? isGold
+                    ? "bg-amber-400 text-slate-950 font-bold shadow-md shadow-amber-900/50"
+                    : "bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 text-white shadow-md shadow-purple-900/50"
+                  : "bg-slate-900/80 text-slate-400 hover:text-white"
+              }`}
+            >
+              {item.icon}
+              <span>{getTranslation(settings.language, item.labelKey)}</span>
+            </button>
+          );
+        })}
+      </div>
+    </header>
+  );
+};
+

@@ -145,7 +145,17 @@ export const InteractiveZoomPanImage: React.FC<InteractiveZoomPanImageProps> = (
           transformOrigin: "center center"
         }}
       >
-        <img src={src} alt={alt} className="max-w-full max-h-full object-contain pointer-events-none" referrerPolicy="no-referrer" />
+        <img
+          src={src}
+          alt={alt}
+          className="max-w-full max-h-full object-contain pointer-events-none"
+          referrerPolicy="no-referrer"
+          onError={(e) => {
+            if (e.currentTarget.src !== "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1200&q=80") {
+              e.currentTarget.src = "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1200&q=80";
+            }
+          }}
+        />
       </div>
 
       {/* Floating HUD Controls */}

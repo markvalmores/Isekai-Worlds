@@ -472,13 +472,17 @@ app.get("/api/wallpapers", async (req, res) => {
   try {
     const category = (req.query.category as string) || "all";
     const page = parseInt((req.query.page as string) || "1", 10);
+    const q = ((req.query.q as string) || "").trim();
     const perPage = 20;
 
     let apiWallpapers: any[] = [];
 
-    // 1. Fetch Jikan v4 API (MyAnimeList / MAL) with exact page number
+    // 1. Fetch Jikan v4 API (MyAnimeList / MAL)
     try {
-      const malRes = await fetch(`https://api.jikan.moe/v4/top/anime?page=${page}&limit=12`);
+      const malUrl = q
+        ? `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&page=${page}&limit=12`
+        : `https://api.jikan.moe/v4/top/anime?page=${page}&limit=12`;
+      const malRes = await fetch(malUrl);
       if (malRes.ok) {
         const malData = await malRes.json();
         const malList = malData?.data || [];
@@ -510,31 +514,57 @@ app.get("/api/wallpapers", async (req, res) => {
     }
 
     // 2. Fetch AniList GraphQL with exact Page parameter for infinite pagination
-    const aniListQuery = `
-      query ($page: Int, $perPage: Int) {
-        Page(page: $page, perPage: $perPage) {
-          pageInfo {
-            hasNextPage
-            currentPage
-          }
-          media(type: ANIME, sort: POPULARITY_DESC) {
-            id
-            title {
-              english
-              romaji
-              native
+    const aniListQuery = q
+      ? `
+        query ($search: String, $page: Int, $perPage: Int) {
+          Page(page: $page, perPage: $perPage) {
+            pageInfo {
+              hasNextPage
+              currentPage
             }
-            coverImage {
-              extraLarge
-              large
+            media(search: $search, type: ANIME) {
+              id
+              title {
+                english
+                romaji
+                native
+              }
+              coverImage {
+                extraLarge
+                large
+              }
+              bannerImage
+              genres
+              averageScore
             }
-            bannerImage
-            genres
-            averageScore
           }
         }
-      }
-    `;
+      `
+      : `
+        query ($page: Int, $perPage: Int) {
+          Page(page: $page, perPage: $perPage) {
+            pageInfo {
+              hasNextPage
+              currentPage
+            }
+            media(type: ANIME, sort: POPULARITY_DESC) {
+              id
+              title {
+                english
+                romaji
+                native
+              }
+              coverImage {
+                extraLarge
+                large
+              }
+              bannerImage
+              genres
+              averageScore
+            }
+          }
+        }
+      `;
 
     try {
       const aniRes = await fetch("https://graphql.anilist.co", {
@@ -542,7 +572,7 @@ app.get("/api/wallpapers", async (req, res) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           query: aniListQuery,
-          variables: { page, perPage: 12 },
+          variables: q ? { search: q, page, perPage: 12 } : { page, perPage: 12 },
         }),
       });
 

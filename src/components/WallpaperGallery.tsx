@@ -44,6 +44,7 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
   const [loadingMore, setLoadingMore] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeSearchTerm, setActiveSearchTerm] = useState("");
   const [activePreview, setActivePreview] = useState<AnimeWallpaper | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [appliedBannerId, setAppliedBannerId] = useState<string | null>(null);
@@ -106,12 +107,14 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
   const categories = ["all", "Isekai", "Fantasy", "Sci-Fi", "Dark Fantasy", "Landscape"];
 
   useEffect(() => {
-    // Reset page to 1 on category change
+    // Reset page and queries to 1 on category change
     setCurrentPage(1);
-    fetchWallpapers(selectedCategory, 1, false);
+    setSearchQuery("");
+    setActiveSearchTerm("");
+    fetchWallpapers(selectedCategory, 1, "", false);
   }, [selectedCategory]);
 
-  const fetchWallpapers = async (cat: string, pageNum: number, append = false) => {
+  const fetchWallpapers = async (cat: string, pageNum: number, queryStr = "", append = false) => {
     try {
       if (append) {
         setLoadingMore(true);
@@ -119,7 +122,7 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
         setLoading(true);
       }
 
-      const res = await fetch(`/api/wallpapers?category=${cat}&page=${pageNum}`);
+      const res = await fetch(`/api/wallpapers?category=${cat}&page=${pageNum}&q=${encodeURIComponent(queryStr)}`);
       const data = await res.json();
 
       if (data.wallpapers && data.wallpapers.length > 0) {
@@ -145,6 +148,14 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
     }
   };
 
+  const handleSearchSubmit = (queryStr: string) => {
+    const trimmed = queryStr.trim();
+    setCurrentPage(1);
+    setActiveSearchTerm(trimmed);
+    addSearchToHistory(trimmed);
+    fetchWallpapers(selectedCategory, 1, trimmed, false);
+  };
+
   const scrollToGalleryTop = () => {
     window.scrollTo({ top: 100, behavior: "smooth" });
   };
@@ -153,7 +164,7 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
     sfx.playWarp();
     const nextP = currentPage + 1;
     setCurrentPage(nextP);
-    fetchWallpapers(selectedCategory, nextP, false);
+    fetchWallpapers(selectedCategory, nextP, activeSearchTerm, false);
     scrollToGalleryTop();
   };
 
@@ -162,14 +173,14 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
     sfx.playClick();
     const prevP = currentPage - 1;
     setCurrentPage(prevP);
-    fetchWallpapers(selectedCategory, prevP, false);
+    fetchWallpapers(selectedCategory, prevP, activeSearchTerm, false);
     scrollToGalleryTop();
   };
 
   const handleJumpToPage = (p: number) => {
     sfx.playClick();
     setCurrentPage(p);
-    fetchWallpapers(selectedCategory, p, false);
+    fetchWallpapers(selectedCategory, p, activeSearchTerm, false);
     scrollToGalleryTop();
   };
 
@@ -177,7 +188,7 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
     sfx.playWarp();
     const nextP = currentPage + 1;
     setCurrentPage(nextP);
-    fetchWallpapers(selectedCategory, nextP, true);
+    fetchWallpapers(selectedCategory, nextP, activeSearchTerm, true);
   };
 
   const toggleFavorite = (id: string, e?: React.MouseEvent) => {
@@ -196,12 +207,7 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
     setTimeout(() => setAppliedBannerId(null), 2500);
   };
 
-  const filtered = wallpapers.filter((w) => {
-    const matchesSearch =
-      w.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      w.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesSearch;
-  });
+  const filtered = wallpapers;
 
   return (
     <div className="space-y-8">
@@ -249,29 +255,35 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
         </div>
 
         {/* Search Field & History Drawer Toggle Button */}
-        <div className="flex items-center gap-2 min-w-[280px]">
-          <div className="relative flex-1">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (searchQuery.trim()) {
+              handleSearchSubmit(searchQuery);
+            }
+          }}
+          className="flex flex-wrap items-center gap-2 min-w-[280px]"
+        >
+          <div className="relative flex-1 min-w-[180px]">
             <Search className="w-4 h-4 text-purple-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               placeholder="Search wallpapers or tags..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && searchQuery.trim()) {
-                  addSearchToHistory(searchQuery);
-                }
-              }}
-              onBlur={() => {
-                if (searchQuery.trim()) {
-                  addSearchToHistory(searchQuery);
-                }
-              }}
               className="w-full bg-slate-900/80 border border-indigo-500/30 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
             />
           </div>
 
           <button
+            type="submit"
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-rose-600 hover:from-blue-500 hover:to-rose-500 text-white font-mono text-xs font-bold uppercase transition-all shadow-md shadow-purple-900/50 whitespace-nowrap"
+          >
+            Search
+          </button>
+
+          <button
+            type="button"
             onClick={() => {
               sfx.playClick();
               setIsHistoryOpen(!isHistoryOpen);
@@ -291,7 +303,7 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
               </span>
             )}
           </button>
-        </div>
+        </form>
       </div>
 
       {/* Recent Search History Drawer / Sidebar */}
@@ -308,6 +320,7 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
             <div className="flex items-center gap-2">
               {searchHistory.length > 0 && (
                 <button
+                  type="button"
                   onClick={clearAllSearchHistory}
                   className="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[11px] font-mono flex items-center gap-1 transition-colors"
                   title="Clear All History"
@@ -318,6 +331,7 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
               )}
 
               <button
+                type="button"
                 onClick={() => setIsHistoryOpen(false)}
                 className="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white"
               >
@@ -337,12 +351,14 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
                     sfx.playClick();
                     setSearchQuery(item);
                     setIsHistoryOpen(false);
+                    handleSearchSubmit(item);
                   }}
                   className="group cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-purple-900/60 border border-indigo-500/20 hover:border-purple-400 text-xs font-mono text-slate-200 hover:text-white transition-all shadow"
                 >
                   <Search className="w-3 h-3 text-cyan-400 group-hover:scale-110 transition-transform" />
                   <span>{item}</span>
                   <button
+                    type="button"
                     onClick={(e) => removeSearchHistoryItem(item, e)}
                     className="p-0.5 rounded-md hover:bg-rose-500/30 text-slate-400 hover:text-rose-300"
                     title="Remove item"

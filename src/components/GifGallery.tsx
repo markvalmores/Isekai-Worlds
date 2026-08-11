@@ -529,7 +529,7 @@ export const GifGallery: React.FC = () => {
         </div>
       ) : (
         (() => {
-          const visibleGifs = gifs.filter((g) => !failedGifIds.has(g.id));
+          const visibleGifs = gifs;
           if (visibleGifs.length === 0) {
             return (
               <div className="p-12 text-center bg-slate-900/50 rounded-3xl border border-slate-800 space-y-3">
@@ -570,8 +570,11 @@ export const GifGallery: React.FC = () => {
                         alt={gif.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         loading="lazy"
-                        onError={() => {
-                          setFailedGifIds((prev) => new Set(prev).add(gif.id));
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          if (e.currentTarget.src !== "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&q=80") {
+                            e.currentTarget.src = "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&q=80";
+                          }
                         }}
                       />
 
@@ -709,6 +712,7 @@ export const GifGallery: React.FC = () => {
                 src={selectedGif.url}
                 alt={selectedGif.title}
                 className="max-w-full max-h-[450px] object-contain rounded-xl"
+                referrerPolicy="no-referrer"
               />
             </div>
 

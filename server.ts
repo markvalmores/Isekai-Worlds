@@ -601,6 +601,82 @@ app.get("/api/wallpapers", async (req, res) => {
       console.warn("Nekos fetch error:", e);
     }
 
+    // Force HTTPS to prevent mixed content blocking on mobile
+    apiWallpapers = apiWallpapers.map((w: any) => {
+      if (w.url && w.url.startsWith("http://")) {
+        w.url = w.url.replace("http://", "https://");
+      }
+      if (w.thumb && w.thumb.startsWith("http://")) {
+        w.thumb = w.thumb.replace("http://", "https://");
+      }
+      return w;
+    });
+
+    if (apiWallpapers.length === 0) {
+      apiWallpapers = [
+        {
+          id: `w-fallback-1-${page}`,
+          title: "Gojo Satoru Infinite Void Art",
+          category: "Fantasy",
+          url: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1200&auto=format&fit=crop&q=80",
+          thumb: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&auto=format&fit=crop&q=80",
+          tags: ["Gojo", "Jujutsu Kaisen", "Fantasy"],
+          resolution: "3840x2160 (4K UHD)",
+          author: "Unsplash Artist",
+          score: "9.8",
+          sourcePage: page
+        },
+        {
+          id: `w-fallback-2-${page}`,
+          title: "Neon Cyberpunk Tokyo Tower",
+          category: "Sci-Fi",
+          url: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1200&auto=format&fit=crop&q=80",
+          thumb: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=400&auto=format&fit=crop&q=80",
+          tags: ["Tokyo", "Cyberpunk", "Sci-Fi"],
+          resolution: "3840x2160 (4K UHD)",
+          author: "Unsplash Artist",
+          score: "9.7",
+          sourcePage: page
+        },
+        {
+          id: `w-fallback-3-${page}`,
+          title: "Stunning Cherry Blossom Landscape",
+          category: "Landscape",
+          url: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1200&auto=format&fit=crop&q=80",
+          thumb: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400&auto=format&fit=crop&q=80",
+          tags: ["Kyoto", "Nature", "Landscape"],
+          resolution: "3840x2160 (4K UHD)",
+          author: "Unsplash Artist",
+          score: "9.6",
+          sourcePage: page
+        },
+        {
+          id: `w-fallback-4-${page}`,
+          title: "Isekai Fantasy World Ruins",
+          category: "Isekai",
+          url: "https://images.unsplash.com/photo-1519074069444-1ba4e66640c2?w=1200&auto=format&fit=crop&q=80",
+          thumb: "https://images.unsplash.com/photo-1519074069444-1ba4e66640c2?w=400&auto=format&fit=crop&q=80",
+          tags: ["Fantasy", "Castle", "Isekai"],
+          resolution: "3840x2160 (4K UHD)",
+          author: "Unsplash Artist",
+          score: "9.5",
+          sourcePage: page
+        },
+        {
+          id: `w-fallback-5-${page}`,
+          title: "Anime Magical Forest Shrine",
+          category: "Landscape",
+          url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&auto=format&fit=crop&q=80",
+          thumb: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&auto=format&fit=crop&q=80",
+          tags: ["Scenic", "Forest", "Landscape"],
+          resolution: "3840x2160 (4K UHD)",
+          author: "Unsplash Artist",
+          score: "9.5",
+          sourcePage: page
+        }
+      ];
+    }
+
     // Filter by category if requested
     let filtered = apiWallpapers;
     if (category !== "all") {
@@ -766,13 +842,66 @@ app.get("/api/gifs", async (req, res) => {
     // Filter out any broken Giphy URLs if present
     gifList = gifList.filter((item) => item.url && !item.url.includes("giphy.com/media/v1.Y2lk"));
 
-    // Deduplicate by URL
+    // Deduplicate by URL and force HTTPS to prevent mixed content blocking on mobile
     const seenUrls = new Set();
-    const uniqueGifs = gifList.filter((item) => {
+    let uniqueGifs = gifList.filter((item) => {
       if (!item.url || seenUrls.has(item.url)) return false;
       seenUrls.add(item.url);
       return true;
+    }).map((item) => {
+      if (item.url && item.url.startsWith("http://")) {
+        item.url = item.url.replace("http://", "https://");
+      }
+      if (item.previewUrl && item.previewUrl.startsWith("http://")) {
+        item.previewUrl = item.previewUrl.replace("http://", "https://");
+      }
+      return item;
     });
+
+    if (uniqueGifs.length === 0) {
+      uniqueGifs = [
+        {
+          id: `fb-dance-${page}`,
+          title: "Kawaii Anime Dance Routine",
+          url: "https://nekos.best/api/v2/dance/0001.gif",
+          previewUrl: "https://nekos.best/api/v2/dance/0001.gif",
+          category: "DANCE",
+          character: "Anime Idol",
+          source: "Nekos.best Engine",
+          tags: ["dance", "anime", "kawaii"]
+        },
+        {
+          id: `fb-hug-${page}`,
+          title: "Warm Anime Hug Embrace",
+          url: "https://nekos.best/api/v2/hug/0002.gif",
+          previewUrl: "https://nekos.best/api/v2/hug/0002.gif",
+          category: "HUG",
+          character: "Anime Scene",
+          source: "Nekos.best Engine",
+          tags: ["hug", "anime", "kawaii"]
+        },
+        {
+          id: `fb-smile-${page}`,
+          title: "Bright Anime Smile Greeting",
+          url: "https://nekos.best/api/v2/smile/0003.gif",
+          previewUrl: "https://nekos.best/api/v2/smile/0003.gif",
+          category: "SMILE",
+          character: "Kawaii Girl",
+          source: "Nekos.best Engine",
+          tags: ["smile", "anime", "kawaii"]
+        },
+        {
+          id: `fb-pat-${page}`,
+          title: "Gentle Headpat Reaction",
+          url: "https://nekos.best/api/v2/pat/0004.gif",
+          previewUrl: "https://nekos.best/api/v2/pat/0004.gif",
+          category: "KAWAII",
+          character: "Anime Waifu",
+          source: "Nekos.best Engine",
+          tags: ["pat", "anime", "kawaii"]
+        }
+      ];
+    }
 
     res.json({
       gifs: uniqueGifs,

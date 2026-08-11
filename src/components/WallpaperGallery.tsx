@@ -437,6 +437,12 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
                     src={wp.thumb}
                     alt={wp.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      if (e.currentTarget.src !== "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&q=80") {
+                        e.currentTarget.src = "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&q=80";
+                      }
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity" />
 

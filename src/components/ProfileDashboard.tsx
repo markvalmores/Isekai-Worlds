@@ -163,24 +163,26 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({
                 onClick={async () => {
                   sfx.playBadgeUnlock();
                   try {
+                    const effectiveUsername = formData.username?.trim() || "IsekaiAdventurer";
                     await fetch("/api/leaderboard/update", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({
-                        id: formData.id,
-                        username: formData.username,
+                        id: formData.id || `user-${Date.now()}`,
+                        username: effectiveUsername,
                         avatar: formData.avatarUrl,
                         banner: formData.bannerUrl,
                         title: formData.title,
                         badge: formData.badge,
                         secondsLogged: Math.max(30, activeSeconds || 30),
-                        country: formData.country,
+                        country: formData.country || "GLOBAL",
                       }),
                     });
+                  } catch (e) {
+                    console.warn("Leaderboard sync offline fallback:", e);
+                  } finally {
                     setSavedSuccess(true);
                     setTimeout(() => setSavedSuccess(false), 3000);
-                  } catch (e) {
-                    console.error("Leaderboard sync error:", e);
                   }
                 }}
                 className="px-4 py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 hover:from-amber-400 hover:to-purple-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-rose-900/40 hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5"

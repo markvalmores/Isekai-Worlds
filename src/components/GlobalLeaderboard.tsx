@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { LeaderboardEntry, UserProfile } from "../types";
 import { sfx } from "../utils/sfx";
+import { db } from "../lib/firebase";
+import { collection, doc, setDoc, getDocs, query, orderBy, limit, serverTimestamp } from "firebase/firestore";
 import {
   Trophy,
-  Search,
-  Clock,
-  Shield,
   Sparkles,
   RefreshCw,
   UserCheck,
@@ -63,27 +62,20 @@ export const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({
         setLoading(true);
       }
 
-      // Post user's current real session time to leaderboard API using the ref value
-      const updateRes = await fetch("/api/leaderboard/update", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: userProfile.id,
-          username: userProfile.username,
-          avatar: userProfile.avatarUrl,
-          banner: userProfile.bannerUrl,
-          title: userProfile.title,
-          badge: userProfile.badge,
-          secondsLogged: activeSecondsRef.current,
-          country: userProfile.country,
-        }),
+      const q = query(collection(db, "rankings"), orderBy("secondsLogged", "desc"), limit(100));
+      const querySnapshot = await getDocs(q);
+      const data: LeaderboardEntry[] = [];
+      let rank = 1;
+      
+      querySnapshot.forEach((doc) => {
+        data.push(doc.data() as LeaderboardEntry);
       });
+      
+      const userRank = data.findIndex(u => u.id === userProfile.id) + 1;
 
-      const updateData = await updateRes.json();
-      if (updateData.leaderboard) {
-        setLeaderboard(updateData.leaderboard);
-        if (updateData.rank) setUserRank(updateData.rank);
-      }
+      setLeaderboard(data);
+      if (userRank > 0) setUserRank(userRank);
+      
     } catch (err) {
       console.error("Leaderboard fetch error:", err);
     } finally {
@@ -101,40 +93,7 @@ export const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({
       const secondsToSubmit = Math.max(30, activeSecondsRef.current || 30);
       const effectiveUsername = userProfile.username?.trim() || "IsekaiAdventurer";
 
-      const updateRes = await fetch("/api/leaderboard/update", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: userProfile.id || `user-${Date.now()}`,
-          username: effectiveUsername,
-          avatar: userProfile.avatarUrl,
-          banner: userProfile.bannerUrl,
-          title: userProfile.title,
-          badge: userProfile.badge,
-          secondsLogged: secondsToSubmit,
-          country: userProfile.country || "GLOBAL",
-        }),
-      });
-
-      if (updateRes.ok) {
-        const updateData = await updateRes.json();
-        if (updateData.leaderboard) {
-          setLeaderboard(updateData.leaderboard);
-          if (updateData.rank) setUserRank(updateData.rank);
-          setRegisterSuccessMsg(
-            `Registered Successfully! You are ranked #${updateData.rank || 1} in the Global Top 100 Leaderboard.`
-          );
-          setTimeout(() => setRegisterSuccessMsg(""), 5000);
-          return;
-        }
-      }
-      throw new Error("API update incomplete");
-    } catch (err) {
-      console.warn("Using offline leaderboard registration fallback:", err);
-      const effectiveUsername = userProfile.username?.trim() || "IsekaiAdventurer";
-      const secondsToSubmit = Math.max(30, activeSecondsRef.current || 30);
-
-      const newEntry: LeaderboardEntry = {
+      const userData: LeaderboardEntry = {
         id: userProfile.id || `user-${Date.now()}`,
         username: effectiveUsername,
         avatar: userProfile.avatarUrl || "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&auto=format&fit=crop&q=80",
@@ -147,16 +106,21 @@ export const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({
         lastActive: "Just now"
       };
 
-      setLeaderboard((prev) => {
-        const filtered = prev.filter((u) => u.id !== newEntry.id && u.username.toLowerCase() !== effectiveUsername.toLowerCase());
-        const updatedList = [...filtered, newEntry].sort((a, b) => b.secondsLogged - a.secondsLogged);
-        const rank = updatedList.findIndex((u) => u.id === newEntry.id) + 1;
-        setUserRank(rank > 0 ? rank : 1);
-        return updatedList;
+      await setDoc(doc(db, "rankings", userData.id), {
+        ...userData,
+        registeredAt: serverTimestamp()
       });
 
-      setRegisterSuccessMsg(`Registered Successfully! Ranked in Global Top 100 Leaderboard.`);
+      // Refresh after registration
+      await fetchLeaderboardAndUpdate(true);
+      
+      setRegisterSuccessMsg(
+        `Registered Successfully! Your name is hardcoded in the Global Ranking forever!`
+      );
       setTimeout(() => setRegisterSuccessMsg(""), 5000);
+      
+    } catch (err) {
+      console.error("Registration error:", err);
     } finally {
       setRegistering(false);
     }

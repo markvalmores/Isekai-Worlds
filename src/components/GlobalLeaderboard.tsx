@@ -16,7 +16,8 @@ import {
   Zap,
   SlidersHorizontal,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  Search
 } from "lucide-react";
 
 interface GlobalLeaderboardProps {

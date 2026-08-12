@@ -252,12 +252,15 @@ const PRESET_CARDS: Card[] = [
 interface CardGamesDashboardProps {
   onAddCoins: (amount: number) => void;
   isGoldMode: boolean;
+  isAdmin?: boolean;
 }
 
-export function CardGamesDashboard({ onAddCoins, isGoldMode }: CardGamesDashboardProps) {
+export function CardGamesDashboard({ onAddCoins, isGoldMode, isAdmin = false }: CardGamesDashboardProps) {
   // We rename the component dynamically or reuse it as "CardGamesDashboard" internally
   const EXTERNAL_URL = "https://mobile-anime-card-gacha-battle.vercel.app/";
   const externalContainerRef = React.useRef<HTMLDivElement>(null);
+
+  const adminActive = isAdmin || localStorage.getItem("isekai_admin_mode") === "true";
   
   // Image error fallback handler to ensure Yu-Gi-Oh and Pokemon legendaries always display art
   const handleCardImgError = (e: React.SyntheticEvent<HTMLImageElement, Event>, game?: string) => {
@@ -295,15 +298,30 @@ export function CardGamesDashboard({ onAddCoins, isGoldMode }: CardGamesDashboar
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  // Inventory state (Persisted locally)
+  // Helper to generate a unique random starter card pack for each new user
+  const generateRandomStarterCards = (): string[] => {
+    const shuffled = [...PRESET_CARDS].sort(() => 0.5 - Math.random());
+    const starterPack = shuffled.slice(0, 3).map((c) => c.id);
+    try {
+      localStorage.setItem("isekai_card_inventory", JSON.stringify(starterPack));
+    } catch {}
+    return starterPack;
+  };
+
+  // Inventory state (Persisted locally per user)
   const [inventory, setInventory] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem("isekai_card_inventory");
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
     } catch {}
-    // Start with 2 default cards
-    return ["yg-1", "pk-2"];
+    return generateRandomStarterCards();
   });
+
+  // Effective inventory: Admins get all cards unlocked in PRESET_CARDS automatically
+  const effectiveInventory = adminActive ? PRESET_CARDS.map((c) => c.id) : inventory;
 
   // Coins state
   const [coins, setCoins] = useState<number>(() => {
@@ -533,7 +551,7 @@ export function CardGamesDashboard({ onAddCoins, isGoldMode }: CardGamesDashboar
     sfx.playWarp();
     if (!selectedFighter) {
       // Pick random collected fighter if none chosen
-      const collectedIds = inventory.length > 0 ? inventory : ["yg-1", "pk-2"];
+      const collectedIds = effectiveInventory.length > 0 ? effectiveInventory : ["yg-1", "pk-2"];
       const randomId = collectedIds[Math.floor(Math.random() * collectedIds.length)];
       const found = PRESET_CARDS.find((c) => c.id === randomId) || PRESET_CARDS[0];
       setSelectedFighter(found);
@@ -652,8 +670,13 @@ export function CardGamesDashboard({ onAddCoins, isGoldMode }: CardGamesDashboar
                 : "bg-slate-950 text-slate-400 border border-slate-850 hover:bg-slate-900 hover:text-white"
             }`}
           >
-            <Database className="w-4 h-4" />
-            <span>My Binder ({inventory.length} Cards)</span>
+            <Database className="w-4 h-4 text-indigo-400" />
+            <span>My Binder ({effectiveInventory.length} Cards)</span>
+            {adminActive && (
+              <span className="text-[9px] font-mono text-amber-400 font-bold bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded">
+                ⚡ Admin Unlocked
+              </span>
+            )}
           </button>
 
           <button
@@ -979,7 +1002,7 @@ export function CardGamesDashboard({ onAddCoins, isGoldMode }: CardGamesDashboar
           {paginatedCards.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
               {paginatedCards.map((card) => {
-                const isCollected = inventory.includes(card.id);
+                const isCollected = effectiveInventory.includes(card.id);
                 const rarityStyle = {
                   Common: "from-slate-900 via-slate-950 to-slate-900 border-slate-800 text-slate-400",
                   Rare: "from-blue-950/40 via-slate-950 to-blue-950/40 border-blue-500/30 text-blue-400",

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { UserProfile } from "../types";
 import { sfx } from "../utils/sfx";
+import { generateRandomUserProfile } from "../utils/randomProfile";
 import {
   UserCheck,
   Edit2,
@@ -14,7 +15,8 @@ import {
   Clock,
   Heart,
   Zap,
-  Layout
+  Layout,
+  RefreshCw
 } from "lucide-react";
 
 interface ProfileDashboardProps {
@@ -33,6 +35,38 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState<UserProfile>(profile);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleGenerateRandom = async () => {
+    sfx.playBadgeUnlock();
+    setIsGenerating(true);
+    try {
+      const res = await fetch("/api/profile/random");
+      if (res.ok) {
+        const randomData = await res.json();
+        const updated = {
+          ...formData,
+          ...randomData
+        };
+        setFormData(updated);
+        updateProfile(updated);
+      } else {
+        const localRandom = generateRandomUserProfile();
+        const updated = { ...formData, ...localRandom };
+        setFormData(updated);
+        updateProfile(updated);
+      }
+    } catch {
+      const localRandom = generateRandomUserProfile();
+      const updated = { ...formData, ...localRandom };
+      setFormData(updated);
+      updateProfile(updated);
+    } finally {
+      setIsGenerating(false);
+      setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 3000);
+    }
+  };
 
   const presetAvatars = [
     "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=300&auto=format&fit=crop&q=80",
@@ -76,17 +110,29 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80" />
 
-          {/* Edit Profile Toggle Button */}
-          <button
-            onClick={() => {
-              sfx.playClick();
-              setEditing(!editing);
-            }}
-            className="absolute top-4 right-4 px-4 py-2 rounded-xl bg-slate-950/80 hover:bg-slate-900 border border-purple-500/40 text-xs font-bold font-mono text-purple-300 flex items-center gap-2 backdrop-blur-md shadow-lg transition-all"
-          >
-            <Edit2 className="w-3.5 h-3.5" />
-            <span>{editing ? "Cancel Editing" : "Edit Discord Profile"}</span>
-          </button>
+          {/* Top Control Buttons */}
+          <div className="absolute top-4 right-4 flex items-center gap-2">
+            <button
+              onClick={handleGenerateRandom}
+              disabled={isGenerating}
+              className="px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-xs font-bold font-mono text-amber-300 flex items-center gap-1.5 backdrop-blur-md shadow-lg transition-all hover:scale-105 active:scale-95"
+              title="Generate Random Anime Profile & Avatar with AI"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isGenerating ? "animate-spin" : ""}`} />
+              <span className="hidden sm:inline">Random Persona</span>
+            </button>
+
+            <button
+              onClick={() => {
+                sfx.playClick();
+                setEditing(!editing);
+              }}
+              className="px-4 py-2 rounded-xl bg-slate-950/80 hover:bg-slate-900 border border-purple-500/40 text-xs font-bold font-mono text-purple-300 flex items-center gap-2 backdrop-blur-md shadow-lg transition-all"
+            >
+              <Edit2 className="w-3.5 h-3.5" />
+              <span>{editing ? "Cancel" : "Edit Profile"}</span>
+            </button>
+          </div>
         </div>
 
         {/* Profile Details Header */}

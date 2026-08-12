@@ -28,6 +28,9 @@ import { CosplayDashboard } from "./components/CosplayDashboard";
 import { DailyLoginModal } from "./components/DailyLoginModal";
 import { SmartTvRemote } from "./components/SmartTvRemote";
 import { AdminLoginModal } from "./components/AdminLoginModal";
+import { CommandPaletteModal } from "./components/CommandPaletteModal";
+import { LiveWallpaperModal } from "./components/LiveWallpaperModal";
+import { generateRandomUserProfile } from "./utils/randomProfile";
 import { FloatingLanguageWidget } from "./components/FloatingLanguageWidget";
 import { SettingsModal } from "./components/SettingsModal";
 import { DailyMissionsModal } from "./components/DailyMissionsModal";
@@ -45,6 +48,8 @@ export default function App() {
   const [isDailyOpen, setIsDailyOpen] = useState(false);
   const [isTvRemoteOpen, setIsTvRemoteOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isLiveWallpaperOpen, setIsLiveWallpaperOpen] = useState(false);
 
   // Admin God Mode State
   const [isAdmin, setIsAdmin] = useState<boolean>(() => {
@@ -154,21 +159,9 @@ export default function App() {
     } catch {
       // Default
     }
-    return {
-      id: "u-player-1",
-      username: "IsekaiTraveler",
-      avatarUrl: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=300&auto=format&fit=crop&q=80",
-      bannerUrl: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1200&auto=format&fit=crop&q=80",
-      bio: "Traversing through anime dimensions. S-Rank Adventurer and Isekai enthusiast.",
-      title: "Chrono Dimension Hopper",
-      badge: "S-Rank Hero",
-      customStatus: "Exploring 4K Anime Wallpapers & Media Feeds...",
-      bannerGradient: "from-blue-600 via-purple-600 to-red-600",
-      accentColor: "#a855f7",
-      country: "GLOBAL",
-      joinedDate: "2026",
-      favAnime: "Re:Zero / Sword Art Online"
-    };
+    const newRandomProfile = generateRandomUserProfile();
+    localStorage.setItem("isekai_user_profile", JSON.stringify(newRandomProfile));
+    return newRandomProfile;
   });
 
   // App Settings State
@@ -519,13 +512,19 @@ export default function App() {
     }
   };
 
-  // Keyboard / Smart TV Remote D-Pad Navigation Handler
+  // Keyboard Shortcut Handler (Cmd+K / Ctrl+K Command Palette & Escape Close)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        sfx.playWarp();
+        setIsCommandPaletteOpen((prev) => !prev);
+      } else if (e.key === "Escape") {
         setIsSettingsOpen(false);
         setIsMissionsOpen(false);
         setIsDonationsOpen(false);
+        setIsCommandPaletteOpen(false);
+        setIsLiveWallpaperOpen(false);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -540,22 +539,47 @@ export default function App() {
         isGold ? "ring-4 ring-amber-400/60" : ""
       } ${settings.tvRemoteNavigationMode ? "ring-4 ring-rose-500/50" : ""}`}
     >
-      {/* Background Ambient Glow (Gold or Blue-Violet-Red) */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        {isGold ? (
-          <>
-            <div className="absolute -top-40 -left-40 w-96 h-96 bg-amber-500/30 rounded-full blur-[120px]" />
-            <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-yellow-400/25 rounded-full blur-[150px]" />
-            <div className="absolute -bottom-40 left-1/3 w-96 h-96 bg-amber-600/30 rounded-full blur-[120px]" />
-          </>
-        ) : (
-          <>
-            <div className="absolute -top-40 -left-40 w-96 h-96 bg-blue-600/20 rounded-full blur-[120px]" />
-            <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[150px]" />
-            <div className="absolute -bottom-40 left-1/3 w-96 h-96 bg-red-600/20 rounded-full blur-[120px]" />
-          </>
-        )}
-      </div>
+      {/* Custom Web App Live Wallpaper Background Engine (MP4, GIF, JPG, PNG Loop) */}
+      {settings.webAppWallpaperEnabled && settings.webAppWallpaperUrl && (
+        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+          {settings.webAppWallpaperType === "video" ? (
+            <video
+              src={settings.webAppWallpaperUrl}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover opacity-35 filter brightness-90 contrast-110"
+            />
+          ) : (
+            <img
+              src={settings.webAppWallpaperUrl}
+              alt="Live Web App Background"
+              className="absolute inset-0 w-full h-full object-cover opacity-35 filter brightness-90 contrast-110"
+            />
+          )}
+          <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-[2px]" />
+        </div>
+      )}
+
+      {/* Background Ambient Light Sync Halo Glows (Gold or Blue-Violet-Red) */}
+      {settings.ambientLightSync !== false && (
+        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+          {isGold ? (
+            <>
+              <div className="absolute -top-40 -left-40 w-96 h-96 bg-amber-500/30 rounded-full blur-[120px] animate-pulse" />
+              <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-yellow-400/25 rounded-full blur-[150px] animate-pulse" />
+              <div className="absolute -bottom-40 left-1/3 w-96 h-96 bg-amber-600/30 rounded-full blur-[120px] animate-pulse" />
+            </>
+          ) : (
+            <>
+              <div className="absolute -top-40 -left-40 w-96 h-96 bg-blue-600/20 rounded-full blur-[120px] animate-pulse" />
+              <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[150px] animate-pulse" />
+              <div className="absolute -bottom-40 left-1/3 w-96 h-96 bg-red-600/20 rounded-full blur-[120px] animate-pulse" />
+            </>
+          )}
+        </div>
+      )}
 
       {/* Main Header Bar */}
       <Header
@@ -572,6 +596,8 @@ export default function App() {
         openDailyModal={() => setIsDailyOpen(true)}
         openAdminModal={() => setIsAdminOpen(true)}
         openTvRemote={() => setIsTvRemoteOpen(!isTvRemoteOpen)}
+        openCommandPalette={() => setIsCommandPaletteOpen(true)}
+        openLiveWallpaperModal={() => setIsLiveWallpaperOpen(true)}
         isAdmin={isAdmin}
         liveActiveUsers={liveActiveUsers}
         liveTotalVisits={liveTotalVisits}
@@ -672,6 +698,7 @@ export default function App() {
           <CardGamesDashboard
             onAddCoins={handleAddCoins}
             isGoldMode={isGold}
+            isAdmin={isAdmin}
           />
         )}
       </main>
@@ -756,6 +783,29 @@ export default function App() {
           localStorage.setItem("isekai_card_inventory", JSON.stringify(ALL_CARDS));
           alert("All 12 Legendary Anime Cards unlocked in Gacha Inventory!");
         }}
+      />
+
+      {/* Global Command Palette Modal (Cmd+K / Ctrl+K) */}
+      <CommandPaletteModal
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        currentPage={currentPage}
+        setCurrentPage={handlePageChange}
+        settings={settings}
+        updateSettings={updateSettings}
+        onClearCache={clearCache}
+        openSettingsModal={() => setIsSettingsOpen(true)}
+        openDailyModal={() => setIsDailyOpen(true)}
+        openAdminModal={() => setIsAdminOpen(true)}
+        openTvRemote={() => setIsTvRemoteOpen(!isTvRemoteOpen)}
+      />
+
+      {/* Web App Live & Custom Wallpaper Engine Modal */}
+      <LiveWallpaperModal
+        isOpen={isLiveWallpaperOpen}
+        onClose={() => setIsLiveWallpaperOpen(false)}
+        settings={settings}
+        updateSettings={updateSettings}
       />
 
       {/* Floating Cookie Consent Notification */}

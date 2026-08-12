@@ -46,6 +46,8 @@ interface HeaderProps {
   openDailyModal?: () => void;
   openAdminModal?: () => void;
   openTvRemote?: () => void;
+  openCommandPalette?: () => void;
+  openLiveWallpaperModal?: () => void;
   isAdmin?: boolean;
   liveActiveUsers?: number;
   liveTotalVisits?: number;
@@ -65,6 +67,8 @@ export const Header: React.FC<HeaderProps> = ({
   openDailyModal,
   openAdminModal,
   openTvRemote,
+  openCommandPalette,
+  openLiveWallpaperModal,
   isAdmin = false,
   liveActiveUsers = 1,
   liveTotalVisits = 1,
@@ -138,6 +142,25 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[11px] sm:text-xs font-mono">
+          {/* Custom Web App Live Wallpaper Engine Button */}
+          {openLiveWallpaperModal && (
+            <button
+              onClick={() => {
+                sfx.playWarp();
+                openLiveWallpaperModal();
+              }}
+              className={`flex items-center gap-1.5 px-3 py-0.5 rounded-full font-bold transition-all hover:scale-105 shadow-sm ${
+                settings.webAppWallpaperEnabled
+                  ? "bg-purple-600 border border-purple-400 text-white animate-pulse shadow-purple-600/40"
+                  : "bg-cyan-500/20 border border-cyan-400/50 text-cyan-300 hover:bg-cyan-500/30"
+              }`}
+              title="Change Custom Web App Wallpapers & Live Backgrounds (MP4, GIF, 4K)"
+            >
+              <Camera className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+              <span>Wallpaper</span>
+            </button>
+          )}
+
           {/* Daily Login Rewards Button */}
           {openDailyModal && (
             <button
@@ -363,6 +386,40 @@ export const Header: React.FC<HeaderProps> = ({
               {profile.username}
             </span>
           </button>
+
+          {/* Live Wallpaper Quick Engine Button */}
+          {openLiveWallpaperModal && (
+            <button
+              onClick={() => {
+                sfx.playWarp();
+                openLiveWallpaperModal();
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all shrink-0 shadow-md ${
+                settings.webAppWallpaperEnabled
+                  ? "bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border-purple-400/60 shadow-purple-600/20"
+                  : "bg-slate-900/90 hover:bg-slate-800 text-slate-300 border-slate-750"
+              }`}
+              title="Change Custom Web App Wallpapers & Live Backgrounds (MP4, GIF, 4K)"
+            >
+              <Camera className="w-3.5 h-3.5 text-cyan-400 animate-pulse shrink-0" />
+              <span>Wallpaper</span>
+            </button>
+          )}
+
+          {/* Command Palette Launcher Button */}
+          {openCommandPalette && (
+            <button
+              onClick={() => {
+                sfx.playClick();
+                openCommandPalette();
+              }}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-900/90 hover:bg-purple-900/40 text-slate-300 hover:text-white rounded-xl border border-purple-500/30 hover:border-purple-400 text-xs font-mono font-bold transition-all shrink-0 shadow-sm"
+              title="Open Command Palette (Cmd+K)"
+            >
+              <Zap className="w-3.5 h-3.5 text-purple-400" />
+              <span className="hidden sm:inline">Cmd+K</span>
+            </button>
+          )}
 
           {/* System Settings Button */}
           <button

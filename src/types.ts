@@ -113,5 +113,10 @@ export interface AppSettings {
   isGoldMode: boolean;
   isekaiCoins: number;
   unlockedGoldPermanently: boolean;
+  ambientLightSync?: boolean;
+  webAppWallpaperEnabled?: boolean;
+  webAppWallpaperUrl?: string;
+  webAppWallpaperType?: "video" | "image";
+  webAppWallpaperOpacity?: number;
 }
 

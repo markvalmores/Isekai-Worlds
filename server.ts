@@ -1275,6 +1275,59 @@ app.post("/api/leaderboard/update", (req, res) => {
   }
 });
 
+// 7. Random Profile Generator API Engine
+app.get("/api/profile/random", async (req, res) => {
+  try {
+    const prefixes = ["Shadow", "Chrono", "Aether", "Kage", "Sora", "Cyber", "Nexus", "Astral", "Ryu", "Phantom", "Celestial", "Starlight", "Vortex", "Apex", "Divine", "Valiant", "Giga", "Radiant", "Titan", "Solar"];
+    const suffixes = ["Blade", "Traveler", "Vanguard", "Samurai", "Sovereign", "Shinobi", "Archon", "Phoenix", "Knight", "Reaper", "Paladin", "Slayer", "Monarch", "Sorcerer", "Wanderer", "Seeker", "Overlord"];
+    const titles = ["S-Rank Dimension Hopper", "Master of Shadow Arts", "Supreme Isekai Overlord", "Chrono Spellcaster", "Archmage of the Abyss", "Starbound Wanderer", "Celestial Guild Master", "Demon King Slayer"];
+    const badges = ["S-Rank Hero", "Mythic Champion", "SS-Rank Hunter", "Shadow Ruler", "Celestial Vanguard", "Grandmaster"];
+
+    let randomAvatar = "";
+    try {
+      const ruRes = await fetch("https://randomuser.me/api/?inc=picture", { signal: AbortSignal.timeout(3000) });
+      if (ruRes.ok) {
+        const ruData = await ruRes.json();
+        randomAvatar = ruData?.results?.[0]?.picture?.large || "";
+      }
+    } catch (e) {}
+
+    if (!randomAvatar) {
+      const fallbackAvatars = [
+        "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&auto=format&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&auto=format&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=400&auto=format&fit=crop&q=80"
+      ];
+      randomAvatar = fallbackAvatars[Math.floor(Math.random() * fallbackAvatars.length)];
+    }
+
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+    const num = Math.floor(100 + Math.random() * 900);
+    const username = `${prefix}${suffix}_${num}`;
+    const title = titles[Math.floor(Math.random() * titles.length)];
+    const badge = badges[Math.floor(Math.random() * badges.length)];
+
+    res.json({
+      id: `u-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      username,
+      avatarUrl: randomAvatar,
+      bannerUrl: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1200&auto=format&fit=crop&q=80",
+      bio: "Traversing through anime dimensions. S-Rank Adventurer and Isekai enthusiast.",
+      title,
+      badge,
+      customStatus: `Exploring Isekai Worlds as ${username}...`,
+      bannerGradient: "from-purple-600 via-indigo-600 to-pink-600",
+      accentColor: "#a855f7",
+      country: "GLOBAL",
+      joinedDate: new Date().getFullYear().toString(),
+      favAnime: "Re:Zero / Sword Art Online"
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to generate random profile" });
+  }
+});
+
 // Vite & Static file handler
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {

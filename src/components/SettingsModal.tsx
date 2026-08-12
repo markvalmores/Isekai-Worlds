@@ -224,6 +224,58 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </button>
           </div>
 
+          {/* Ambient Light Sync Toggle */}
+          <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+            <div className="space-y-0.5">
+              <span className="text-slate-200 font-bold flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-yellow-300" />
+                <span>Ambient Light Sync</span>
+              </span>
+              <span className="text-slate-400 text-[10px]">Dynamic glowing ambient halos behind the app canvas</span>
+            </div>
+            <button
+              onClick={() => {
+                sfx.playClick();
+                updateSettings({ ambientLightSync: settings.ambientLightSync === false ? true : false });
+              }}
+              className={`w-12 h-6 rounded-full transition-colors relative p-1 ${
+                settings.ambientLightSync !== false ? "bg-yellow-500" : "bg-slate-800"
+              }`}
+            >
+              <div
+                className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                  settings.ambientLightSync !== false ? "translate-x-6" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Web App Custom Live Wallpaper Toggle */}
+          <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+            <div className="space-y-0.5">
+              <span className="text-slate-200 font-bold flex items-center gap-2">
+                <Cloud className="w-4 h-4 text-cyan-400" />
+                <span>Web App Custom Wallpaper</span>
+              </span>
+              <span className="text-slate-400 text-[10px]">Display looping MP4, GIF, JPG, or PNG background</span>
+            </div>
+            <button
+              onClick={() => {
+                sfx.playWarp();
+                updateSettings({ webAppWallpaperEnabled: !settings.webAppWallpaperEnabled });
+              }}
+              className={`w-12 h-6 rounded-full transition-colors relative p-1 ${
+                settings.webAppWallpaperEnabled ? "bg-purple-600" : "bg-slate-800"
+              }`}
+            >
+              <div
+                className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                  settings.webAppWallpaperEnabled ? "translate-x-6" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div>
+
           {/* Smart TV / Controller Navigation Mode */}
           <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
             <div className="space-y-0.5">

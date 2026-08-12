@@ -257,6 +257,33 @@ interface CardGamesDashboardProps {
 export function CardGamesDashboard({ onAddCoins, isGoldMode }: CardGamesDashboardProps) {
   // We rename the component dynamically or reuse it as "CardGamesDashboard" internally
   const EXTERNAL_URL = "https://mobile-anime-card-gacha-battle.vercel.app/";
+  const externalContainerRef = React.useRef<HTMLDivElement>(null);
+  
+  // Image error fallback handler to ensure Yu-Gi-Oh and Pokemon legendaries always display art
+  const handleCardImgError = (e: React.SyntheticEvent<HTMLImageElement, Event>, game?: string) => {
+    const target = e.currentTarget;
+    target.onerror = null;
+    if (game === "yugioh") {
+      target.src = "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=600&q=80";
+    } else {
+      target.src = "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?w=600&q=80";
+    }
+  };
+
+  const toggleExternalNativeFullscreen = () => {
+    sfx.playClick();
+    if (!document.fullscreenElement) {
+      if (externalContainerRef.current?.requestFullscreen) {
+        externalContainerRef.current.requestFullscreen().catch(() => {});
+      }
+      setIsFullscreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+      setIsFullscreen(false);
+    }
+  };
   
   // Tabs: "gacha" | "inventory" | "battle" | "external"
   const [subTab, setSubTab] = useState<"gacha" | "inventory" | "battle" | "external">("gacha");
@@ -842,6 +869,8 @@ export function CardGamesDashboard({ onAddCoins, isGoldMode }: CardGamesDashboar
                       <img
                         src={card.imageUrl}
                         alt={card.name}
+                        referrerPolicy="no-referrer"
+                        onError={(e) => handleCardImgError(e, card.game)}
                         className="w-full h-20 object-cover rounded-lg"
                       />
                       <div className="space-y-0.5">
@@ -988,6 +1017,8 @@ export function CardGamesDashboard({ onAddCoins, isGoldMode }: CardGamesDashboar
                       <img
                         src={card.imageUrl}
                         alt={card.name}
+                        referrerPolicy="no-referrer"
+                        onError={(e) => handleCardImgError(e, card.game)}
                         className="w-full h-36 object-cover rounded-2xl border border-slate-850/60 shadow-inner"
                       />
 
@@ -1078,6 +1109,8 @@ export function CardGamesDashboard({ onAddCoins, isGoldMode }: CardGamesDashboar
                     <img
                       src={selectedFighter.imageUrl}
                       alt={selectedFighter.name}
+                      referrerPolicy="no-referrer"
+                      onError={(e) => handleCardImgError(e, selectedFighter.game)}
                       className="w-full h-44 object-cover rounded-xl border border-slate-800"
                     />
                     <h5 className="text-xs font-black text-white uppercase mt-3">{selectedFighter.name}</h5>
@@ -1220,6 +1253,8 @@ export function CardGamesDashboard({ onAddCoins, isGoldMode }: CardGamesDashboar
                     <img
                       src={selectedFighter.imageUrl}
                       alt={selectedFighter.name}
+                      referrerPolicy="no-referrer"
+                      onError={(e) => handleCardImgError(e, selectedFighter.game)}
                       className="w-16 h-20 object-cover rounded-xl border-2 border-indigo-500 shadow-md"
                     />
                     <p className="text-[10px] font-bold text-white truncate max-w-[80px]">{selectedFighter.name}</p>
@@ -1232,6 +1267,8 @@ export function CardGamesDashboard({ onAddCoins, isGoldMode }: CardGamesDashboar
                     <img
                       src={opponentFighter.imageUrl}
                       alt={opponentFighter.name}
+                      referrerPolicy="no-referrer"
+                      onError={(e) => handleCardImgError(e, opponentFighter.game)}
                       className="w-16 h-20 object-cover rounded-xl border-2 border-red-500 shadow-md"
                     />
                     <p className="text-[10px] font-bold text-white truncate max-w-[80px]">{opponentFighter.name}</p>
@@ -1333,18 +1370,21 @@ export function CardGamesDashboard({ onAddCoins, isGoldMode }: CardGamesDashboar
               </a>
 
               <button
-                onClick={() => { sfx.playClick(); setIsFullscreen(!isFullscreen); }}
+                onClick={toggleExternalNativeFullscreen}
                 className="p-2 bg-slate-950 border border-slate-850 hover:bg-slate-850 text-slate-300 hover:text-white rounded-xl transition-all"
-                title="Toggle Fullscreen"
+                title="Toggle True Fullscreen"
               >
                 {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
               </button>
             </div>
           </div>
 
-          <div className={`relative rounded-3xl overflow-hidden bg-slate-950 border border-slate-800 flex flex-col justify-between transition-all duration-300 shadow-2xl ${
-            isFullscreen ? "fixed inset-0 z-50 rounded-none w-screen h-screen" : "h-[650px]"
-          }`}>
+          <div
+            ref={externalContainerRef}
+            className={`relative rounded-3xl overflow-hidden bg-slate-950 border border-slate-800 flex flex-col justify-between transition-all duration-300 shadow-2xl ${
+              isFullscreen ? "fixed inset-0 z-50 rounded-none w-screen h-screen" : "h-[650px]"
+            }`}
+          >
             <iframe
               key={iframeKey}
               src={EXTERNAL_URL}

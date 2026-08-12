@@ -26,7 +26,10 @@ import {
   Radio,
   Gamepad2,
   HardDrive,
-  Layers
+  Layers,
+  Camera,
+  ShieldCheck,
+  Radio as RemoteIcon
 } from "lucide-react";
 
 interface HeaderProps {
@@ -40,6 +43,10 @@ interface HeaderProps {
   openSettingsModal: () => void;
   openMissionsModal: () => void;
   openDonationsModal: () => void;
+  openDailyModal?: () => void;
+  openAdminModal?: () => void;
+  openTvRemote?: () => void;
+  isAdmin?: boolean;
   liveActiveUsers?: number;
   liveTotalVisits?: number;
 }
@@ -55,6 +62,10 @@ export const Header: React.FC<HeaderProps> = ({
   openSettingsModal,
   openMissionsModal,
   openDonationsModal,
+  openDailyModal,
+  openAdminModal,
+  openTvRemote,
+  isAdmin = false,
   liveActiveUsers = 1,
   liveTotalVisits = 1,
 }) => {
@@ -72,6 +83,7 @@ export const Header: React.FC<HeaderProps> = ({
     { id: "home", labelKey: "home", icon: <Compass className="w-4 h-4" /> },
     { id: "wallpapers", labelKey: "wallpapers", icon: <ImageIcon className="w-4 h-4" /> },
     { id: "gifs", labelKey: "gifs", icon: <Film className="w-4 h-4" /> },
+    { id: "cosplay", labelKey: "cosplay", icon: <Camera className="w-4 h-4 text-pink-400" /> },
     { id: "media", labelKey: "media", icon: <Tv2 className="w-4 h-4" /> },
     { id: "watch", labelKey: "watch", icon: <Tv className="w-4 h-4" /> },
     { id: "radio", labelKey: "radio", icon: <Radio className="w-4 h-4" /> },
@@ -126,6 +138,55 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[11px] sm:text-xs font-mono">
+          {/* Daily Login Rewards Button */}
+          {openDailyModal && (
+            <button
+              onClick={() => {
+                sfx.playClick();
+                openDailyModal();
+              }}
+              className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-500/20 border border-indigo-400/50 text-indigo-300 hover:scale-105 transition-all font-bold animate-pulse"
+              title="Claim Daily Login Bonus"
+            >
+              <Gift className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Daily Rewards</span>
+            </button>
+          )}
+
+          {/* Smart TV Remote Button */}
+          {openTvRemote && (
+            <button
+              onClick={() => {
+                sfx.playClick();
+                openTvRemote();
+              }}
+              className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/20 border border-purple-400/50 text-purple-300 hover:scale-105 transition-all font-bold"
+              title="Open Smart TV Remote Controls"
+            >
+              <Tv className="w-3.5 h-3.5 text-purple-400" />
+              <span className="hidden sm:inline">TV Remote</span>
+            </button>
+          )}
+
+          {/* Login as Admin Button */}
+          {openAdminModal && (
+            <button
+              onClick={() => {
+                sfx.playClick();
+                openAdminModal();
+              }}
+              className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full font-bold transition-all ${
+                isAdmin
+                  ? "bg-red-500 border border-red-400 text-slate-950 animate-bounce shadow-md"
+                  : "bg-red-500/20 border border-red-500/50 text-red-400 hover:bg-red-500/30"
+              }`}
+              title="Admin Access & God Mode"
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>{isAdmin ? "ADMIN ACTIVE" : "Login as Admin"}</span>
+            </button>
+          )}
+
           {/* Daily Missions & Coins Button */}
           <button
             onClick={() => {

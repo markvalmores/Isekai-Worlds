@@ -50,16 +50,16 @@ const GAME_CATALOG: GameDetail[] = [
     rating: 4.8
   },
   {
-    id: "y8",
-    title: "Y8 Classic Arcade",
-    url: "https://www.y8.com/",
-    description: "The legendary internet classic gaming destination. Explore hundreds of thousands of flash-style casual games, high-score retro battles, and community-hosted mini-games across every genre.",
+    id: "playtomax",
+    title: "PlayToMax Arcade Games",
+    url: "https://playtomax.com/games",
+    description: "High-performance HTML5 browser arcade platform. Explore hundreds of fast-paced, free-to-play casual games, retro puzzle battles, and multi-genre action games playable natively.",
     category: "Arcade & Casual",
     coverUrl: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=800&auto=format&fit=crop&q=80",
-    tags: ["Retro", "Casual", "Mini-Games", "Action"],
+    tags: ["HTML5", "Casual", "Mini-Games", "Action"],
     difficulty: "Easy",
-    releaseYear: "2006",
-    rating: 4.5
+    releaseYear: "2018",
+    rating: 4.7
   },
   {
     id: "cloudmoon",
@@ -81,9 +81,12 @@ const PREPOPULATED_COMMENTS: Record<string, { user: string; text: string; time: 
     { user: "GachaSlayer", text: "Been grinding Bahamut raids for 6 hours straight. Frame rate on the web edition is super crisp.", time: "1 day ago", rating: 4 },
     { user: "VyrnLover", text: "Is there any way to turn on English audio? Yes, click Settings inside game menu!", time: "3 days ago", rating: 5 }
   ],
+  playtomax: [
+    { user: "ArcadeKing", text: "Super clean HTML5 games on PlayToMax! Runs smoothly without any installation or flash plugins.", time: "30 mins ago", rating: 5 },
+    { user: "Speedrunner", text: "Love the casual mini-games catalog here. Great frame rates!", time: "3 hours ago", rating: 5 }
+  ],
   y8: [
-    { user: "RetroKid", text: "Ah, the absolute nostalgia. Slope game is still the best on Y8!", time: "45 mins ago", rating: 5 },
-    { user: "CasualGamer", text: "I can spend days playing puzzle mini games here. Some games might prompt flash warning, but most are updated to HTML5 now.", time: "5 hours ago", rating: 4 }
+    { user: "ArcadeKing", text: "Super clean HTML5 games! Runs smoothly without any installation.", time: "30 mins ago", rating: 5 }
   ],
   cloudmoon: [
     { user: "MobileHacker", text: "Wow, playing Genshin on a low-end Chromebook through CloudMoon with zero lag is black magic.", time: "1 hour ago", rating: 5 },
@@ -110,6 +113,7 @@ export function PlayGamesDashboard({ onAddCoins, isGoldMode = false }: PlayGames
   const [coinsClaimed, setCoinsClaimed] = useState<number>(0);
   const [likesCount, setLikesCount] = useState<Record<string, number>>({
     granblue: 342,
+    playtomax: 1205,
     y8: 1205,
     cloudmoon: 419
   });
@@ -128,10 +132,26 @@ export function PlayGamesDashboard({ onAddCoins, isGoldMode = false }: PlayGames
   const [newCommentText, setNewCommentText] = useState<string>("");
   const [newCommentRating, setNewCommentRating] = useState<number>(5);
 
-  // Controller simulator states
+  // Controller simulator & fullscreen container refs
   const [isCalibrated, setIsCalibrated] = useState<boolean>(false);
   const [lastButtonAction, setLastButtonAction] = useState<string>("Ready");
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const gameContainerRef = useRef<HTMLDivElement>(null);
+
+  const toggleNativeFullscreen = () => {
+    sfx.playClick();
+    if (!document.fullscreenElement) {
+      if (gameContainerRef.current?.requestFullscreen) {
+        gameContainerRef.current.requestFullscreen().catch(() => {});
+      }
+      setIsFullscreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+      setIsFullscreen(false);
+    }
+  };
 
   // Game tracking loop - grants +15 coins every 45s of active page session
   useEffect(() => {
@@ -504,12 +524,9 @@ export function PlayGamesDashboard({ onAddCoins, isGoldMode = false }: PlayGames
                   </a>
 
                   <button
-                    onClick={() => {
-                      sfx.playClick();
-                      setIsFullscreen(!isFullscreen);
-                    }}
+                    onClick={toggleNativeFullscreen}
                     className="p-2 bg-slate-950 border border-slate-850 hover:bg-slate-850 text-slate-300 hover:text-white rounded-xl transition-all"
-                    title="Toggle Fullscreen"
+                    title="Toggle True Fullscreen"
                   >
                     {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
                   </button>
@@ -517,9 +534,12 @@ export function PlayGamesDashboard({ onAddCoins, isGoldMode = false }: PlayGames
               </div>
 
               {/* Simulated Monitor Frame */}
-              <div className={`relative rounded-3xl overflow-hidden bg-slate-950 border border-slate-800 flex flex-col justify-between transition-all duration-300 shadow-2xl ${
-                isFullscreen ? "fixed inset-0 z-50 rounded-none w-screen h-screen" : "h-[620px]"
-              }`}>
+              <div
+                ref={gameContainerRef}
+                className={`relative rounded-3xl overflow-hidden bg-slate-950 border border-slate-800 flex flex-col justify-between transition-all duration-300 shadow-2xl ${
+                  isFullscreen ? "fixed inset-0 z-50 rounded-none w-screen h-screen" : "h-[620px]"
+                }`}
+              >
                 {/* Floating telemetry HUD (Only if fullscreen) */}
                 {isFullscreen && (
                   <div className="absolute top-4 left-4 z-40 bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 text-[9px] font-mono space-y-1 backdrop-blur shadow-md">

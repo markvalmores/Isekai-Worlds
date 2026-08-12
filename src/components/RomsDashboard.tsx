@@ -40,9 +40,25 @@ interface RomsDashboardProps {
 }
 
 export function RomsDashboard({ onAddCoins, isGoldMode = false }: RomsDashboardProps) {
-  const EMBED_URL = "https://r-roms.gitlab.io/megathread/popular/";
+  const EMBED_URL = "https://cdromance.org/";
   const [iframeKey, setIframeKey] = useState<number>(0);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const romsContainerRef = React.useRef<HTMLDivElement>(null);
+
+  const toggleNativeFullscreen = () => {
+    sfx.playClick();
+    if (!document.fullscreenElement) {
+      if (romsContainerRef.current?.requestFullscreen) {
+        romsContainerRef.current.requestFullscreen().catch(() => {});
+      }
+      setIsFullscreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+      setIsFullscreen(false);
+    }
+  };
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isBookmarked, setIsBookmarked] = useState<boolean>(() => {
     try {
@@ -107,10 +123,10 @@ export function RomsDashboard({ onAddCoins, isGoldMode = false }: RomsDashboardP
             Retro Vault Connection: ONLINE
           </div>
           <h2 className="text-xl sm:text-3xl font-black uppercase tracking-tight text-white">
-            Retro ROMs Megathread Portal
+            CDRomance Retro ROMs & ISOs Portal
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            Access the legendary Gitlab Retro Megathread containing a safe, validated database of the world's most popular console ROMs, emulator configurations, and retro BIOS files.
+            Explore CDRomance, the premier archive for retro CD-based ISOs, PS1/PS2/PSP games, SNES translations, and classic console ROMs with direct browser accessibility.
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-2 text-[10px] font-mono text-slate-450">
@@ -209,7 +225,7 @@ export function RomsDashboard({ onAddCoins, isGoldMode = false }: RomsDashboardP
               <div className="text-left">
                 <span className="text-[8px] font-mono text-purple-400 uppercase tracking-widest block font-bold">Active Embedded Sandbox</span>
                 <h3 className="text-xs font-black text-white uppercase">
-                  Gitlab R-Roms Megathread
+                  CDRomance Vault Portal
                 </h3>
               </div>
             </div>
@@ -244,12 +260,9 @@ export function RomsDashboard({ onAddCoins, isGoldMode = false }: RomsDashboardP
               </a>
 
               <button
-                onClick={() => {
-                  sfx.playClick();
-                  setIsFullscreen(!isFullscreen);
-                }}
+                onClick={toggleNativeFullscreen}
                 className="p-2 bg-slate-950 border border-slate-850 hover:bg-slate-850 text-slate-300 hover:text-white rounded-xl transition-all"
-                title="Toggle Fullscreen"
+                title="Toggle True Fullscreen"
               >
                 {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
               </button>
@@ -257,14 +270,17 @@ export function RomsDashboard({ onAddCoins, isGoldMode = false }: RomsDashboardP
           </div>
 
           {/* Embedded Container */}
-          <div className={`relative rounded-3xl overflow-hidden bg-slate-950 border border-slate-800 flex flex-col justify-between transition-all duration-300 shadow-2xl ${
-            isFullscreen ? "fixed inset-0 z-50 rounded-none w-screen h-screen" : "h-[650px]"
-          }`}>
+          <div
+            ref={romsContainerRef}
+            className={`relative rounded-3xl overflow-hidden bg-slate-950 border border-slate-800 flex flex-col justify-between transition-all duration-300 shadow-2xl ${
+              isFullscreen ? "fixed inset-0 z-50 rounded-none w-screen h-screen" : "h-[650px]"
+            }`}
+          >
             {isFullscreen && (
               <div className="absolute top-4 left-4 z-40 bg-slate-950/90 border border-slate-800 rounded-xl p-2.5 text-[9px] font-mono space-y-1 backdrop-blur shadow-md text-white">
                 <span className="text-purple-400 font-bold block">✦ Active Session: {formatSessionTime(romsSeconds)}</span>
                 <button
-                  onClick={() => setIsFullscreen(false)}
+                  onClick={toggleNativeFullscreen}
                   className="mt-1 text-[8px] bg-slate-900 border border-slate-750 text-white px-2 py-0.5 rounded uppercase block font-bold hover:bg-slate-800"
                 >
                   Exit Fullscreen
@@ -276,7 +292,7 @@ export function RomsDashboard({ onAddCoins, isGoldMode = false }: RomsDashboardP
               key={iframeKey}
               src={EMBED_URL}
               className="w-full h-full border-none bg-slate-900"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
               sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
               referrerPolicy="no-referrer"
             />
@@ -285,7 +301,7 @@ export function RomsDashboard({ onAddCoins, isGoldMode = false }: RomsDashboardP
             <div className="bg-slate-900/90 border-t border-slate-850 px-4 py-2.5 flex items-center justify-between text-[10px] font-mono text-slate-450">
               <div className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-ping" />
-                <span>Redirect active on r-roms.gitlab.io/megathread/popular</span>
+                <span>Redirect active on cdromance.org</span>
               </div>
               <div className="hidden sm:block">
                 Secure SSL: <span className="text-emerald-400 font-bold">ACTIVE</span>

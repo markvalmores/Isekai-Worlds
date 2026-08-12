@@ -1,4 +1,4 @@
-export type PageView = "home" | "wallpapers" | "gifs" | "media" | "leaderboard" | "profile" | "vr" | "hardware" | "watch" | "radio" | "amv" | "games" | "roms" | "cards";
+export type PageView = "home" | "wallpapers" | "gifs" | "cosplay" | "media" | "leaderboard" | "profile" | "vr" | "hardware" | "watch" | "radio" | "amv" | "games" | "roms" | "cards";
 
 export type LanguageCode =
   | "en"

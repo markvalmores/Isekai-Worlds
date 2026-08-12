@@ -24,6 +24,10 @@ import { RadioGagaAMV } from "./components/AmvDashboard";
 import { PlayGamesDashboard } from "./components/PlayGamesDashboard";
 import { RomsDashboard } from "./components/RomsDashboard";
 import { CardGamesDashboard } from "./components/CardGamesDashboard";
+import { CosplayDashboard } from "./components/CosplayDashboard";
+import { DailyLoginModal } from "./components/DailyLoginModal";
+import { SmartTvRemote } from "./components/SmartTvRemote";
+import { AdminLoginModal } from "./components/AdminLoginModal";
 import { FloatingLanguageWidget } from "./components/FloatingLanguageWidget";
 import { SettingsModal } from "./components/SettingsModal";
 import { DailyMissionsModal } from "./components/DailyMissionsModal";
@@ -38,6 +42,47 @@ export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isMissionsOpen, setIsMissionsOpen] = useState(false);
   const [isDonationsOpen, setIsDonationsOpen] = useState(false);
+  const [isDailyOpen, setIsDailyOpen] = useState(false);
+  const [isTvRemoteOpen, setIsTvRemoteOpen] = useState(false);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
+
+  // Admin God Mode State
+  const [isAdmin, setIsAdmin] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("isekai_admin_mode") === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  // First User Coin Bonus Check (3478 Coins)
+  const [isFirstUser, setIsFirstUser] = useState<boolean>(() => {
+    try {
+      const hasVisited = localStorage.getItem("isekai_has_visited_before");
+      if (!hasVisited) {
+        localStorage.setItem("isekai_has_visited_before", "true");
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  });
+
+  // Check if Daily Login Rewards Modal should auto-popup on first visit of the day
+  useEffect(() => {
+    try {
+      const todayStr = new Date().toISOString().split("T")[0];
+      const lastLoginStr = localStorage.getItem("isekai_last_login_date");
+      if (lastLoginStr !== todayStr || isFirstUser) {
+        // First visit today! Trigger daily login modal
+        const timer = setTimeout(() => {
+          setIsDailyOpen(true);
+        }, 1200);
+        return () => clearTimeout(timer);
+      }
+    } catch (e) {}
+  }, []);
 
   // Active Time Logger State (In Seconds)
   const [activeSeconds, setActiveSeconds] = useState<number>(() => {
@@ -198,6 +243,7 @@ export default function App() {
       home: "Portal Hub",
       wallpapers: "4K Anime Wallpapers",
       gifs: "Anime GIFs & Reactions",
+      cosplay: "Cosplay & Costume Vault",
       media: "Live Anime Streams",
       leaderboard: "Global Leaderboards",
       profile: "Profile Dashboard",
@@ -248,7 +294,7 @@ export default function App() {
     }
 
     try {
-      // Read custom AMV playlist from localStorage directly
+      // Read custom AMV playlist from localStorage
       let amvPlaylist = [];
       try {
         const savedPlaylist = localStorage.getItem("isekai_amv_playlist");
@@ -260,6 +306,33 @@ export default function App() {
       // Read custom AMV playlist ID
       const amvPlaylistId = localStorage.getItem("isekai_amv_playlist_id") || "PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu";
 
+      // Read card inventory
+      let inventory = [];
+      try {
+        const savedInv = localStorage.getItem("isekai_card_inventory");
+        if (savedInv) inventory = JSON.parse(savedInv);
+      } catch (e) {}
+
+      // Read game comments
+      let gameComments = null;
+      try {
+        const savedComms = localStorage.getItem("isekai_game_comments");
+        if (savedComms) gameComments = JSON.parse(savedComms);
+      } catch (e) {}
+
+      // Read saved wallpapers, gifs, watch history
+      let savedWallpapers = null;
+      let savedGifs = null;
+      let watchHistory = null;
+      try {
+        const sw = localStorage.getItem("isekai_saved_wallpapers");
+        if (sw) savedWallpapers = JSON.parse(sw);
+        const sg = localStorage.getItem("isekai_saved_gifs");
+        if (sg) savedGifs = JSON.parse(sg);
+        const wh = localStorage.getItem("isekai_watch_history");
+        if (wh) watchHistory = JSON.parse(wh);
+      } catch (e) {}
+
       const res = await fetch("/api/sync/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -269,7 +342,12 @@ export default function App() {
           settings,
           amvPlaylist,
           amvPlaylistId,
-          activeSeconds
+          activeSeconds,
+          inventory,
+          gameComments,
+          savedWallpapers,
+          savedGifs,
+          watchHistory
         })
       });
 
@@ -302,7 +380,7 @@ export default function App() {
       if (res.ok && resJson.success && resJson.data) {
         const payload = resJson.data;
 
-        // Apply to localStorage
+        // Apply to localStorage & React state
         if (payload.profile) {
           localStorage.setItem("isekai_user_profile", JSON.stringify(payload.profile));
           setProfile(payload.profile);
@@ -316,6 +394,21 @@ export default function App() {
         }
         if (payload.amvPlaylistId) {
           localStorage.setItem("isekai_amv_playlist_id", payload.amvPlaylistId);
+        }
+        if (payload.inventory) {
+          localStorage.setItem("isekai_card_inventory", JSON.stringify(payload.inventory));
+        }
+        if (payload.gameComments) {
+          localStorage.setItem("isekai_game_comments", JSON.stringify(payload.gameComments));
+        }
+        if (payload.savedWallpapers) {
+          localStorage.setItem("isekai_saved_wallpapers", JSON.stringify(payload.savedWallpapers));
+        }
+        if (payload.savedGifs) {
+          localStorage.setItem("isekai_saved_gifs", JSON.stringify(payload.savedGifs));
+        }
+        if (payload.watchHistory) {
+          localStorage.setItem("isekai_watch_history", JSON.stringify(payload.watchHistory));
         }
         if (typeof payload.activeSeconds === "number") {
           localStorage.setItem("isekai_active_seconds", payload.activeSeconds.toString());
@@ -476,6 +569,10 @@ export default function App() {
         openSettingsModal={() => setIsSettingsOpen(true)}
         openMissionsModal={() => setIsMissionsOpen(true)}
         openDonationsModal={() => setIsDonationsOpen(true)}
+        openDailyModal={() => setIsDailyOpen(true)}
+        openAdminModal={() => setIsAdminOpen(true)}
+        openTvRemote={() => setIsTvRemoteOpen(!isTvRemoteOpen)}
+        isAdmin={isAdmin}
         liveActiveUsers={liveActiveUsers}
         liveTotalVisits={liveTotalVisits}
       />
@@ -502,6 +599,13 @@ export default function App() {
         )}
 
         {currentPage === "gifs" && <GifGallery />}
+
+        {currentPage === "cosplay" && (
+          <CosplayDashboard
+            onAddCoins={handleAddCoins}
+            isGoldMode={isGold}
+          />
+        )}
 
         {currentPage === "media" && (
           <MediaHub
@@ -606,6 +710,52 @@ export default function App() {
         isOpen={isDonationsOpen}
         onClose={() => setIsDonationsOpen(false)}
         isGoldMode={isGold}
+      />
+
+      {/* Daily Login Rewards Modal */}
+      <DailyLoginModal
+        isOpen={isDailyOpen}
+        onClose={() => setIsDailyOpen(false)}
+        onClaimCoins={(amt, reason) => {
+          handleAddCoins(amt);
+          handleCloudSave(syncKey || "default-user");
+        }}
+        isFirstUser={isFirstUser}
+      />
+
+      {/* Smart TV Remote Control Panel */}
+      <SmartTvRemote
+        isOpen={isTvRemoteOpen}
+        onClose={() => setIsTvRemoteOpen(false)}
+        activeTab={currentPage}
+        setActiveTab={handlePageChange}
+        tabsList={[
+          { id: "home", label: "Portal Hub" },
+          { id: "wallpapers", label: "Wallpapers" },
+          { id: "gifs", label: "GIFs" },
+          { id: "cosplay", label: "Cosplay" },
+          { id: "media", label: "Streams" },
+          { id: "watch", label: "Watch Anime" },
+          { id: "games", label: "Arcade Games" },
+          { id: "cards", label: "Cards Arena" }
+        ]}
+      />
+
+      {/* Executive Admin Portal Modal */}
+      <AdminLoginModal
+        isOpen={isAdminOpen}
+        onClose={() => setIsAdminOpen(false)}
+        isAdmin={isAdmin}
+        setIsAdmin={setIsAdmin}
+        onAddCoins={(amt) => handleAddCoins(amt)}
+        onUnlockAllCards={() => {
+          // Unlock all cards in card inventory
+          const ALL_CARDS = [
+            "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12"
+          ];
+          localStorage.setItem("isekai_card_inventory", JSON.stringify(ALL_CARDS));
+          alert("All 12 Legendary Anime Cards unlocked in Gacha Inventory!");
+        }}
       />
 
       {/* Floating Cookie Consent Notification */}

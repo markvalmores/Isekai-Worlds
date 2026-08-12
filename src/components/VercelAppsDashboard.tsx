@@ -363,23 +363,25 @@ export const VercelAppsDashboard: React.FC = () => {
             key={app.id}
             className="group relative bg-slate-900/80 border border-indigo-500/20 hover:border-indigo-400/60 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 flex flex-col"
           >
-            {/* Thumbnail Header */}
+            {/* Thumbnail Header with Live Vercel Website Iframe Preview */}
             <div className="relative h-48 overflow-hidden bg-slate-950">
-              <img
-                src={app.thumbnail}
-                alt={app.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-100"
+              <iframe
+                src={app.url}
+                title={app.title}
+                className="w-[133.33%] h-[133.33%] border-0 pointer-events-none scale-75 origin-top-left opacity-80 group-hover:opacity-100 transition-opacity"
+                sandbox="allow-scripts allow-same-origin"
+                loading="lazy"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent pointer-events-none"></div>
 
               {app.featured && (
-                <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-amber-500/90 text-slate-950 font-black text-[10px] tracking-wider uppercase shadow-lg flex items-center gap-1 font-mono">
+                <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-amber-500/90 text-slate-950 font-black text-[10px] tracking-wider uppercase shadow-lg flex items-center gap-1 font-mono z-10">
                   <Star className="w-3 h-3 fill-slate-950" />
                   Featured
                 </span>
               )}
 
-              <span className="absolute top-3 right-3 px-3 py-1 rounded-full bg-indigo-950/80 border border-indigo-400/40 text-indigo-300 font-mono text-[10px] uppercase font-bold tracking-wider">
+              <span className="absolute top-3 right-3 px-3 py-1 rounded-full bg-indigo-950/80 border border-indigo-400/40 text-indigo-300 font-mono text-[10px] uppercase font-bold tracking-wider z-10">
                 {app.category}
               </span>
             </div>

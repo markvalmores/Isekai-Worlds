@@ -29,6 +29,8 @@ import {
   Layers,
   Camera,
   ShieldCheck,
+  ChevronLeft,
+  ChevronRight,
   Radio as RemoteIcon
 } from "lucide-react";
 
@@ -107,6 +109,42 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   const isGold = settings.isGoldMode;
+
+  const navScrollRef = React.useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = React.useState(false);
+  const [canScrollRight, setCanScrollRight] = React.useState(true);
+
+  const checkScroll = () => {
+    if (navScrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = navScrollRef.current;
+      setCanScrollLeft(scrollLeft > 5);
+      setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 5);
+    }
+  };
+
+  React.useEffect(() => {
+    checkScroll();
+    window.addEventListener("resize", checkScroll);
+    return () => window.removeEventListener("resize", checkScroll);
+  }, []);
+
+  React.useEffect(() => {
+    if (navScrollRef.current) {
+      const activeEl = navScrollRef.current.querySelector('[data-active="true"]');
+      if (activeEl) {
+        activeEl.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      }
+    }
+  }, [currentPage]);
+
+  const scrollNav = (direction: "left" | "right") => {
+    sfx.playClick();
+    if (navScrollRef.current) {
+      const amount = direction === "left" ? -280 : 280;
+      navScrollRef.current.scrollBy({ left: amount, behavior: "smooth" });
+      setTimeout(checkScroll, 350);
+    }
+  };
 
   return (
     <header className={`sticky top-0 z-40 backdrop-blur-xl transition-all duration-500 border-b ${
@@ -266,7 +304,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Main Navigation Row */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-4">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 py-2.5 flex items-center justify-between gap-2 sm:gap-4">
         {/* Brand Logo with Gold / Rainbow Gradient */}
         <div
           onClick={() => handleNavClick("home")}
@@ -289,15 +327,15 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          <div className="flex flex-col min-w-0">
-            <h1 className={`text-sm sm:text-lg lg:text-xl font-black tracking-wider uppercase bg-clip-text text-transparent flex items-center gap-1 truncate ${
+          <div className="hidden sm:flex flex-col min-w-0">
+            <h1 className={`text-sm lg:text-lg font-black tracking-wider uppercase bg-clip-text text-transparent flex items-center gap-1 truncate ${
               isGold
                 ? "bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-500 drop-shadow-[0_2px_10px_rgba(245,158,11,0.5)]"
                 : "bg-gradient-to-r from-blue-400 via-purple-300 to-red-400 drop-shadow-[0_2px_10px_rgba(168,85,247,0.3)]"
             }`}>
               <span>Isekai Worlds</span> {isGold && <Crown className="w-3.5 h-3.5 text-amber-400 inline shrink-0" />}
             </h1>
-            <span className={`text-[9px] sm:text-[10px] font-mono tracking-widest uppercase -mt-0.5 truncate ${
+            <span className={`text-[9px] font-mono tracking-widest uppercase -mt-0.5 truncate ${
               isGold ? "text-amber-300" : "text-indigo-300"
             }`}>
               {isGold ? "Gold Portal" : "Anime Multiverse"}
@@ -305,36 +343,74 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Desktop Navigation Links */}
-        <nav className={`hidden xl:flex items-center gap-1 p-1.5 rounded-2xl border ${
-          isGold
-            ? "bg-amber-950/40 border-amber-500/30"
-            : "bg-slate-900/60 border-indigo-500/20"
-        }`}>
-          {navItems.map((item) => {
-            const isActive = currentPage === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => handleNavClick(item.id)}
-                onMouseEnter={() => sfx.playHover()}
-                className={`flex items-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 select-none ${
-                  isActive
-                    ? isGold
-                      ? "bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-bold shadow-md shadow-amber-900/50 scale-[1.02]"
-                      : "bg-gradient-to-r from-blue-600 via-violet-600 to-red-600 text-white shadow-md shadow-purple-900/50 scale-[1.02]"
-                    : "text-slate-300 hover:text-white hover:bg-slate-800/80"
-                }`}
-              >
-                {item.icon}
-                <span>{getTranslation(settings.language, item.labelKey)}</span>
-              </button>
-            );
-          })}
-        </nav>
+        {/* Side-Scrollable Tabs Bar with Left and Right Navigation Controls */}
+        <div className="relative flex items-center gap-1 flex-1 min-w-0 mx-1 sm:mx-2">
+          {/* Left Scroll Arrow Button */}
+          <button
+            onClick={() => scrollNav("left")}
+            disabled={!canScrollLeft}
+            className={`p-1.5 rounded-xl border font-bold transition-all shrink-0 z-10 ${
+              canScrollLeft
+                ? "bg-purple-600/30 hover:bg-purple-600/60 border-purple-400 text-purple-200 shadow-md shadow-purple-600/30 hover:scale-105 cursor-pointer"
+                : "bg-slate-900/40 border-slate-800 text-slate-600 cursor-not-allowed opacity-40"
+            }`}
+            title="Scroll Tabs Left"
+            aria-label="Scroll Tabs Left"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+
+          {/* Scrollable Tabs Track */}
+          <nav
+            ref={navScrollRef}
+            onScroll={checkScroll}
+            className={`flex items-center gap-1.5 p-1 sm:p-1.5 rounded-2xl border overflow-x-auto no-scrollbar scroll-smooth flex-1 min-w-0 ${
+              isGold
+                ? "bg-amber-950/40 border-amber-500/30"
+                : "bg-slate-900/60 border-indigo-500/20"
+            }`}
+          >
+            {navItems.map((item) => {
+              const isActive = currentPage === item.id;
+              return (
+                <button
+                  key={item.id}
+                  data-active={isActive ? "true" : "false"}
+                  onClick={() => handleNavClick(item.id)}
+                  onMouseEnter={() => sfx.playHover()}
+                  className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 select-none whitespace-nowrap shrink-0 ${
+                    isActive
+                      ? isGold
+                        ? "bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-bold shadow-md shadow-amber-900/50 scale-[1.02]"
+                        : "bg-gradient-to-r from-blue-600 via-violet-600 to-red-600 text-white shadow-md shadow-purple-900/50 scale-[1.02]"
+                      : "text-slate-300 hover:text-white hover:bg-slate-800/80"
+                  }`}
+                >
+                  {item.icon}
+                  <span>{getTranslation(settings.language, item.labelKey)}</span>
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* Right Scroll Arrow Button */}
+          <button
+            onClick={() => scrollNav("right")}
+            disabled={!canScrollRight}
+            className={`p-1.5 rounded-xl border font-bold transition-all shrink-0 z-10 ${
+              canScrollRight
+                ? "bg-purple-600/30 hover:bg-purple-600/60 border-purple-400 text-purple-200 shadow-md shadow-purple-600/30 hover:scale-105 cursor-pointer"
+                : "bg-slate-900/40 border-slate-800 text-slate-600 cursor-not-allowed opacity-40"
+            }`}
+            title="Scroll Tabs Right"
+            aria-label="Scroll Tabs Right"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
 
         {/* User Actions & Settings */}
-        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           {/* Gold Mode Indicator Toggle */}
           <button
             onClick={() => {
@@ -353,7 +429,7 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
 
           {/* Quick Language Selector */}
-          <div className="relative group shrink-0">
+          <div className="relative group shrink-0 hidden sm:block">
             <select
               value={settings.language}
               onChange={(e) => {
@@ -374,7 +450,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* User Profile Pill */}
           <button
             onClick={() => handleNavClick("profile")}
-            className="flex items-center gap-2 bg-slate-900/80 hover:bg-slate-800 p-1 sm:p-1.5 pr-2.5 sm:pr-3 rounded-2xl border border-indigo-500/30 hover:border-indigo-400 transition-all shrink-0"
+            className="flex items-center gap-1.5 bg-slate-900/80 hover:bg-slate-800 p-1 sm:p-1.5 pr-2 sm:pr-2.5 rounded-2xl border border-indigo-500/30 hover:border-indigo-400 transition-all shrink-0"
             title="Open Profile Dashboard"
           >
             <img
@@ -382,7 +458,7 @@ export const Header: React.FC<HeaderProps> = ({
               alt={profile.username}
               className={`w-6 h-6 sm:w-7 sm:h-7 rounded-xl object-cover ring-2 ${isGold ? "ring-amber-400" : "ring-purple-500/40"}`}
             />
-            <span className="hidden md:inline text-xs font-bold text-slate-200 truncate max-w-[70px] lg:max-w-[90px]">
+            <span className="hidden lg:inline text-xs font-bold text-slate-200 truncate max-w-[70px] lg:max-w-[90px]">
               {profile.username}
             </span>
           </button>
@@ -394,7 +470,7 @@ export const Header: React.FC<HeaderProps> = ({
                 sfx.playWarp();
                 openLiveWallpaperModal();
               }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all shrink-0 shadow-md ${
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all shrink-0 shadow-md ${
                 settings.webAppWallpaperEnabled
                   ? "bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border-purple-400/60 shadow-purple-600/20"
                   : "bg-slate-900/90 hover:bg-slate-800 text-slate-300 border-slate-750"
@@ -402,7 +478,7 @@ export const Header: React.FC<HeaderProps> = ({
               title="Change Custom Web App Wallpapers & Live Backgrounds (MP4, GIF, 4K)"
             >
               <Camera className="w-3.5 h-3.5 text-cyan-400 animate-pulse shrink-0" />
-              <span>Wallpaper</span>
+              <span className="hidden sm:inline">Wallpaper</span>
             </button>
           )}
 
@@ -413,7 +489,7 @@ export const Header: React.FC<HeaderProps> = ({
                 sfx.playClick();
                 openCommandPalette();
               }}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-900/90 hover:bg-purple-900/40 text-slate-300 hover:text-white rounded-xl border border-purple-500/30 hover:border-purple-400 text-xs font-mono font-bold transition-all shrink-0 shadow-sm"
+              className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-900/90 hover:bg-purple-900/40 text-slate-300 hover:text-white rounded-xl border border-purple-500/30 hover:border-purple-400 text-xs font-mono font-bold transition-all shrink-0 shadow-sm"
               title="Open Command Palette (Cmd+K)"
             >
               <Zap className="w-3.5 h-3.5 text-purple-400" />
@@ -433,29 +509,6 @@ export const Header: React.FC<HeaderProps> = ({
             <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-300" />
           </button>
         </div>
-      </div>
-
-      {/* Mobile & Handheld Secondary Nav Pill Bar */}
-      <div className="xl:hidden bg-slate-950/90 px-3 py-2 border-t border-indigo-500/10 overflow-x-auto no-scrollbar flex items-center gap-2">
-        {navItems.map((item) => {
-          const isActive = currentPage === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => handleNavClick(item.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                isActive
-                  ? isGold
-                    ? "bg-amber-400 text-slate-950 font-bold shadow-md shadow-amber-900/50"
-                    : "bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 text-white shadow-md shadow-purple-900/50"
-                  : "bg-slate-900/80 text-slate-400 hover:text-white"
-              }`}
-            >
-              {item.icon}
-              <span>{getTranslation(settings.language, item.labelKey)}</span>
-            </button>
-          );
-        })}
       </div>
     </header>
   );

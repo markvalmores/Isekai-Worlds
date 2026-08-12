@@ -1,0 +1,30 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helpers
+    function isSignedIn() { return request.auth != null; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    
+    // Rankings
+    match /rankings/{rankingId} {
+      allow list: if isSignedIn(); // Simplified for now as it's a leaderboard
+      allow create: if isSignedIn() && isValidId(rankingId) && request.resource.data.id == request.auth.uid;
+      allow update: if isSignedIn() && request.resource.data.id == request.auth.uid;
+    }
+
+    // Favorites
+    match /favorites/{favoriteId} {
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(favoriteId) && request.resource.data.userId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // Videos
+    match /videos/{videoId} {
+      allow read: if true; // Publicly viewable
+      allow create: if isSignedIn() && isValidId(videoId) && request.resource.data.authorId == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.authorId == request.auth.uid;
+    }
+  }
+}

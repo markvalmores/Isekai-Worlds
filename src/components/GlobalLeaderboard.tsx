@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { LeaderboardEntry, UserProfile } from "../types";
 import { sfx } from "../utils/sfx";
 import { db } from "../lib/firebase";
-import { collection, doc, setDoc, getDocs, query, orderBy, limit, serverTimestamp } from "firebase/firestore";
+import { collection, doc, setDoc, onSnapshot, query, orderBy, limit, serverTimestamp } from "firebase/firestore";
 import {
   Trophy,
   Sparkles,
@@ -45,44 +45,27 @@ export const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({
     activeSecondsRef.current = userActiveSeconds;
   }, [userActiveSeconds]);
 
-  // Sync leaderboard every 12 seconds instead of spamming on every single second
+  // Sync leaderboard in real-time
   useEffect(() => {
-    // Initial fetch
-    fetchLeaderboardAndUpdate(true);
+    const q = query(collection(db, "rankings"), orderBy("secondsLogged", "desc"), limit(100));
 
-    const interval = setInterval(() => {
-      fetchLeaderboardAndUpdate(false);
-    }, 12000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchLeaderboardAndUpdate = async (isFirstLoad = false) => {
-    try {
-      if (isFirstLoad || leaderboard.length === 0) {
-        setLoading(true);
-      }
-
-      const q = query(collection(db, "rankings"), orderBy("secondsLogged", "desc"), limit(100));
-      const querySnapshot = await getDocs(q);
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const data: LeaderboardEntry[] = [];
-      let rank = 1;
-      
       querySnapshot.forEach((doc) => {
         data.push(doc.data() as LeaderboardEntry);
       });
       
-      const userRank = data.findIndex(u => u.id === userProfile.id) + 1;
-
       setLeaderboard(data);
-      if (userRank > 0) setUserRank(userRank);
-      
-    } catch (err) {
-      console.error("Leaderboard fetch error:", err);
-    } finally {
       setLoading(false);
-    }
-  };
+      
+      const userRank = data.findIndex(u => u.id === userProfile.id) + 1;
+      if (userRank > 0) setUserRank(userRank);
+    }, (err) => {
+      console.error("Leaderboard snapshot error:", err);
+    });
+
+    return () => unsubscribe();
+  }, [userProfile.id]);
 
   const [registerSuccessMsg, setRegisterSuccessMsg] = useState("");
 
@@ -113,7 +96,6 @@ export const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({
       });
 
       // Refresh after registration
-      await fetchLeaderboardAndUpdate(true);
       
       setRegisterSuccessMsg(
         `Registered Successfully! Your name is hardcoded in the Global Ranking forever!`
@@ -367,7 +349,6 @@ export const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({
               <button
                 onClick={() => {
                   sfx.playClick();
-                  fetchLeaderboardAndUpdate();
                 }}
                 className="px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-indigo-500/30 text-xs font-mono text-slate-300 flex items-center gap-1.5 transition-colors shrink-0"
               >

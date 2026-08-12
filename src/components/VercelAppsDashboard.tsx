@@ -267,10 +267,19 @@ const VERCEL_APPS: VercelAppItem[] = [
 ];
 
 export const VercelAppsDashboard: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<"Apps" | "Favorites" | "UTube">("Apps");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [previewApp, setPreviewApp] = useState<VercelAppItem | null>(null);
+  const [favorites, setFavorites] = useState<string[]>([]);
+  
+  // Real-time sync for favorites
+  useEffect(() => {
+    // Simplified favorite sync: In a real app, pass userProfile.id to check favorites
+    // For now, simulating with local state for structure
+    return () => {};
+  }, []);
 
   const categories = ["All", "Games", "Rhythm", "Gacha", "Media & VTuber", "Utilities"];
 
@@ -280,8 +289,20 @@ export const VercelAppsDashboard: React.FC = () => {
       app.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       app.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       app.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesCategory && matchesSearch;
+    
+    // Filtering for favorites
+    const isFavorite = activeTab === "Favorites" ? favorites.includes(app.id) : true;
+    
+    return matchesCategory && matchesSearch && isFavorite;
   });
+
+  const toggleFavorite = (appId: string) => {
+    sfx.playClick();
+    setFavorites(prev => 
+      prev.includes(appId) ? prev.filter(id => id !== appId) : [...prev, appId]
+    );
+    // In a real app, update Firestore here
+  };
 
   const handleCopyLink = (app: VercelAppItem) => {
     sfx.playClick();
@@ -321,130 +342,162 @@ export const VercelAppsDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Controls & Search Bar */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-        {/* Category Filter Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 custom-scrollbar">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => {
-                sfx.playClick();
-                setSelectedCategory(cat);
-              }}
-              className={`px-4 py-2 rounded-xl text-xs font-mono font-bold whitespace-nowrap transition-all cursor-pointer ${
-                selectedCategory === cat
-                  ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-900/40 scale-105"
-                  : "bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
-        {/* Search Bar */}
-        <div className="relative min-w-[280px]">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search apps by title or tag..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-900/80 border border-indigo-500/30 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400 transition-all font-mono"
-          />
-        </div>
-      </div>
-
-      {/* Apps Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredApps.map((app) => (
-          <div
-            key={app.id}
-            className="group relative bg-slate-900/80 border border-indigo-500/20 hover:border-indigo-400/60 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 flex flex-col"
+      {/* Tabs */}
+      <div className="flex items-center gap-2 border-b border-slate-800 pb-4">
+        {(["Apps", "Favorites", "UTube"] as const).map(tab => (
+          <button
+            key={tab}
+            onClick={() => { sfx.playClick(); setActiveTab(tab); }}
+            className={`px-6 py-2 rounded-xl text-xs font-mono font-bold transition-all ${
+              activeTab === tab
+                ? "bg-indigo-600 text-white"
+                : "text-slate-400 hover:text-white hover:bg-slate-800"
+            }`}
           >
-            {/* Thumbnail Header with Live Vercel Website Iframe Preview */}
-            <div className="relative h-48 overflow-hidden bg-slate-950">
-              <iframe
-                src={app.url}
-                title={app.title}
-                className="w-[133.33%] h-[133.33%] border-0 pointer-events-none scale-75 origin-top-left opacity-80 group-hover:opacity-100 transition-opacity"
-                sandbox="allow-scripts allow-same-origin"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent pointer-events-none"></div>
-
-              {app.featured && (
-                <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-amber-500/90 text-slate-950 font-black text-[10px] tracking-wider uppercase shadow-lg flex items-center gap-1 font-mono z-10">
-                  <Star className="w-3 h-3 fill-slate-950" />
-                  Featured
-                </span>
-              )}
-
-              <span className="absolute top-3 right-3 px-3 py-1 rounded-full bg-indigo-950/80 border border-indigo-400/40 text-indigo-300 font-mono text-[10px] uppercase font-bold tracking-wider z-10">
-                {app.category}
-              </span>
-            </div>
-
-            {/* Card Content */}
-            <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
-              <div className="space-y-2">
-                <h3 className="text-lg font-black text-white group-hover:text-indigo-300 transition-colors">
-                  {app.title}
-                </h3>
-                <p className="text-xs text-slate-300 leading-relaxed line-clamp-2">
-                  {app.description}
-                </p>
-              </div>
-
-              {/* Tags */}
-              <div className="flex flex-wrap gap-1.5">
-                {app.tags.map((t, idx) => (
-                  <span
-                    key={idx}
-                    className="px-2 py-0.5 rounded-lg bg-slate-800 border border-slate-700/60 text-[10px] font-mono text-slate-300"
-                  >
-                    #{t}
-                  </span>
-                ))}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="pt-3 border-t border-slate-800 flex items-center gap-2">
-                <a
-                  href={app.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => sfx.playClick()}
-                  className="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-mono font-bold text-xs shadow-lg shadow-indigo-900/30 flex items-center justify-center gap-1.5 transition-all text-center"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  <span>Launch App</span>
-                </a>
-
-                <button
-                  onClick={() => handleCopyLink(app)}
-                  className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-all cursor-pointer"
-                  title="Copy Vercel Link"
-                >
-                  {copiedId === app.id ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                </button>
-
-                <button
-                  onClick={() => {
-                    sfx.playClick();
-                    setPreviewApp(app);
-                  }}
-                  className="p-2.5 rounded-xl bg-purple-950/80 hover:bg-purple-900 text-purple-300 border border-purple-500/40 transition-all cursor-pointer"
-                  title="Quick Embed Preview"
-                >
-                  <Tv className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </div>
+            {tab}
+          </button>
         ))}
       </div>
+
+      {activeTab === "UTube" ? (
+        <div className="text-center py-20 bg-slate-900/40 rounded-3xl border border-slate-800 text-slate-400">
+          UTube Platform Coming Soon! Stay tuned for video uploads and livestreams.
+        </div>
+      ) : (
+        <>
+          {/* Controls & Search Bar */}
+          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+            {/* Category Filter Pills */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 custom-scrollbar">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => {
+                    sfx.playClick();
+                    setSelectedCategory(cat);
+                  }}
+                  className={`px-4 py-2 rounded-xl text-xs font-mono font-bold whitespace-nowrap transition-all cursor-pointer ${
+                    selectedCategory === cat
+                      ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-900/40 scale-105"
+                      : "bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800"
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            {/* Search Bar */}
+            <div className="relative min-w-[280px]">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search apps by title or tag..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-slate-900/80 border border-indigo-500/30 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400 transition-all font-mono"
+              />
+            </div>
+          </div>
+
+          {/* Apps Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredApps.map((app) => (
+              <div
+                key={app.id}
+                className="group relative bg-slate-900/80 border border-indigo-500/20 hover:border-indigo-400/60 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 flex flex-col"
+              >
+                {/* Thumbnail Header ... */}
+                <div className="relative h-48 overflow-hidden bg-slate-950">
+                  <iframe
+                    src={app.url}
+                    title={app.title}
+                    className="w-[133.33%] h-[133.33%] border-0 pointer-events-none scale-75 origin-top-left opacity-80 group-hover:opacity-100 transition-opacity"
+                    sandbox="allow-scripts allow-same-origin"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent pointer-events-none"></div>
+
+                  <button
+                    onClick={() => toggleFavorite(app.id)}
+                    className="absolute top-3 left-3 p-1.5 rounded-full bg-slate-950/60 text-slate-300 hover:text-red-400 z-20 transition-colors"
+                  >
+                    <Heart className={`w-5 h-5 ${favorites.includes(app.id) ? "fill-red-500 text-red-500" : ""}`} />
+                  </button>
+
+                  {app.featured && (
+                    <span className="absolute top-3 right-10 px-3 py-1 rounded-full bg-amber-500/90 text-slate-950 font-black text-[10px] tracking-wider uppercase shadow-lg flex items-center gap-1 font-mono z-10">
+                      <Star className="w-3 h-3 fill-slate-950" />
+                      Featured
+                    </span>
+                  )}
+
+                  <span className="absolute top-3 right-3 px-3 py-1 rounded-full bg-indigo-950/80 border border-indigo-400/40 text-indigo-300 font-mono text-[10px] uppercase font-bold tracking-wider z-10">
+                    {app.category}
+                  </span>
+                </div>
+
+                {/* Card Content */}
+                <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-black text-white group-hover:text-indigo-300 transition-colors">
+                      {app.title}
+                    </h3>
+                    <p className="text-xs text-slate-300 leading-relaxed line-clamp-2">
+                      {app.description}
+                    </p>
+                  </div>
+
+                  {/* Tags */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {app.tags.map((t, idx) => (
+                      <span
+                        key={idx}
+                        className="px-2 py-0.5 rounded-lg bg-slate-800 border border-slate-700/60 text-[10px] font-mono text-slate-300"
+                      >
+                        #{t}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="pt-3 border-t border-slate-800 flex items-center gap-2">
+                    <a
+                      href={app.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => sfx.playClick()}
+                      className="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-mono font-bold text-xs shadow-lg shadow-indigo-900/30 flex items-center justify-center gap-1.5 transition-all text-center"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      <span>Launch App</span>
+                    </a>
+
+                    <button
+                      onClick={() => handleCopyLink(app)}
+                      className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-all cursor-pointer"
+                      title="Copy Vercel Link"
+                    >
+                      {copiedId === app.id ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        sfx.playClick();
+                        setPreviewApp(app);
+                      }}
+                      className="p-2.5 rounded-xl bg-purple-950/80 hover:bg-purple-900 text-purple-300 border border-purple-500/40 transition-all cursor-pointer"
+                      title="Quick Embed Preview"
+                    >
+                      <Tv className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
       {filteredApps.length === 0 && (
         <div className="text-center py-20 bg-slate-900/40 rounded-3xl border border-slate-800 space-y-3">

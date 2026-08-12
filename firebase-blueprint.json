@@ -1,0 +1,55 @@
+{
+  "entities": {
+    "Ranking": {
+      "title": "Global Ranking",
+      "description": "User leaderboard entry",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "username": { "type": "string" },
+        "secondsLogged": { "type": "number" },
+        "registeredAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "username", "secondsLogged"]
+    },
+    "Favorite": {
+      "title": "Favorite App/Game",
+      "description": "User's favorite app or game",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "appId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "appId"]
+    },
+    "Video": {
+      "title": "UTube Video",
+      "description": "Video uploaded to UTube",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "url": { "type": "string" },
+        "authorId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "title", "url", "authorId"]
+    }
+  },
+  "firestore": {
+    "/rankings/{rankingId}": {
+      "schema": "Ranking",
+      "description": "User leaderboard entries"
+    },
+    "/favorites/{favoriteId}": {
+      "schema": "Favorite",
+      "description": "User favorites"
+    },
+    "/videos/{videoId}": {
+      "schema": "Video",
+      "description": "UTube videos"
+    }
+  }
+}

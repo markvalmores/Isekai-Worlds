@@ -149,7 +149,7 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({
             </div>
 
             {/* Quick Metrics */}
-            <div className="flex items-center gap-4 text-xs font-mono">
+            <div className="flex flex-wrap items-center gap-3 text-xs font-mono">
               <div className="p-3 rounded-2xl bg-slate-950/80 border border-indigo-500/20 text-center">
                 <span className="text-slate-400 text-[10px] block">Global Rank</span>
                 <strong className="text-amber-400 text-sm">#{userRank}</strong>
@@ -158,6 +158,37 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({
                 <span className="text-slate-400 text-[10px] block">Active Time</span>
                 <strong className="text-cyan-400 text-sm">{formatHoursMins(activeSeconds)}</strong>
               </div>
+
+              <button
+                onClick={async () => {
+                  sfx.playBadgeUnlock();
+                  try {
+                    await fetch("/api/leaderboard/update", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        id: formData.id,
+                        username: formData.username,
+                        avatar: formData.avatarUrl,
+                        banner: formData.bannerUrl,
+                        title: formData.title,
+                        badge: formData.badge,
+                        secondsLogged: Math.max(30, activeSeconds || 30),
+                        country: formData.country,
+                      }),
+                    });
+                    setSavedSuccess(true);
+                    setTimeout(() => setSavedSuccess(false), 3000);
+                  } catch (e) {
+                    console.error("Leaderboard sync error:", e);
+                  }
+                }}
+                className="px-4 py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 hover:from-amber-400 hover:to-purple-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-rose-900/40 hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5"
+                title="Sync and register your profile on the Realtime Global Top 100"
+              >
+                <Zap className="w-3.5 h-3.5 text-yellow-200 animate-pulse" />
+                <span>Register in Top 100</span>
+              </button>
             </div>
           </div>
 

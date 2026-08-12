@@ -128,7 +128,30 @@ export const HomeHeroView: React.FC<HomeHeroViewProps> = ({
           </p>
 
           {/* Quick CTA Buttons */}
-          <div className="flex flex-wrap items-center gap-4 pt-2">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2">
+            <button
+              onClick={() => {
+                sfx.playWarp();
+                setCurrentPage("wallpapers");
+              }}
+              className="px-5 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 hover:from-blue-500 hover:to-red-500 text-white font-bold text-xs sm:text-sm tracking-wider uppercase shadow-lg shadow-purple-900/50 hover:shadow-rose-500/40 transform hover:-translate-y-0.5 transition-all flex items-center gap-2"
+            >
+              <Compass className="w-5 h-5" />
+              <span>{getTranslation(settings.language, "exploreNow")}</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+
+            <button
+              onClick={() => {
+                sfx.playWarp();
+                setCurrentPage("leaderboard");
+              }}
+              className="px-5 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 hover:from-amber-400 hover:to-purple-500 text-white font-bold text-xs sm:text-sm tracking-wider uppercase shadow-lg shadow-rose-900/40 hover:scale-105 transition-all flex items-center gap-2"
+            >
+              <Trophy className="w-5 h-5 text-amber-200" />
+              <span>Join Top 100 Now</span>
+            </button>
+
             <a
               href="https://markitext.wixsite.com/isekaiworlds"
               target="_blank"
@@ -136,23 +159,11 @@ export const HomeHeroView: React.FC<HomeHeroViewProps> = ({
               onClick={() => {
                 sfx.playWarp();
               }}
-              className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 hover:from-blue-500 hover:to-red-500 text-white font-bold text-sm tracking-wider uppercase shadow-lg shadow-purple-900/50 hover:shadow-rose-500/40 transform hover:-translate-y-0.5 transition-all flex items-center gap-2"
+              className="px-4 py-3.5 rounded-2xl bg-slate-950/80 hover:bg-slate-900 border border-indigo-500/40 text-slate-300 font-bold text-xs tracking-wider uppercase hover:border-indigo-400 transition-all flex items-center gap-1.5"
             >
-              <Compass className="w-5 h-5" />
-              <span>{getTranslation(settings.language, "exploreNow")}</span>
-              <ArrowRight className="w-4 h-4" />
+              <Globe className="w-4 h-4 text-cyan-400" />
+              <span>Official Web</span>
             </a>
-
-            <button
-              onClick={() => {
-                sfx.playWarp();
-                setCurrentPage("leaderboard");
-              }}
-              className="px-6 py-3.5 rounded-2xl bg-slate-950/80 hover:bg-slate-900 border border-indigo-500/40 text-slate-200 font-bold text-sm tracking-wider uppercase hover:border-indigo-400 transition-all flex items-center gap-2"
-            >
-              <Trophy className="w-5 h-5 text-amber-400" />
-              <span>{getTranslation(settings.language, "viewLeaderboard")}</span>
-            </button>
           </div>
         </div>
 

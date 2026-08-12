@@ -91,11 +91,47 @@ export const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({
     }
   };
 
+  const [registerSuccessMsg, setRegisterSuccessMsg] = useState("");
+
   const handleRegisterUser = async () => {
     try {
-      sfx.playWarp();
+      sfx.playBadgeUnlock();
       setRegistering(true);
-      await fetchLeaderboardAndUpdate(false);
+
+      const secondsToSubmit = Math.max(30, activeSecondsRef.current || 30);
+
+      const updateRes = await fetch("/api/leaderboard/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: userProfile.id,
+          username: userProfile.username,
+          avatar: userProfile.avatarUrl,
+          banner: userProfile.bannerUrl,
+          title: userProfile.title,
+          badge: userProfile.badge,
+          secondsLogged: secondsToSubmit,
+          country: userProfile.country,
+        }),
+      });
+
+      const updateData = await updateRes.json();
+      if (updateData.leaderboard) {
+        setLeaderboard(updateData.leaderboard);
+        if (updateData.rank) setUserRank(updateData.rank);
+        setRegisterSuccessMsg(
+          `Registered Successfully! You are ranked #${updateData.rank || 1} in the Global Top 100 Leaderboard.`
+        );
+      } else {
+        await fetchLeaderboardAndUpdate(false);
+        setRegisterSuccessMsg("Registered Successfully! Global Leaderboard updated.");
+      }
+
+      setTimeout(() => setRegisterSuccessMsg(""), 5000);
+    } catch (err) {
+      console.error("Failed to register user:", err);
+      setRegisterSuccessMsg("Registration error. Retrying live connection...");
+      setTimeout(() => setRegisterSuccessMsg(""), 4000);
     } finally {
       setRegistering(false);
     }
@@ -153,8 +189,24 @@ export const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({
         </div>
       </div>
 
+      {/* Success Notification Banner */}
+      {registerSuccessMsg && (
+        <div className="p-4 rounded-2xl bg-emerald-950/90 border border-emerald-500/50 text-emerald-200 text-xs font-mono font-bold flex items-center justify-between gap-3 shadow-xl animate-fadeIn">
+          <div className="flex items-center gap-2">
+            <UserCheck className="w-5 h-5 text-emerald-400 shrink-0" />
+            <span>{registerSuccessMsg}</span>
+          </div>
+          <button
+            onClick={() => setRegisterSuccessMsg("")}
+            className="text-emerald-400 hover:text-white text-xs underline shrink-0"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* User Session Rank Card Banner */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-blue-950/90 via-purple-950/90 to-red-950/90 border border-purple-500/30 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 shadow-xl">
+      <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-blue-950/90 via-purple-950/90 to-red-950/90 border border-purple-500/30 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 shadow-xl">
         <div className="flex items-center gap-4">
           <img
             src={userProfile.avatarUrl}
@@ -172,17 +224,30 @@ export const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center justify-between sm:justify-end gap-6 font-mono pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-800">
-          <div className="text-left sm:text-right">
+        <div className="flex flex-wrap items-center justify-between md:justify-end gap-4 font-mono pt-3 md:pt-0 border-t md:border-t-0 border-slate-800">
+          <div className="text-left md:text-right">
             <span className="text-[10px] text-slate-400 uppercase block">Active Session Time</span>
             <strong className="text-base sm:text-lg text-cyan-400">{formatHoursMinsSecs(userActiveSeconds)}</strong>
           </div>
-          <div className="text-right sm:pl-6 sm:border-l border-slate-800">
+
+          <div className="text-right md:pl-4 md:border-l border-slate-800">
             <span className="text-[10px] text-slate-400 uppercase block">Real Rank</span>
             <strong className="text-lg sm:text-xl text-amber-400">
               {leaderboard.length === 0 ? "Not Ranked" : `#${userRank}`}
             </strong>
           </div>
+
+          {/* Prominent Register & Join Top 100 Now Button */}
+          <button
+            onClick={handleRegisterUser}
+            disabled={registering}
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 hover:from-amber-400 hover:to-purple-500 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-rose-900/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+            title="Click to register or update your handle instantly on the Global Top 100 Leaderboard"
+          >
+            <UserPlus className="w-4 h-4 text-yellow-200" />
+            <span>{registering ? "Syncing Rank..." : "Register & Join Top 100 Now"}</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
       </div>
 

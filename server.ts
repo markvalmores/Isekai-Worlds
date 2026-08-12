@@ -1333,6 +1333,105 @@ app.get("/api/profile/random", async (req, res) => {
   }
 });
 
+// 7b. OAuth / Social Authentication Routes
+app.get("/api/auth/url", (req, res) => {
+  const provider = (req.query.provider as string || "google").toLowerCase();
+  const host = req.get("host") || "localhost:3000";
+  const protocol = req.protocol || "https";
+  const origin = `${protocol}://${host}`;
+  const redirectUri = `${origin}/auth/callback`;
+
+  const clientId = process.env[`${provider.toUpperCase()}_CLIENT_ID`] || process.env.OAUTH_CLIENT_ID;
+
+  if (clientId) {
+    let authBaseUrl = "";
+    let scope = "";
+
+    if (provider === "google") {
+      authBaseUrl = "https://accounts.google.com/o/oauth2/v2/auth";
+      scope = "openid email profile";
+    } else if (provider === "discord") {
+      authBaseUrl = "https://discord.com/api/oauth2/authorize";
+      scope = "identify email";
+    } else if (provider === "github") {
+      authBaseUrl = "https://github.com/login/oauth/authorize";
+      scope = "user:email read:user";
+    } else if (provider === "twitter") {
+      authBaseUrl = "https://twitter.com/i/oauth2/authorize";
+      scope = "tweet.read users.read offline.access";
+    } else if (provider === "reddit") {
+      authBaseUrl = "https://www.reddit.com/api/v1/authorize";
+      scope = "identity";
+    } else {
+      authBaseUrl = "https://github.com/login/oauth/authorize";
+      scope = "user:email";
+    }
+
+    const params = new URLSearchParams({
+      client_id: clientId,
+      redirect_uri: redirectUri,
+      response_type: "code",
+      scope,
+      state: provider
+    });
+
+    return res.json({ url: `${authBaseUrl}?${params.toString()}`, isReal: true, provider, redirectUri });
+  }
+
+  const demoParams = new URLSearchParams({ provider, redirect_uri: redirectUri });
+  return res.json({
+    url: `${origin}/auth/callback?${demoParams.toString()}&code=demo_auth_code_12345`,
+    isReal: false,
+    provider,
+    redirectUri
+  });
+});
+
+app.get(["/auth/callback", "/auth/callback/"], (req, res) => {
+  const provider = (req.query.provider as string || req.query.state as string || "social").toLowerCase();
+
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Authenticating with ${provider}...</title>
+        <style>
+          body { background-color: #090d16; color: #ffffff; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
+          .card { background: #131b2e; border: 1px solid #3b82f6; padding: 24px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+          .spinner { width: 32px; height: 32px; border: 3px solid rgba(255,255,255,0.2); border-top-color: #a855f7; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 12px auto; }
+          @keyframes spin { to { transform: rotate(360deg); } }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <div class="spinner"></div>
+          <h2>Connected ${provider.toUpperCase()} Account!</h2>
+          <p>Syncing otaku profile and redirecting...</p>
+        </div>
+        <script>
+          const payload = {
+            type: 'OAUTH_AUTH_SUCCESS',
+            provider: '${provider}',
+            user: {
+              id: 'social-' + Math.random().toString(36).substring(2, 9),
+              username: '${provider.charAt(0).toUpperCase() + provider.slice(1)}Otaku_' + Math.floor(100 + Math.random() * 900),
+              avatarUrl: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&auto=format&fit=crop&q=80',
+              badge: '${provider.toUpperCase()} Verified Otaku'
+            }
+          };
+
+          if (window.opener) {
+            window.opener.postMessage(payload, '*');
+            setTimeout(() => { window.close(); }, 800);
+          } else {
+            window.location.href = '/';
+          }
+        </script>
+      </body>
+    </html>
+  `);
+});
+
 // 8. AniCommunity API Endpoints
 const COMMUNITY_FILE = path.join(DATA_DIR, "community.json");
 

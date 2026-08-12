@@ -52,6 +52,7 @@ interface HeaderProps {
   openTvRemote?: () => void;
   openCommandPalette?: () => void;
   openLiveWallpaperModal?: () => void;
+  openSocialAuthModal?: () => void;
   isAdmin?: boolean;
   liveActiveUsers?: number;
   liveTotalVisits?: number;
@@ -73,6 +74,7 @@ export const Header: React.FC<HeaderProps> = ({
   openTvRemote,
   openCommandPalette,
   openLiveWallpaperModal,
+  openSocialAuthModal,
   isAdmin = false,
   liveActiveUsers = 1,
   liveTotalVisits = 1,
@@ -101,6 +103,7 @@ export const Header: React.FC<HeaderProps> = ({
     { id: "games", labelKey: "games", icon: <Gamepad2 className="w-4 h-4 text-emerald-400" /> },
     { id: "roms", labelKey: "roms", icon: <HardDrive className="w-4 h-4 text-purple-400" /> },
     { id: "cards", labelKey: "cards", icon: <Layers className="w-4 h-4 text-amber-400 animate-pulse" /> },
+    { id: "vercel", labelKey: "vercel", icon: <Globe className="w-4 h-4 text-cyan-400 animate-pulse" /> },
     { id: "leaderboard", labelKey: "leaderboard", icon: <Trophy className="w-4 h-4" /> },
     { id: "profile", labelKey: "profile", icon: <UserCheck className="w-4 h-4" /> },
     { id: "vr", labelKey: "vr", icon: <Eye className="w-4 h-4" /> },
@@ -450,6 +453,25 @@ export const Header: React.FC<HeaderProps> = ({
             </select>
             <Globe className="w-3.5 h-3.5 text-purple-400 absolute right-2 sm:right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
+
+          {/* Social Auth Login / Verification Button */}
+          {openSocialAuthModal && (
+            <button
+              onClick={() => {
+                sfx.playClick();
+                openSocialAuthModal();
+              }}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-2xl border text-xs font-mono font-bold transition-all shrink-0 shadow-sm ${
+                profile.verifiedSocial
+                  ? "bg-emerald-950/80 border-emerald-500/50 text-emerald-300 hover:bg-emerald-900"
+                  : "bg-indigo-950/80 border-indigo-500/40 text-indigo-300 hover:bg-indigo-900"
+              }`}
+              title="Social Sign-In & Connected Accounts"
+            >
+              <ShieldCheck className={`w-3.5 h-3.5 ${profile.verifiedSocial ? "text-emerald-400" : "text-indigo-400"}`} />
+              <span className="hidden xl:inline">{profile.verifiedSocial ? "Verified" : "Social Login"}</span>
+            </button>
+          )}
 
           {/* User Profile Pill */}
           <button

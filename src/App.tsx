@@ -37,6 +37,8 @@ import { FloatingLanguageWidget } from "./components/FloatingLanguageWidget";
 import { SettingsModal } from "./components/SettingsModal";
 import { DailyMissionsModal } from "./components/DailyMissionsModal";
 import { DonationCreditsModal } from "./components/DonationCreditsModal";
+import { SocialAuthModal } from "./components/SocialAuthModal";
+import { VercelAppsDashboard } from "./components/VercelAppsDashboard";
 import { Cookie, Check, Sparkles, Tv } from "lucide-react";
 
 export default function App() {
@@ -52,6 +54,7 @@ export default function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isLiveWallpaperOpen, setIsLiveWallpaperOpen] = useState(false);
+  const [isSocialAuthOpen, setIsSocialAuthOpen] = useState(false);
 
   // Admin God Mode State
   const [isAdmin, setIsAdmin] = useState<boolean>(() => {
@@ -251,7 +254,8 @@ export default function App() {
       amv: "Anime Music Videos",
       games: "Arcade Games Portal",
       roms: "Retro ROMs Vault",
-      cards: "Anime Card Games Arena"
+      cards: "Anime Card Games Arena",
+      vercel: "Vercel APPs & Games"
     };
 
     setTargetPageName(names[page] || "Isekai Realm");
@@ -602,6 +606,7 @@ export default function App() {
         openTvRemote={() => setIsTvRemoteOpen(!isTvRemoteOpen)}
         openCommandPalette={() => setIsCommandPaletteOpen(true)}
         openLiveWallpaperModal={() => setIsLiveWallpaperOpen(true)}
+        openSocialAuthModal={() => setIsSocialAuthOpen(true)}
         isAdmin={isAdmin}
         liveActiveUsers={liveActiveUsers}
         liveTotalVisits={liveTotalVisits}
@@ -678,6 +683,7 @@ export default function App() {
             updateProfile={updateProfile}
             activeSeconds={activeSeconds}
             userRank={userRank}
+            openSocialAuthModal={() => setIsSocialAuthOpen(true)}
           />
         )}
 
@@ -722,6 +728,10 @@ export default function App() {
             isGoldMode={isGold}
             isAdmin={isAdmin}
           />
+        )}
+
+        {currentPage === "vercel" && (
+          <VercelAppsDashboard />
         )}
       </main>
 
@@ -830,6 +840,14 @@ export default function App() {
         onClose={() => setIsLiveWallpaperOpen(false)}
         settings={settings}
         updateSettings={updateSettings}
+      />
+
+      {/* Social Media Sign-In & Verification Modal */}
+      <SocialAuthModal
+        isOpen={isSocialAuthOpen}
+        onClose={() => setIsSocialAuthOpen(false)}
+        userProfile={profile}
+        updateProfile={updateProfile}
       />
 
       {/* Floating Cookie Consent Notification */}

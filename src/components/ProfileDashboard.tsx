@@ -24,6 +24,7 @@ interface ProfileDashboardProps {
   updateProfile: (updates: Partial<UserProfile>) => void;
   activeSeconds: number;
   userRank: number;
+  openSocialAuthModal?: () => void;
 }
 
 export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({
@@ -31,6 +32,7 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({
   updateProfile,
   activeSeconds,
   userRank,
+  openSocialAuthModal,
 }) => {
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState<UserProfile>(profile);
@@ -208,6 +210,38 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({
             <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 text-xs text-slate-300 leading-relaxed max-w-2xl">
               <span className="text-purple-400 font-bold font-mono block mb-1">Custom Status: "{formData.customStatus}"</span>
               {formData.bio}
+            </div>
+
+            {/* Connected Social Accounts & Social Auth Status */}
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-950/60 via-purple-950/60 to-slate-950/80 border border-indigo-500/30 flex flex-wrap items-center justify-between gap-3 max-w-2xl">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 shrink-0">
+                  <Shield className="w-5 h-5 text-indigo-400 animate-pulse" />
+                </div>
+                <div>
+                  <span className="text-xs font-bold text-white block">
+                    {profile.verifiedSocial ? "Verified Social Account" : "Social Media Authentication"}
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-400">
+                    {profile.verifiedSocial
+                      ? `Linked via ${profile.loginMethod?.toUpperCase() || "Social OAuth"}`
+                      : "Link Google, Discord, GitHub, Twitter, Twitch or Reddit"}
+                  </span>
+                </div>
+              </div>
+
+              {openSocialAuthModal && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    sfx.playClick();
+                    openSocialAuthModal();
+                  }}
+                  className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs shadow-md transition-all cursor-pointer"
+                >
+                  Manage Social Auth
+                </button>
+              )}
             </div>
           </div>
         </div>

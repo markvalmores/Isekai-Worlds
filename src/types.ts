@@ -15,7 +15,8 @@ export type PageView =
   | "amv"
   | "games"
   | "roms"
-  | "cards";
+  | "cards"
+  | "vercel";
 
 export type LanguageCode =
   | "en"
@@ -32,6 +33,15 @@ export type LanguageCode =
   | "ar"
   | "hi";
 
+export interface SocialAccounts {
+  google?: { connected: boolean; email?: string; name?: string; avatar?: string };
+  discord?: { connected: boolean; username?: string; id?: string; avatar?: string };
+  github?: { connected: boolean; username?: string; avatar?: string };
+  twitter?: { connected: boolean; handle?: string; avatar?: string };
+  twitch?: { connected: boolean; username?: string; avatar?: string };
+  reddit?: { connected: boolean; username?: string; avatar?: string };
+}
+
 export interface UserProfile {
   id: string;
   username: string;
@@ -46,6 +56,9 @@ export interface UserProfile {
   country: string;
   joinedDate: string;
   favAnime: string;
+  socialAccounts?: SocialAccounts;
+  verifiedSocial?: boolean;
+  loginMethod?: string;
 }
 
 export interface LeaderboardEntry {

@@ -39,6 +39,7 @@ export const DICTIONARY: Record<LanguageCode, Record<string, string>> = {
     games: "Play Games",
     roms: "Retro ROMs",
     cards: "Card Games",
+    vercel: "Vercel APPs",
     leaderboard: "Global Active Top 100",
     profile: "Profile Dashboard",
     vr: "3D VR View Mode",

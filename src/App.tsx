@@ -25,6 +25,8 @@ import { PlayGamesDashboard } from "./components/PlayGamesDashboard";
 import { RomsDashboard } from "./components/RomsDashboard";
 import { CardGamesDashboard } from "./components/CardGamesDashboard";
 import { CosplayDashboard } from "./components/CosplayDashboard";
+import { AchievementsDashboard } from "./components/AchievementsDashboard";
+import { AniCommunity } from "./components/AniCommunity";
 import { DailyLoginModal } from "./components/DailyLoginModal";
 import { SmartTvRemote } from "./components/SmartTvRemote";
 import { AdminLoginModal } from "./components/AdminLoginModal";
@@ -234,6 +236,8 @@ export default function App() {
 
     const names: Record<PageView, string> = {
       home: "Portal Hub",
+      community: "AniCommunity Feed",
+      achievements: "Milestones & Achievements",
       wallpapers: "4K Anime Wallpapers",
       gifs: "Anime GIFs & Reactions",
       cosplay: "Cosplay & Costume Vault",
@@ -615,6 +619,24 @@ export default function App() {
           />
         )}
 
+        {currentPage === "community" && (
+          <AniCommunity
+            userProfile={profile}
+            isGoldMode={isGold}
+          />
+        )}
+
+        {currentPage === "achievements" && (
+          <AchievementsDashboard
+            userProfile={profile}
+            updateProfile={updateProfile}
+            activeSeconds={activeSeconds}
+            isekaiCoins={settings.isekaiCoins}
+            onAddCoins={handleAddCoins}
+            isGoldMode={isGold}
+          />
+        )}
+
         {currentPage === "wallpapers" && (
           <WallpaperGallery
             profile={profile}
@@ -758,6 +780,8 @@ export default function App() {
         setActiveTab={handlePageChange}
         tabsList={[
           { id: "home", label: "Portal Hub" },
+          { id: "community", label: "AniCommunity" },
+          { id: "achievements", label: "Achievements" },
           { id: "wallpapers", label: "Wallpapers" },
           { id: "gifs", label: "GIFs" },
           { id: "cosplay", label: "Cosplay" },

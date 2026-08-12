@@ -28,6 +28,8 @@ export const DICTIONARY: Record<LanguageCode, Record<string, string>> = {
     welcomeTitle: "WELCOME TO ISEKAI WORLDS",
     subtitle: "The Ultimate Multiverse Platform for Anime, Wallpapers, Live Feeds & Global Rankings",
     home: "Portal Hub",
+    community: "AniCommunity",
+    achievements: "Achievements",
     wallpapers: "4K Wallpapers",
     gifs: "Anime GIFs",
     media: "Live Anime Stream",

@@ -31,7 +31,9 @@ import {
   ShieldCheck,
   ChevronLeft,
   ChevronRight,
-  Radio as RemoteIcon
+  Radio as RemoteIcon,
+  Award,
+  MessageSquare
 } from "lucide-react";
 
 interface HeaderProps {
@@ -87,6 +89,8 @@ export const Header: React.FC<HeaderProps> = ({
 
   const navItems: { id: PageView; labelKey: string; icon: React.ReactNode }[] = [
     { id: "home", labelKey: "home", icon: <Compass className="w-4 h-4" /> },
+    { id: "community", labelKey: "community", icon: <MessageSquare className="w-4 h-4 text-purple-400" /> },
+    { id: "achievements", labelKey: "achievements", icon: <Award className="w-4 h-4 text-amber-400" /> },
     { id: "wallpapers", labelKey: "wallpapers", icon: <ImageIcon className="w-4 h-4" /> },
     { id: "gifs", labelKey: "gifs", icon: <Film className="w-4 h-4" /> },
     { id: "cosplay", labelKey: "cosplay", icon: <Camera className="w-4 h-4 text-pink-400" /> },

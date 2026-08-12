@@ -1328,6 +1328,279 @@ app.get("/api/profile/random", async (req, res) => {
   }
 });
 
+// 8. AniCommunity API Endpoints
+const COMMUNITY_FILE = path.join(DATA_DIR, "community.json");
+
+interface CommunityPostData {
+  id: string;
+  authorId: string;
+  authorName: string;
+  authorAvatar: string;
+  authorBadge: string;
+  authorTitle: string;
+  channel: string;
+  timestamp: string;
+  content: string;
+  mediaType?: "image" | "video" | "gif" | "none";
+  mediaUrl?: string;
+  tags: string[];
+  taggedFriends?: string[];
+  upvotes: number;
+  downvotes: number;
+  reactions?: {
+    heart?: number;
+    fire?: number;
+    laugh?: number;
+    mindblown?: number;
+  };
+  commentsCount: number;
+  comments?: any[];
+  isPinned?: boolean;
+}
+
+const seedCommunityPosts: CommunityPostData[] = [
+  {
+    id: "cpost-1",
+    authorId: "user-system-1",
+    authorName: "ShadowSlayer99",
+    authorAvatar: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=300&auto=format&fit=crop&q=80",
+    authorBadge: "👑 Overlord",
+    authorTitle: "Shadow Monarch",
+    channel: "#anime-discussion",
+    timestamp: "10 mins ago",
+    content: "Solo Leveling Season 2 animation quality is looking insanely hype! Who else is ready for Arise? 🔥 Tag your squad!",
+    mediaType: "image",
+    mediaUrl: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1000&auto=format&fit=crop&q=80",
+    tags: ["SoloLeveling", "Arise", "HypeAnime", "SungJinwoo"],
+    taggedFriends: ["@AsunaMaid", "@GokuFan99"],
+    upvotes: 248,
+    downvotes: 3,
+    reactions: { heart: 120, fire: 98, laugh: 5, mindblown: 42 },
+    commentsCount: 2,
+    isPinned: true,
+    comments: [
+      {
+        id: "cc-1",
+        postId: "cpost-1",
+        authorName: "AsunaMaid",
+        authorAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80",
+        authorBadge: "🌸 Cosplay Icon",
+        timestamp: "8 mins ago",
+        content: "I am working on a Jinwoo cosplay right now! Can't wait!",
+        likes: 34
+      },
+      {
+        id: "cc-2",
+        postId: "cpost-1",
+        authorName: "GokuFan99",
+        authorAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80",
+        authorBadge: "⚡ Saiyan God",
+        timestamp: "5 mins ago",
+        content: "The sound design in that trailer was peak sound engineering!",
+        likes: 19
+      }
+    ]
+  },
+  {
+    id: "cpost-2",
+    authorId: "user-system-2",
+    authorName: "RemEnthusiast",
+    authorAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80",
+    authorBadge: "💙 Best Girl Fan",
+    authorTitle: "Isekai Traveler",
+    channel: "#cosplay-corner",
+    timestamp: "25 mins ago",
+    content: "Finished my Re:Zero Rem Maid Cosplay photo shoot! What do you guys think? Drop your favorite isekai maid below!",
+    mediaType: "image",
+    mediaUrl: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=1000&auto=format&fit=crop&q=80",
+    tags: ["Cosplay", "ReZero", "Rem", "IsekaiMaid", "OtakuCulture"],
+    taggedFriends: ["@RemEnthusiast"],
+    upvotes: 189,
+    downvotes: 1,
+    reactions: { heart: 154, fire: 82, laugh: 2, mindblown: 29 },
+    commentsCount: 0,
+    comments: []
+  },
+  {
+    id: "cpost-3",
+    authorId: "user-system-3",
+    authorName: "ErenJaeger",
+    authorAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&auto=format&fit=crop&q=80",
+    authorBadge: "🐉 Titan Shifter",
+    authorTitle: "Freedom Fighter",
+    channel: "#amv-showcase",
+    timestamp: "1 hour ago",
+    content: "Just rendered a brand new 4K 120FPS AMV with RTX Path Tracing shaders in Isekai Worlds Studio! Check out this sequence setup 🎥⚡",
+    mediaType: "image",
+    mediaUrl: "https://images.unsplash.com/photo-1563089145-599997674d42?w=1000&auto=format&fit=crop&q=80",
+    tags: ["AMV", "AttackOnTitan", "AnimeEdit", "IsekaiStudio"],
+    taggedFriends: [],
+    upvotes: 312,
+    downvotes: 4,
+    reactions: { heart: 98, fire: 210, laugh: 1, mindblown: 88 },
+    commentsCount: 0,
+    comments: []
+  }
+];
+
+function loadCommunityPosts(): CommunityPostData[] {
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    if (fs.existsSync(COMMUNITY_FILE)) {
+      const content = fs.readFileSync(COMMUNITY_FILE, "utf-8");
+      const parsed = JSON.parse(content);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (err) {
+    console.error("Failed to read community file:", err);
+  }
+  return seedCommunityPosts;
+}
+
+function saveCommunityPosts(data: CommunityPostData[]) {
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    fs.writeFileSync(COMMUNITY_FILE, JSON.stringify(data, null, 2), "utf-8");
+  } catch (err) {
+    console.error("Failed to save community file:", err);
+  }
+}
+
+let activeCommunityPosts = loadCommunityPosts();
+
+app.get("/api/community/posts", (req, res) => {
+  res.json({ posts: activeCommunityPosts });
+});
+
+app.post("/api/community/posts", (req, res) => {
+  try {
+    const { authorId, authorName, authorAvatar, authorBadge, authorTitle, channel, content, mediaType, mediaUrl, tags, taggedFriends } = req.body;
+    if (!content || !content.trim()) {
+      return res.status(400).json({ error: "Post content cannot be empty" });
+    }
+
+    const newPost: CommunityPostData = {
+      id: `cpost-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      authorId: authorId || "guest-user",
+      authorName: authorName || "Anonymous Otaku",
+      authorAvatar: authorAvatar || "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=300&auto=format&fit=crop&q=80",
+      authorBadge: authorBadge || "🌟 Community Member",
+      authorTitle: authorTitle || "Isekai Traveler",
+      channel: channel || "#general",
+      timestamp: "Just now",
+      content: content.trim(),
+      mediaType: mediaType || "none",
+      mediaUrl: mediaUrl || "",
+      tags: Array.isArray(tags) ? tags : ["AniCommunity"],
+      taggedFriends: Array.isArray(taggedFriends) ? taggedFriends : [],
+      upvotes: 1,
+      downvotes: 0,
+      reactions: { heart: 1, fire: 0, laugh: 0, mindblown: 0 },
+      commentsCount: 0,
+      comments: []
+    };
+
+    activeCommunityPosts.unshift(newPost);
+    saveCommunityPosts(activeCommunityPosts);
+
+    res.json({ success: true, post: newPost, posts: activeCommunityPosts });
+  } catch (error: any) {
+    res.status(500).json({ error: "Failed to create post", details: error.message });
+  }
+});
+
+app.post("/api/community/posts/:id/vote", (req, res) => {
+  try {
+    const { id } = req.params;
+    const { direction } = req.body;
+
+    const post = activeCommunityPosts.find(p => p.id === id);
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    if (direction === "up") {
+      post.upvotes += 1;
+    } else if (direction === "down") {
+      post.downvotes += 1;
+    }
+
+    saveCommunityPosts(activeCommunityPosts);
+    res.json({ success: true, post, posts: activeCommunityPosts });
+  } catch (error: any) {
+    res.status(500).json({ error: "Failed to vote on post", details: error.message });
+  }
+});
+
+app.post("/api/community/posts/:id/reactions", (req, res) => {
+  try {
+    const { id } = req.params;
+    const { type } = req.body;
+
+    const post = activeCommunityPosts.find(p => p.id === id);
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    if (!post.reactions) {
+      post.reactions = { heart: 0, fire: 0, laugh: 0, mindblown: 0 };
+    }
+
+    if (type === "heart") post.reactions.heart = (post.reactions.heart || 0) + 1;
+    if (type === "fire") post.reactions.fire = (post.reactions.fire || 0) + 1;
+    if (type === "laugh") post.reactions.laugh = (post.reactions.laugh || 0) + 1;
+    if (type === "mindblown") post.reactions.mindblown = (post.reactions.mindblown || 0) + 1;
+
+    saveCommunityPosts(activeCommunityPosts);
+    res.json({ success: true, post, posts: activeCommunityPosts });
+  } catch (error: any) {
+    res.status(500).json({ error: "Failed to react to post", details: error.message });
+  }
+});
+
+app.post("/api/community/posts/:id/comments", (req, res) => {
+  try {
+    const { id } = req.params;
+    const { authorName, authorAvatar, authorBadge, content } = req.body;
+
+    if (!content || !content.trim()) {
+      return res.status(400).json({ error: "Comment content cannot be empty" });
+    }
+
+    const post = activeCommunityPosts.find(p => p.id === id);
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    if (!post.comments) post.comments = [];
+
+    const newComment = {
+      id: `cc-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      postId: id,
+      authorName: authorName || "Otaku Member",
+      authorAvatar: authorAvatar || "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=300&auto=format&fit=crop&q=80",
+      authorBadge: authorBadge || "🌟 Member",
+      timestamp: "Just now",
+      content: content.trim(),
+      likes: 1
+    };
+
+    post.comments.push(newComment);
+    post.commentsCount = post.comments.length;
+
+    saveCommunityPosts(activeCommunityPosts);
+    res.json({ success: true, comment: newComment, post, posts: activeCommunityPosts });
+  } catch (error: any) {
+    res.status(500).json({ error: "Failed to add comment", details: error.message });
+  }
+});
+
 // Vite & Static file handler
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {

@@ -1,4 +1,21 @@
-export type PageView = "home" | "wallpapers" | "gifs" | "cosplay" | "media" | "leaderboard" | "profile" | "vr" | "hardware" | "watch" | "radio" | "amv" | "games" | "roms" | "cards";
+export type PageView =
+  | "home"
+  | "community"
+  | "achievements"
+  | "wallpapers"
+  | "gifs"
+  | "cosplay"
+  | "media"
+  | "leaderboard"
+  | "profile"
+  | "vr"
+  | "hardware"
+  | "watch"
+  | "radio"
+  | "amv"
+  | "games"
+  | "roms"
+  | "cards";
 
 export type LanguageCode =
   | "en"
@@ -119,4 +136,61 @@ export interface AppSettings {
   webAppWallpaperType?: "video" | "image";
   webAppWallpaperOpacity?: number;
 }
+
+export interface AchievementItem {
+  id: string;
+  title: string;
+  description: string;
+  category: "activity" | "games" | "media" | "social" | "master";
+  rewardBadge: string;
+  rewardAvatar?: string;
+  rewardCoins: number;
+  rewardTitle?: string;
+  progress: number;
+  target: number;
+  unlocked: boolean;
+  claimed: boolean;
+  iconName: string;
+}
+
+export interface CommunityComment {
+  id: string;
+  postId: string;
+  authorName: string;
+  authorAvatar: string;
+  authorBadge?: string;
+  timestamp: string;
+  content: string;
+  likes: number;
+  userLiked?: boolean;
+}
+
+export interface CommunityPost {
+  id: string;
+  authorId: string;
+  authorName: string;
+  authorAvatar: string;
+  authorBadge: string;
+  authorTitle: string;
+  channel: string;
+  timestamp: string;
+  content: string;
+  mediaType?: "image" | "video" | "gif" | "none";
+  mediaUrl?: string;
+  tags: string[];
+  taggedFriends?: string[];
+  upvotes: number;
+  downvotes: number;
+  userVote?: "up" | "down" | null;
+  reactions?: {
+    heart?: number;
+    fire?: number;
+    laugh?: number;
+    mindblown?: number;
+  };
+  commentsCount: number;
+  comments?: CommunityComment[];
+  isPinned?: boolean;
+}
+
 

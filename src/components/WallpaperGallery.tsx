@@ -4,6 +4,17 @@ import { CommentSection } from "./CommentSection";
 import { InteractiveZoomPanImage } from "./InteractiveZoomPanImage";
 import { sfx } from "../utils/sfx";
 import { fetchWallpapersApi } from "../utils/api";
+import { db } from "../lib/firebase";
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  doc,
+  setDoc,
+  deleteDoc,
+  serverTimestamp
+} from "firebase/firestore";
 import {
   Image as ImageIcon,
   Search,
@@ -49,6 +60,26 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
   const [activePreview, setActivePreview] = useState<AnimeWallpaper | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [appliedBannerId, setAppliedBannerId] = useState<string | null>(null);
+
+  // Real-time Firestore synchronization for saved wallpapers
+  useEffect(() => {
+    if (!profile?.id) return;
+    const favsRef = collection(db, "saved_wallpapers");
+    const qFavs = query(favsRef, where("userId", "==", profile.id));
+
+    const unsubscribe = onSnapshot(qFavs, (snapshot) => {
+      const list: string[] = [];
+      snapshot.forEach((doc) => {
+        const d = doc.data();
+        if (d.wallpaperId) list.push(d.wallpaperId);
+      });
+      setFavorites(list);
+    }, (err) => {
+      console.warn("Firestore saved_wallpapers sync error:", err);
+    });
+
+    return () => unsubscribe();
+  }, [profile?.id]);
 
   // Search History Drawer State & LocalStorage
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -191,12 +222,40 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
     fetchWallpapers(selectedCategory, nextP, activeSearchTerm, true);
   };
 
-  const toggleFavorite = (id: string, e?: React.MouseEvent) => {
+  const toggleFavorite = async (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     sfx.playClick();
-    setFavorites((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
+    if (!profile?.id) return;
+
+    const wp = wallpapers.find((w) => w.id === id);
+    if (!wp) return;
+
+    const favoriteDocId = `${profile.id}_${wp.id}`;
+    const docRef = doc(db, "saved_wallpapers", favoriteDocId);
+
+    const isFav = favorites.includes(id);
+
+    try {
+      if (isFav) {
+        await deleteDoc(docRef);
+      } else {
+        await setDoc(docRef, {
+          userId: profile.id,
+          username: profile.username || "Voyager",
+          wallpaperId: wp.id,
+          wallpaperTitle: wp.title || "Anime Art",
+          url: wp.url,
+          thumb: wp.thumb || wp.url,
+          createdAt: serverTimestamp()
+        });
+        if (onAddCoins) onAddCoins(10);
+      }
+    } catch (err) {
+      console.error("Failed to sync wallpaper favorite with Firestore:", err);
+      setFavorites((prev) =>
+        prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      );
+    }
   };
 
   const handleSetAsBanner = (wallpaper: AnimeWallpaper, e?: React.MouseEvent) => {

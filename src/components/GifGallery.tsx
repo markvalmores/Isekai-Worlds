@@ -2,6 +2,17 @@ import React, { useEffect, useState } from "react";
 import { AnimeGif } from "../types";
 import { sfx } from "../utils/sfx";
 import { fetchGifsApi } from "../utils/api";
+import { db } from "../lib/firebase";
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  doc,
+  setDoc,
+  deleteDoc,
+  serverTimestamp
+} from "firebase/firestore";
 import {
   Film,
   Search,
@@ -100,6 +111,38 @@ export const GifGallery: React.FC = () => {
   const [selectedGif, setSelectedGif] = useState<AnimeGif | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
+
+  // Load active profile from localStorage for Firebase sync fallback
+  const [activeProfile] = useState(() => {
+    try {
+      const saved = localStorage.getItem("isekai_user_profile");
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return {
+      id: "u-anon-" + Math.random().toString(36).substring(2, 8),
+      username: "Isekai Voyager"
+    };
+  });
+
+  // Real-time Firestore synchronization for saved GIFs
+  useEffect(() => {
+    if (!activeProfile?.id) return;
+    const favsRef = collection(db, "saved_gifs");
+    const qFavs = query(favsRef, where("userId", "==", activeProfile.id));
+
+    const unsubscribe = onSnapshot(qFavs, (snapshot) => {
+      const list: string[] = [];
+      snapshot.forEach((doc) => {
+        const d = doc.data();
+        if (d.gifId) list.push(d.gifId);
+      });
+      setFavorites(list);
+    }, (err) => {
+      console.warn("Firestore saved_gifs sync error:", err);
+    });
+
+    return () => unsubscribe();
+  }, [activeProfile?.id]);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -264,12 +307,40 @@ export const GifGallery: React.FC = () => {
     fetchGifs(query, 1, false);
   };
 
-  const toggleFavorite = (id: string, e: React.MouseEvent) => {
+  const toggleFavorite = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     sfx.playClick();
-    setFavorites((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
+    if (!activeProfile?.id) return;
+
+    const gifObj = gifs.find((g) => g.id === id) || FALLBACK_GIFS.find((g) => g.id === id);
+    if (!gifObj) return;
+
+    const favoriteDocId = `${activeProfile.id}_${gifObj.id}`;
+    const docRef = doc(db, "saved_gifs", favoriteDocId);
+
+    const isFav = favorites.includes(id);
+
+    try {
+      if (isFav) {
+        await deleteDoc(docRef);
+      } else {
+        await setDoc(docRef, {
+          userId: activeProfile.id,
+          username: activeProfile.username || "Voyager",
+          gifId: gifObj.id,
+          title: gifObj.title || "Anime GIF",
+          url: gifObj.url,
+          previewUrl: gifObj.previewUrl || gifObj.url,
+          category: gifObj.category || "ALL",
+          createdAt: serverTimestamp()
+        });
+      }
+    } catch (err) {
+      console.error("Failed to sync GIF favorite with Firestore:", err);
+      setFavorites((prev) =>
+        prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      );
+    }
   };
 
   const handleCopyUrl = (url: string, id: string, e?: React.MouseEvent) => {

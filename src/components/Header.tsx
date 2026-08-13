@@ -417,14 +417,14 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* User Actions & Settings */}
-        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Gold Mode Indicator Toggle */}
           <button
             onClick={() => {
               sfx.playWarp();
               updateSettings({ isGoldMode: !settings.isGoldMode });
             }}
-            className={`p-1.5 sm:p-2 rounded-xl border font-mono text-xs font-bold flex items-center gap-1.5 transition-all ${
+            className={`hidden md:flex p-1.5 sm:p-2 rounded-xl border font-mono text-xs font-bold items-center gap-1.5 transition-all ${
               isGold
                 ? "bg-amber-400 text-slate-950 border-amber-300 shadow-lg shadow-amber-500/30"
                 : "bg-slate-900 text-slate-400 border-indigo-500/30 hover:text-amber-300"
@@ -436,7 +436,7 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
 
           {/* Quick Language Selector */}
-          <div className="relative group shrink-0 hidden sm:block">
+          <div className="relative group shrink-0 hidden md:block">
             <select
               value={settings.language}
               onChange={(e) => {
@@ -461,7 +461,7 @@ export const Header: React.FC<HeaderProps> = ({
                 sfx.playClick();
                 openSocialAuthModal();
               }}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-2xl border text-xs font-mono font-bold transition-all shrink-0 shadow-sm ${
+              className={`hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-2xl border text-xs font-mono font-bold transition-all shrink-0 shadow-sm ${
                 profile.verifiedSocial
                   ? "bg-emerald-950/80 border-emerald-500/50 text-emerald-300 hover:bg-emerald-900"
                   : "bg-indigo-950/80 border-indigo-500/40 text-indigo-300 hover:bg-indigo-900"
@@ -476,7 +476,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* User Profile Pill */}
           <button
             onClick={() => handleNavClick("profile")}
-            className="flex items-center gap-1.5 bg-slate-900/80 hover:bg-slate-800 p-1 sm:p-1.5 pr-2 sm:pr-2.5 rounded-2xl border border-indigo-500/30 hover:border-indigo-400 transition-all shrink-0"
+            className="flex items-center gap-1.5 bg-slate-900/80 hover:bg-slate-800 p-1 sm:p-1.5 pr-1.5 sm:pr-2.5 rounded-2xl border border-indigo-500/30 hover:border-indigo-400 transition-all shrink-0"
             title="Open Profile Dashboard"
           >
             <img
@@ -496,7 +496,7 @@ export const Header: React.FC<HeaderProps> = ({
                 sfx.playWarp();
                 openLiveWallpaperModal();
               }}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all shrink-0 shadow-md ${
+              className={`hidden lg:flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all shrink-0 shadow-md ${
                 settings.webAppWallpaperEnabled
                   ? "bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border-purple-400/60 shadow-purple-600/20"
                   : "bg-slate-900/90 hover:bg-slate-800 text-slate-300 border-slate-750"
@@ -515,7 +515,7 @@ export const Header: React.FC<HeaderProps> = ({
                 sfx.playClick();
                 openCommandPalette();
               }}
-              className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-900/90 hover:bg-purple-900/40 text-slate-300 hover:text-white rounded-xl border border-purple-500/30 hover:border-purple-400 text-xs font-mono font-bold transition-all shrink-0 shadow-sm"
+              className="hidden lg:flex items-center gap-1 px-2.5 py-1.5 bg-slate-900/90 hover:bg-purple-900/40 text-slate-300 hover:text-white rounded-xl border border-purple-500/30 hover:border-purple-400 text-xs font-mono font-bold transition-all shrink-0 shadow-sm"
               title="Open Command Palette (Cmd+K)"
             >
               <Zap className="w-3.5 h-3.5 text-purple-400" />

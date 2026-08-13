@@ -731,7 +731,11 @@ export default function App() {
         )}
 
         {currentPage === "vercel" && (
-          <VercelAppsDashboard />
+          <VercelAppsDashboard
+            userProfile={profile}
+            onAddCoins={handleAddCoins}
+            isGoldMode={isGold}
+          />
         )}
       </main>
 

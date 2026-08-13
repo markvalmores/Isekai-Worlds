@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { Camera, Search, Heart, Bookmark, Share2, Download, ExternalLink, Sparkles, Filter, Eye, RefreshCw, X, Shield, Star, Flame } from "lucide-react";
 import { sfx } from "../utils/sfx";
+import { db } from "../lib/firebase";
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  doc,
+  setDoc,
+  deleteDoc,
+  serverTimestamp
+} from "firebase/firestore";
 
 interface CosplayItem {
   id: string;
@@ -28,14 +39,39 @@ export function CosplayDashboard({ onAddCoins, isGoldMode = false }: CosplayDash
   const [selectedCosplay, setSelectedCosplay] = useState<CosplayItem | null>(null);
   
   // Bookmarked Cosplay items
-  const [savedCosplayIds, setSavedCosplayIds] = useState<string[]>(() => {
+  const [savedCosplayIds, setSavedCosplayIds] = useState<string[]>([]);
+
+  // Load active profile from localStorage for Firebase sync fallback
+  const [activeProfile] = useState(() => {
     try {
-      const saved = localStorage.getItem("isekai_saved_cosplay");
-      return saved ? JSON.parse(saved) : [];
-    } catch (e) {
-      return [];
-    }
+      const saved = localStorage.getItem("isekai_user_profile");
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return {
+      id: "u-anon-" + Math.random().toString(36).substring(2, 8),
+      username: "Isekai Voyager"
+    };
   });
+
+  // Real-time Firestore synchronization for saved cosplays
+  useEffect(() => {
+    if (!activeProfile?.id) return;
+    const favsRef = collection(db, "saved_cosplay");
+    const qFavs = query(favsRef, where("userId", "==", activeProfile.id));
+
+    const unsubscribe = onSnapshot(qFavs, (snapshot) => {
+      const list: string[] = [];
+      snapshot.forEach((doc) => {
+        const d = doc.data();
+        if (d.cosplayId) list.push(d.cosplayId);
+      });
+      setSavedCosplayIds(list);
+    }, (err) => {
+      console.warn("Firestore saved_cosplay sync error:", err);
+    });
+
+    return () => unsubscribe();
+  }, [activeProfile?.id]);
 
   // Liked Cosplay items
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
@@ -68,17 +104,39 @@ export function CosplayDashboard({ onAddCoins, isGoldMode = false }: CosplayDash
     fetchCosplayFeed(searchQuery, activeCategory);
   };
 
-  const toggleBookmark = (item: CosplayItem) => {
+  const toggleBookmark = async (item: CosplayItem) => {
     sfx.playClick();
-    let updated: string[] = [];
-    if (savedCosplayIds.includes(item.id)) {
-      updated = savedCosplayIds.filter((id) => id !== item.id);
-    } else {
-      updated = [...savedCosplayIds, item.id];
-      onAddCoins(15, "Bookmarked Cosplay Photo (+15 Coins)");
+    if (!activeProfile?.id) return;
+
+    const favoriteDocId = `${activeProfile.id}_${item.id}`;
+    const docRef = doc(db, "saved_cosplay", favoriteDocId);
+
+    const isBookmarked = savedCosplayIds.includes(item.id);
+
+    try {
+      if (isBookmarked) {
+        await deleteDoc(docRef);
+      } else {
+        await setDoc(docRef, {
+          userId: activeProfile.id,
+          username: activeProfile.username || "Voyager",
+          cosplayId: item.id,
+          title: item.title || "Cosplay Shoot",
+          character: item.character || "",
+          cosplayer: item.cosplayer || "",
+          imageUrl: item.imageUrl,
+          thumbUrl: item.thumbUrl || item.imageUrl,
+          series: item.series || "",
+          createdAt: serverTimestamp()
+        });
+        onAddCoins(15, "Bookmarked Cosplay Photo (+15 Coins)");
+      }
+    } catch (err) {
+      console.error("Failed to sync cosplay bookmark with Firestore:", err);
+      setSavedCosplayIds((prev) =>
+        prev.includes(item.id) ? prev.filter((id) => id !== item.id) : [...prev, item.id]
+      );
     }
-    setSavedCosplayIds(updated);
-    localStorage.setItem("isekai_saved_cosplay", JSON.stringify(updated));
   };
 
   const toggleLike = (id: string) => {

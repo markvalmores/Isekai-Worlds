@@ -489,6 +489,7 @@ app.get("/api/anime/trending", async (req, res) => {
         Accept: "application/json",
       },
       body: JSON.stringify({ query }),
+      signal: AbortSignal.timeout(5000),
     });
 
     if (aniRes.ok) {
@@ -520,7 +521,9 @@ app.get("/api/anime/trending", async (req, res) => {
     }
 
     // Fallback: Jikan API v4
-    const jikanRes = await fetch("https://api.jikan.moe/v4/top/anime?limit=20");
+    const jikanRes = await fetch("https://api.jikan.moe/v4/top/anime?limit=20", {
+      signal: AbortSignal.timeout(5000)
+    });
     if (jikanRes.ok) {
       const jikanData = await jikanRes.json();
       const list = jikanData?.data || [];
@@ -563,7 +566,9 @@ app.get("/api/wallpapers", async (req, res) => {
       const malUrl = q
         ? `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&page=${page}&limit=12`
         : `https://api.jikan.moe/v4/top/anime?page=${page}&limit=12`;
-      const malRes = await fetch(malUrl);
+      const malRes = await fetch(malUrl, {
+        signal: AbortSignal.timeout(5000)
+      });
       if (malRes.ok) {
         const malData = await malRes.json();
         const malList = malData?.data || [];
@@ -655,6 +660,7 @@ app.get("/api/wallpapers", async (req, res) => {
           query: aniListQuery,
           variables: q ? { search: q, page, perPage: 12 } : { page, perPage: 12 },
         }),
+        signal: AbortSignal.timeout(5000),
       });
 
       if (aniRes.ok) {

@@ -323,13 +323,11 @@ export const Header: React.FC<HeaderProps> = ({
               : "bg-gradient-to-tr from-blue-600 via-purple-600 to-red-600 shadow-purple-500/30 group-hover:shadow-rose-500/50"
           }`}>
             <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center overflow-hidden relative">
-              <span className={`text-base sm:text-lg font-black bg-clip-text text-transparent transform group-hover:scale-110 transition-transform ${
-                isGold
-                  ? "bg-gradient-to-br from-amber-300 via-yellow-200 to-amber-500"
-                  : "bg-gradient-to-br from-blue-400 via-purple-300 to-red-400"
-              }`}>
-                IW
-              </span>
+              <img
+                src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/4c755e0f-f925-4948-89de-e05d40d0d2ef/df45l8a-ccb2750e-0c08-4ed6-be91-3c33889d3c26.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiIvZi80Yzc1NWUwZi1mOTI1LTQ5NDgtODlkZS1lMDVkNDBkMGQyZWYvZGY0NWw4YS1jY2IyNzUwZS0wYzA4LTRlZDYtYmU5MS0zYzMzODg5ZDNjMjYucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.86n9Lyf9AfBbnCLqXa7mVYEE9aTv_9qu409TdePxhBU"
+                alt="Isekai Worlds Logo"
+                className="w-full h-full object-contain transform group-hover:scale-110 transition-transform"
+              />
               <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/20 via-yellow-500/20 to-amber-500/20 animate-pulse"></div>
             </div>
           </div>

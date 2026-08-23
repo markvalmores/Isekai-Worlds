@@ -26,6 +26,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { sfx } from "../utils/sfx";
+import { CardBattleArena } from "./CardBattleArena";
 
 interface Card {
   id: string;
@@ -498,6 +499,8 @@ export function CardGamesDashboard({ onAddCoins, isGoldMode, isAdmin = false }: 
 
   // Battle Arena Simulation State
   const [battleMode, setBattleMode] = useState<"lobby" | "cpu_loading" | "pvp_waiting" | "active_cpu" | "active_pvp" | "ended">("lobby");
+  const [isPlayerTurn, setIsPlayerTurn] = useState(true);
+  const [destroyedCards, setDestroyedCards] = useState<Card[]>([]);
   const [pvpWaitSeconds, setPvpWaitSeconds] = useState(0);
   const [selectedFighter, setSelectedFighter] = useState<Card | null>(null);
   const [opponentFighter, setOpponentFighter] = useState<Card | null>(null);
@@ -585,6 +588,7 @@ export function CardGamesDashboard({ onAddCoins, isGoldMode, isAdmin = false }: 
 
     if (nextOppHp <= 0) {
       setBattleLogs((prev) => [...prev, log1, `🏆 Victory! You have defeated ${opponentName}!`, `💰 Reward added: +50 Isekai Coins!`]);
+      setDestroyedCards((prev) => [...prev, opponentFighter]);
       addLocalCoins(50);
       setBattleReward(50);
       setBattleMode("ended");
@@ -602,6 +606,7 @@ export function CardGamesDashboard({ onAddCoins, isGoldMode, isAdmin = false }: 
 
     if (nextPlayHp <= 0) {
       setBattleLogs((prev) => [...prev, log1, log2, `💀 Defeat! ${opponentName} wins.`, `💰 Consolation prize: +10 Isekai Coins`]);
+      setDestroyedCards((prev) => [...prev, selectedFighter]);
       addLocalCoins(10);
       setBattleReward(10);
       setBattleMode("ended");
@@ -1200,149 +1205,14 @@ export function CardGamesDashboard({ onAddCoins, isGoldMode, isAdmin = false }: 
           </div>
 
           {/* Arena Interactive Display */}
-          <div className="lg:col-span-2 p-6 rounded-3xl bg-slate-900/60 border border-slate-850 flex flex-col justify-between min-h-[440px]">
-            {battleMode === "lobby" && (
-              <div className="flex-1 flex flex-col items-center justify-center space-y-3 text-slate-500">
-                <Swords className="w-12 h-12 text-slate-700 animate-pulse" />
-                <span className="text-xs font-mono font-bold uppercase">Multiverse Battle Stadium</span>
-                <p className="text-[10px] text-slate-600 font-mono max-w-xs text-center leading-relaxed">
-                  Summon your champion. Victories reward you with up to 50 Coins instantly! Defeats still offer a 10 coin active consolation.
-                </p>
-              </div>
-            )}
-
-            {battleMode === "pvp_waiting" && (
-              <div className="flex-1 flex flex-col items-center justify-center space-y-4">
-                <div className="relative w-16 h-16 rounded-full bg-indigo-500/10 border border-indigo-400 flex items-center justify-center text-white text-xl animate-spin-slow">
-                  <RefreshCw className="w-8 h-8 text-indigo-400 animate-spin" />
-                </div>
-                <div className="text-center space-y-1">
-                  <span className="text-xs font-mono text-indigo-400 font-bold uppercase animate-pulse">Waiting for Real Player match...</span>
-                  <p className="text-[9px] font-mono text-slate-500">Searching global lobby index. Queue Time: {pvpWaitSeconds}s</p>
-                </div>
-
-                <div className="w-full max-w-md p-3 bg-slate-950 rounded-xl border border-slate-850 text-left font-mono text-[9px] text-slate-400 space-y-1">
-                  {battleLogs.map((log, i) => (
-                    <div key={i} className="truncate">{log}</div>
-                  ))}
-                </div>
-
-                <button
-                  onClick={() => { sfx.playClick(); setBattleMode("lobby"); }}
-                  className="px-3 py-1 bg-slate-950 border border-slate-800 text-slate-450 hover:text-white rounded-lg text-[9px] font-mono uppercase"
-                >
-                  Cancel Matchmaking
-                </button>
-              </div>
-            )}
-
-            {(battleMode === "active_cpu" || battleMode === "active_pvp") && selectedFighter && opponentFighter && (
-              <div className="flex-1 flex flex-col justify-between">
-                {/* Visual HP Bars */}
-                <div className="grid grid-cols-2 gap-4 pb-4 border-b border-slate-850/60">
-                  {/* Player HP */}
-                  <div className="space-y-1.5 text-left">
-                    <div className="flex justify-between items-center text-[10px] font-mono">
-                      <span className="text-white font-bold truncate">PLAYER (You)</span>
-                      <span className="text-emerald-400">{playerHp} HP</span>
-                    </div>
-                    <div className="h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-850">
-                      <div
-                        className="h-full bg-emerald-500 transition-all duration-300"
-                        style={{ width: `${playerHp}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Opponent HP */}
-                  <div className="space-y-1.5 text-right">
-                    <div className="flex justify-between items-center text-[10px] font-mono">
-                      <span className="text-red-400">{opponentHp} HP</span>
-                      <span className="text-white font-bold truncate">{opponentName}</span>
-                    </div>
-                    <div className="h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-850">
-                      <div
-                        className="h-full bg-red-500 transition-all duration-300"
-                        style={{ width: `${opponentHp}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Core Arena graphics */}
-                <div className="flex-1 py-4 flex items-center justify-around gap-4">
-                  {/* Player Fighter Graphic */}
-                  <div className="text-center space-y-1.5 scale-90">
-                    <img
-                      src={selectedFighter.imageUrl}
-                      alt={selectedFighter.name}
-                      referrerPolicy="no-referrer"
-                      onError={(e) => handleCardImgError(e, selectedFighter.game)}
-                      className="w-16 h-20 object-cover rounded-xl border-2 border-indigo-500 shadow-md"
-                    />
-                    <p className="text-[10px] font-bold text-white truncate max-w-[80px]">{selectedFighter.name}</p>
-                  </div>
-
-                  <div className="text-lg font-mono text-red-500 font-black italic animate-bounce shrink-0">VS</div>
-
-                  {/* Opponent Fighter Graphic */}
-                  <div className="text-center space-y-1.5 scale-90">
-                    <img
-                      src={opponentFighter.imageUrl}
-                      alt={opponentFighter.name}
-                      referrerPolicy="no-referrer"
-                      onError={(e) => handleCardImgError(e, opponentFighter.game)}
-                      className="w-16 h-20 object-cover rounded-xl border-2 border-red-500 shadow-md"
-                    />
-                    <p className="text-[10px] font-bold text-white truncate max-w-[80px]">{opponentFighter.name}</p>
-                  </div>
-                </div>
-
-                {/* Arena Battle logs box */}
-                <div className="p-3 bg-slate-950 rounded-xl border border-slate-850 h-28 overflow-y-auto text-left font-mono text-[9px] text-indigo-300 space-y-1 scrollbar-thin">
-                  {battleLogs.map((log, i) => (
-                    <div key={i}>{log}</div>
-                  ))}
-                </div>
-
-                {/* Battle Actions bar */}
-                <div className="pt-4 border-t border-slate-850/60 flex items-center justify-between">
-                  <span className="text-[9px] font-mono text-slate-500 uppercase">Your turn! Select action</span>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={executeAttack}
-                      className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-[10px] font-mono font-bold uppercase flex items-center gap-1 transition-all active:scale-95 shadow"
-                    >
-                      <Zap className="w-3.5 h-3.5 text-yellow-300" />
-                      <span>{selectedFighter.attackName ? "Attack Match" : "Execute Strike"}</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {battleMode === "ended" && (
-              <div className="flex-1 flex flex-col items-center justify-center space-y-4 text-center">
-                <div className="w-14 h-14 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-xl text-amber-400">
-                  🏆
-                </div>
-                <div>
-                  <h4 className="text-sm font-black text-white uppercase font-mono">Battle Concluded</h4>
-                  <p className="text-[10px] text-slate-400 mt-1">Multiplayer signal terminated cleanly.</p>
-                </div>
-
-                <div className="p-3 bg-slate-950 rounded-xl border border-slate-850 font-mono text-[10px] text-white">
-                  Result Cash Rewards: <strong className="text-amber-400">+{battleReward} Coins</strong>
-                </div>
-
-                <button
-                  onClick={() => { sfx.playClick(); setBattleMode("lobby"); }}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-mono font-bold uppercase rounded-lg shadow-md transition-all active:scale-95"
-                >
-                  Return to Stadium Lobby
-                </button>
-              </div>
-            )}
+          <div className="lg:col-span-2">
+            <CardBattleArena
+              playerCard={selectedFighter}
+              opponentCard={opponentFighter}
+              battleMode={battleMode}
+              isPlayerTurn={isPlayerTurn}
+              destroyedCards={destroyedCards}
+            />
           </div>
         </div>
       )}

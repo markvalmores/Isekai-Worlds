@@ -69,7 +69,7 @@ const VERCEL_APPS: VercelAppItem[] = [
   },
   {
     id: "elfe-health",
-    title: "Idol Diva Remake",
+    title: "Elfe Game",
     url: "https://elfegame.vercel.app/",
     category: "Utilities",
     description: "Interactive health and wellness RPG companion tracking daily vitality, hydration, and fitness quests.",

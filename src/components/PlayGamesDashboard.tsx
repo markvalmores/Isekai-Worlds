@@ -43,7 +43,7 @@ const GAME_CATALOG: GameDetail[] = [
     url: "https://game.granbluefantasy.jp/",
     description: "An epic mobile RPG playable directly on modern desktop & mobile browsers. Features spectacular hand-drawn art, legendary turn-based gacha systems, and a majestic score composed by Nobuo Uematsu.",
     category: "JRPG & Gacha",
-    coverUrl: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?w=800&auto=format&fit=crop&q=80",
+    coverUrl: "https://granbluefantasy.com/og/img/path/ogp.png",
     tags: ["Turn-Based", "Fantasy", "Multiplayer", "RPG"],
     difficulty: "Hard",
     releaseYear: "2014",
@@ -55,7 +55,7 @@ const GAME_CATALOG: GameDetail[] = [
     url: "https://playtomax.com/games",
     description: "High-performance HTML5 browser arcade platform. Explore hundreds of fast-paced, free-to-play casual games, retro puzzle battles, and multi-genre action games playable natively.",
     category: "Arcade & Casual",
-    coverUrl: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=800&auto=format&fit=crop&q=80",
+    coverUrl: "https://cdn.slidesharecdn.com/ss_thumbnails/playtomaxcompanypresentation-170410131117-thumbnail.jpg?width=640&height=640&fit=bounds",
     tags: ["HTML5", "Casual", "Mini-Games", "Action"],
     difficulty: "Easy",
     releaseYear: "2018",
@@ -67,11 +67,23 @@ const GAME_CATALOG: GameDetail[] = [
     url: "https://web.cloudmoonapp.com/",
     description: "An ultra-low-latency, high-performance cloud gaming virtual machine emulator. Run complex Android RPGs and heavy mobile action titles directly inside your web browser without lag.",
     category: "Cloud Gaming",
-    coverUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=80",
+    coverUrl: "https://clouddosage.com/wp-content/uploads/2024/07/cloudmoon.webp",
     tags: ["Emulator", "Virtual Machine", "Low Latency", "Mobile"],
     difficulty: "Medium",
     releaseYear: "2023",
     rating: 4.7
+  },
+  {
+    id: "army-of-ages",
+    title: "Army of Ages",
+    url: "https://www.gameflare.com/embed/army-of-ages/",
+    description: "A classic strategy game where you must build your army and defend your kingdom through the ages.",
+    category: "Strategy",
+    coverUrl: "https://i.ytimg.com/vi/SAxcUrcmf7M/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLA74X8MnTDD_yhaG0SiL7_dh2mB4g",
+    tags: ["Strategy", "Flash", "Retro"],
+    difficulty: "Medium",
+    releaseYear: "2013",
+    rating: 4.5
   }
 ];
 

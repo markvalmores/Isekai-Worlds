@@ -54,6 +54,7 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
   const [wallpapers, setWallpapers] = useState<AnimeWallpaper[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSearchTerm, setActiveSearchTerm] = useState("");
@@ -136,17 +137,29 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMorePages, setHasMorePages] = useState(true);
 
-  const categories = ["all", "Isekai", "Fantasy", "Sci-Fi", "Dark Fantasy", "Landscape"];
+  const providers = [
+    { id: "all", name: "All 4K Engines", icon: "🌌", desc: "nekos.best • waifu.im • waifu.pics • anilist" },
+    { id: "nekos.best", name: "Nekos.best", icon: "🐾", desc: "High-res anime illustrations & neko art" },
+    { id: "waifu.im", name: "Waifu.im (4K)", icon: "✨", desc: "Ultra-HD 4K Waifu & character visuals" },
+    { id: "waifu.pics", name: "Waifu.pics", icon: "🌸", desc: "Anime aesthetics, reactions & characters" },
+    { id: "anilist", name: "AniList", icon: "🎬", desc: "Official anime series 4K banners & key art" }
+  ];
+
+  const categories = ["all", "Waifu", "Neko", "Isekai", "Fantasy", "Sci-Fi", "Landscape", "Dark Fantasy"];
 
   useEffect(() => {
-    // Reset page and queries to 1 on category change
+    // Reset page and queries to 1 on category or provider change
     setCurrentPage(1);
-    setSearchQuery("");
-    setActiveSearchTerm("");
-    fetchWallpapers(selectedCategory, 1, "", false);
-  }, [selectedCategory]);
+    fetchWallpapers(selectedCategory, 1, activeSearchTerm, selectedProvider, false);
+  }, [selectedCategory, selectedProvider]);
 
-  const fetchWallpapers = async (cat: string, pageNum: number, queryStr = "", append = false) => {
+  const fetchWallpapers = async (
+    cat: string,
+    pageNum: number,
+    queryStr = "",
+    providerStr = "all",
+    append = false
+  ) => {
     try {
       if (append) {
         setLoadingMore(true);
@@ -154,7 +167,7 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
         setLoading(true);
       }
 
-      const wallpapersList = await fetchWallpapersApi(cat, pageNum, queryStr);
+      const wallpapersList = await fetchWallpapersApi(cat, pageNum, queryStr, providerStr);
 
       if (wallpapersList && wallpapersList.length > 0) {
         if (append) {
@@ -184,7 +197,7 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
     setCurrentPage(1);
     setActiveSearchTerm(trimmed);
     addSearchToHistory(trimmed);
-    fetchWallpapers(selectedCategory, 1, trimmed, false);
+    fetchWallpapers(selectedCategory, 1, trimmed, selectedProvider, false);
   };
 
   const scrollToGalleryTop = () => {
@@ -195,7 +208,7 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
     sfx.playWarp();
     const nextP = currentPage + 1;
     setCurrentPage(nextP);
-    fetchWallpapers(selectedCategory, nextP, activeSearchTerm, false);
+    fetchWallpapers(selectedCategory, nextP, activeSearchTerm, selectedProvider, false);
     scrollToGalleryTop();
   };
 
@@ -204,14 +217,14 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
     sfx.playClick();
     const prevP = currentPage - 1;
     setCurrentPage(prevP);
-    fetchWallpapers(selectedCategory, prevP, activeSearchTerm, false);
+    fetchWallpapers(selectedCategory, prevP, activeSearchTerm, selectedProvider, false);
     scrollToGalleryTop();
   };
 
   const handleJumpToPage = (p: number) => {
     sfx.playClick();
     setCurrentPage(p);
-    fetchWallpapers(selectedCategory, p, activeSearchTerm, false);
+    fetchWallpapers(selectedCategory, p, activeSearchTerm, selectedProvider, false);
     scrollToGalleryTop();
   };
 
@@ -219,7 +232,24 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
     sfx.playWarp();
     const nextP = currentPage + 1;
     setCurrentPage(nextP);
-    fetchWallpapers(selectedCategory, nextP, activeSearchTerm, true);
+    fetchWallpapers(selectedCategory, nextP, activeSearchTerm, selectedProvider, true);
+  };
+
+  const getProviderBadge = (provider?: string) => {
+    const p = (provider || "").toLowerCase();
+    if (p.includes("nekos")) {
+      return { label: "nekos.best", color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40" };
+    }
+    if (p.includes("waifu.im") || p.includes("waifuim")) {
+      return { label: "waifu.im 4K", color: "bg-rose-500/20 text-rose-300 border-rose-500/40" };
+    }
+    if (p.includes("waifu.pics") || p.includes("waifupics")) {
+      return { label: "waifu.pics", color: "bg-amber-500/20 text-amber-300 border-amber-500/40" };
+    }
+    if (p.includes("anilist")) {
+      return { label: "AniList 4K", color: "bg-cyan-500/20 text-cyan-300 border-cyan-500/40" };
+    }
+    return { label: "Anime 4K", color: "bg-indigo-500/20 text-indigo-300 border-indigo-500/40" };
   };
 
   const toggleFavorite = async (id: string, e?: React.MouseEvent) => {
@@ -275,7 +305,7 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
         <div className="relative z-10 max-w-2xl space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-xs font-mono text-cyan-300">
             <ImageIcon className="w-4 h-4 text-cyan-400" />
-            <span>UNLIMITED ANIME WALLPAPER GALLERY • PAGE {currentPage}</span>
+            <span>UNLIMITED ANIME 4K WALLPAPER ENGINE • PAGE {currentPage}</span>
           </div>
 
           <h2 className="text-3xl font-black uppercase tracking-tight text-white">
@@ -283,8 +313,56 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
           </h2>
 
           <p className="text-xs text-slate-300 leading-relaxed">
-            Browse ultra high-definition Isekai, fantasy, and sci-fi wallpapers. Unlimited page pagination (Page 1 to ∞) with endless dynamic anime art.
+            Multi-source 4K Ultra-HD anime wallpapers aggregated directly from <strong className="text-emerald-300">nekos.best</strong>, <strong className="text-rose-300">waifu.im</strong>, <strong className="text-amber-300">waifu.pics</strong>, and <strong className="text-cyan-300">AniList GraphQL</strong> with infinite pagination and dynamic filtering.
           </p>
+        </div>
+      </div>
+
+      {/* 4K Wallpaper API Provider Engine Selector */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-xs font-mono text-slate-400">
+          <span className="flex items-center gap-1.5 text-cyan-300 font-bold">
+            <Sparkles className="w-3.5 h-3.5" />
+            Select 4K Wallpaper Source Engine:
+          </span>
+          <span className="text-[11px] text-slate-500">Live API Feeds</span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+          {providers.map((p) => {
+            const isSelected = selectedProvider === p.id;
+            return (
+              <button
+                key={p.id}
+                onClick={() => {
+                  sfx.playClick();
+                  setSelectedProvider(p.id);
+                }}
+                className={`p-3 rounded-2xl border text-left transition-all relative overflow-hidden flex flex-col justify-between ${
+                  isSelected
+                    ? "bg-gradient-to-br from-indigo-900/80 via-purple-900/80 to-slate-900 border-purple-400 shadow-lg shadow-purple-950/60 ring-1 ring-purple-400/50"
+                    : "bg-slate-900/80 border-indigo-500/20 hover:border-purple-500/40 text-slate-400 hover:text-white"
+                }`}
+              >
+                <div className="flex items-center justify-between w-full mb-1">
+                  <span className="text-base">{p.icon}</span>
+                  {isSelected && (
+                    <span className="px-1.5 py-0.5 rounded-full bg-purple-500/30 border border-purple-400/60 text-[9px] font-mono text-purple-200 font-bold uppercase">
+                      Active
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <div className="text-xs font-bold font-mono text-white tracking-wide">
+                    {p.name}
+                  </div>
+                  <div className="text-[10px] text-slate-400 leading-tight mt-0.5 truncate">
+                    {p.desc}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -327,7 +405,7 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
             <Search className="w-4 h-4 text-purple-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
-              placeholder="Search wallpapers or tags..."
+              placeholder="Search anime, characters, waifus..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-slate-900/80 border border-indigo-500/30 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
@@ -522,12 +600,17 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity" />
 
                   {/* Resolution & Source Badge */}
-                  <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 z-10">
-                    <span className="px-2 py-0.5 rounded-md bg-slate-950/85 border border-purple-500/30 text-[10px] font-mono text-cyan-300">
+                  <div className="absolute top-2.5 left-2.5 flex flex-wrap items-center gap-1.5 z-10 max-w-[80%]">
+                    {(() => {
+                      const badge = getProviderBadge(wp.sourceProvider);
+                      return (
+                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-bold border backdrop-blur-md shadow ${badge.color}`}>
+                          {badge.label}
+                        </span>
+                      );
+                    })()}
+                    <span className="px-2 py-0.5 rounded-md bg-slate-950/85 border border-purple-500/30 text-[10px] font-mono text-cyan-300 backdrop-blur-md">
                       {wp.resolution}
-                    </span>
-                    <span className="px-2 py-0.5 rounded-md bg-slate-950/85 border border-indigo-500/40 text-[10px] font-mono font-bold text-amber-300 shadow">
-                      {wp.author || "MyAnimeList"}
                     </span>
                   </div>
 
@@ -621,9 +704,21 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-2xl">
           <div className="relative max-w-4xl w-full bg-slate-900 border border-indigo-500/30 rounded-3xl overflow-hidden shadow-2xl space-y-4 p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-              <div>
-                <h3 className="text-xl font-bold text-white">{activePreview.title}</h3>
-                <p className="text-xs font-mono text-cyan-400">Category: {activePreview.category} • {activePreview.resolution}</p>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xl font-bold text-white">{activePreview.title}</h3>
+                  {(() => {
+                    const badge = getProviderBadge(activePreview.sourceProvider);
+                    return (
+                      <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold border ${badge.color}`}>
+                        {badge.label}
+                      </span>
+                    );
+                  })()}
+                </div>
+                <p className="text-xs font-mono text-cyan-400">
+                  Category: {activePreview.category} • Resolution: {activePreview.resolution} • Source: {activePreview.author}
+                </p>
               </div>
               <button
                 onClick={() => {

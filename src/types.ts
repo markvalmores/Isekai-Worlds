@@ -84,6 +84,13 @@ export interface AnimeWallpaper {
   resolution: string;
   author: string;
   likes?: number;
+  sourceProvider?: "nekos.best" | "waifu.im" | "waifu.pics" | "anilist" | "all" | string;
+  sourceUrl?: string;
+  dominantColor?: string;
+  score?: string;
+  sourcePage?: number;
+  width?: number;
+  height?: number;
 }
 
 export interface AnimeGif {

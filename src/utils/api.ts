@@ -222,15 +222,16 @@ export function cleanPlaylistId(playlistId: string): string {
 }
 
 /**
- * Robust wallpaper query with automatic fallbacks
+ * Robust wallpaper query with automatic fallbacks supporting nekos.best, waifu.im, waifu.pics, and anilist
  */
 export async function fetchWallpapersApi(
   category: string,
   page: number,
-  query = ""
+  query = "",
+  provider = "all"
 ): Promise<AnimeWallpaper[]> {
   try {
-    const url = `/api/wallpapers?category=${category}&page=${page}&q=${encodeURIComponent(query)}`;
+    const url = `/api/wallpapers?category=${encodeURIComponent(category)}&page=${page}&q=${encodeURIComponent(query)}&provider=${encodeURIComponent(provider)}`;
     const response = await fetchWithRetry(url, {}, 2, 800);
     if (response.ok) {
       const data = await response.json();

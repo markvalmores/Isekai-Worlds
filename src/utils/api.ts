@@ -1,4 +1,5 @@
 import { AnimeWallpaper, AnimeGif } from "../types";
+import { fetchLiveAnimeWallpapers } from "./animeApi";
 
 export interface AMVVideo {
   id: string;
@@ -222,7 +223,8 @@ export function cleanPlaylistId(playlistId: string): string {
 }
 
 /**
- * Robust wallpaper query with automatic fallbacks supporting nekos.best, waifu.im, waifu.pics, and anilist
+ * Robust wallpaper query powered directly by Live Anime Thumbnails & Multi-API Artworks
+ * (Nekos.best, Waifu.im, Waifu.pics, AniList, Jikan) with seamless backend and client fallback
  */
 export async function fetchWallpapersApi(
   category: string,
@@ -230,9 +232,10 @@ export async function fetchWallpapersApi(
   query = "",
   provider = "all"
 ): Promise<AnimeWallpaper[]> {
+  // 1. Try server-side aggregation first with short timeout
   try {
     const url = `/api/wallpapers?category=${encodeURIComponent(category)}&page=${page}&q=${encodeURIComponent(query)}&provider=${encodeURIComponent(provider)}`;
-    const response = await fetchWithRetry(url, {}, 2, 800);
+    const response = await fetchWithRetry(url, {}, 1, 500);
     if (response.ok) {
       const data = await response.json();
       if (data.wallpapers && Array.isArray(data.wallpapers) && data.wallpapers.length > 0) {
@@ -240,24 +243,27 @@ export async function fetchWallpapersApi(
       }
     }
   } catch (err) {
-    console.error("fetchWallpapersApi failed, using fallback wallpapers:", err);
+    // Expected on network blips, fall through to direct live anime APIs
   }
 
-  // Filter fallback list based on category/query to keep it intuitive
-  const filtered = FALLBACK_WALLPAPERS.filter((wp) => {
-    if (category !== "all" && wp.category.toLowerCase() !== category.toLowerCase()) return false;
-    if (query) {
-      const q = query.toLowerCase();
-      return (
-        wp.title.toLowerCase().includes(q) ||
-        wp.category.toLowerCase().includes(q) ||
-        wp.tags.some((t) => t.toLowerCase().includes(q))
-      );
+  // 2. Direct browser-level live anime thumbnails & multi-API artwork engine
+  try {
+    const liveWallpapers = await fetchLiveAnimeWallpapers({
+      category,
+      page,
+      query,
+      provider,
+      limit: 24
+    });
+    if (liveWallpapers && liveWallpapers.length > 0) {
+      return liveWallpapers;
     }
-    return true;
-  });
+  } catch (err) {
+    console.error("fetchLiveAnimeWallpapers error:", err);
+  }
 
-  return filtered.length > 0 ? filtered : FALLBACK_WALLPAPERS;
+  // 3. High-res anime seed fallback
+  return FALLBACK_WALLPAPERS;
 }
 
 /**

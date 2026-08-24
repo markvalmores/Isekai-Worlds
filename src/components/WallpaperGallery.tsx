@@ -138,11 +138,12 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
   const [hasMorePages, setHasMorePages] = useState(true);
 
   const providers = [
-    { id: "all", name: "All 4K Engines", icon: "🌌", desc: "nekos.best • waifu.im • waifu.pics • anilist" },
-    { id: "nekos.best", name: "Nekos.best", icon: "🐾", desc: "High-res anime illustrations & neko art" },
+    { id: "all", name: "All 4K Engines", icon: "🌌", desc: "nekos.best • waifu.im • waifu.pics • anilist • jikan" },
+    { id: "nekos.best", name: "Nekos.best", icon: "🐾", desc: "Live anime illustrations & neko art" },
     { id: "waifu.im", name: "Waifu.im (4K)", icon: "✨", desc: "Ultra-HD 4K Waifu & character visuals" },
     { id: "waifu.pics", name: "Waifu.pics", icon: "🌸", desc: "Anime aesthetics, reactions & characters" },
-    { id: "anilist", name: "AniList", icon: "🎬", desc: "Official anime series 4K banners & key art" }
+    { id: "anilist", name: "AniList 4K", icon: "🎬", desc: "Official anime series 4K banners & key art" },
+    { id: "jikan", name: "Jikan (MAL)", icon: "🏆", desc: "MyAnimeList official high-res posters & key visuals" }
   ];
 
   const categories = ["all", "Waifu", "Neko", "Isekai", "Fantasy", "Sci-Fi", "Landscape", "Dark Fantasy"];
@@ -249,7 +250,10 @@ export const WallpaperGallery: React.FC<WallpaperGalleryProps> = ({
     if (p.includes("anilist")) {
       return { label: "AniList 4K", color: "bg-cyan-500/20 text-cyan-300 border-cyan-500/40" };
     }
-    return { label: "Anime 4K", color: "bg-indigo-500/20 text-indigo-300 border-indigo-500/40" };
+    if (p.includes("jikan") || p.includes("mal")) {
+      return { label: "Jikan (MAL)", color: "bg-blue-500/20 text-blue-300 border-blue-500/40" };
+    }
+    return { label: "Live Anime 4K", color: "bg-indigo-500/20 text-indigo-300 border-indigo-500/40" };
   };
 
   const toggleFavorite = async (id: string, e?: React.MouseEvent) => {

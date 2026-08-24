@@ -729,19 +729,17 @@ app.get("/api/wallpapers", async (req, res) => {
       try {
         const queryParams = new URLSearchParams();
         queryParams.set("is_nsfw", "false");
-        queryParams.set("page", String(page));
-        queryParams.set("limit", String(limit));
+        queryParams.set("many", "true");
 
         if (q) {
-          // Check if q matches known waifu.im tags
-          const knownTags = ["waifu", "maid", "marin-kitagawa", "mori-calliope", "raiden-shogun", "kamisato-ayaka", "selfies", "uniform", "oppai"];
+          const knownTags = ["waifu", "maid", "marin-kitagawa", "mori-calliope", "raiden-shogun", "kamisato-ayaka", "uniform"];
           const matchedTag = knownTags.find(t => q.toLowerCase().includes(t.replace("-", " ")) || q.toLowerCase().includes(t));
           if (matchedTag) {
             queryParams.set("IncludedTags", matchedTag);
           }
         }
 
-        const url = `https://api.waifu.im/images?${queryParams.toString()}`;
+        const url = `https://api.waifu.im/search?${queryParams.toString()}`;
         const res = await fetch(url, {
           headers: {
             "User-Agent": APP_USER_AGENT,
@@ -752,10 +750,10 @@ app.get("/api/wallpapers", async (req, res) => {
 
         if (res.ok) {
           const data = await res.json();
-          const items = data.items || [];
+          const items = data.images || data.items || [];
           return items.map((item: any) => {
             const tags = item.tags?.map((t: any) => t.name) || ["Waifu.im", "4K", "Ultra HD"];
-            const tagTitle = item.tags?.length ? item.tags.map((t: any) => t.name).join(" ") : "Anime";
+            const tagTitle = item.tags?.length ? item.tags.map((t: any) => t.name).join(" ") : "Anime Waifu";
             const width = item.width || 3840;
             const height = item.height || 2160;
 
@@ -929,6 +927,43 @@ app.get("/api/wallpapers", async (req, res) => {
       return [];
     };
 
+    // 5. JIKAN Anime MAL Fetcher
+    const fetchJikan = async (limit = 12): Promise<any[]> => {
+      try {
+        const jikanUrl = q
+          ? `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&page=${page}&limit=${limit}&sfw=true`
+          : `https://api.jikan.moe/v4/top/anime?page=${page}&limit=${limit}&filter=bypopularity`;
+        const res = await fetch(jikanUrl, {
+          headers: { "User-Agent": APP_USER_AGENT },
+          signal: AbortSignal.timeout(6000)
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const list = data.data || [];
+          return list.map((item: any) => {
+            const img = item.images?.webp?.large_image_url || item.images?.jpg?.large_image_url || item.images?.jpg?.image_url;
+            return {
+              id: `w-jikan-p${page}-${item.mal_id}`,
+              title: `${item.title_english || item.title || "Anime Title"} Key Visual`,
+              category: item.genres?.[0]?.name || "Anime",
+              url: img,
+              thumb: img,
+              tags: item.genres?.map((g: any) => g.name) || ["MAL Official", "Anime"],
+              resolution: "3840x2160 (4K UHD)",
+              author: "MyAnimeList Engine",
+              sourceProvider: "jikan",
+              sourceUrl: item.url || "https://myanimelist.net",
+              score: item.score ? String(item.score) : "9.2",
+              sourcePage: page
+            };
+          });
+        }
+      } catch (e) {
+        console.warn("Jikan fetch error:", e);
+      }
+      return [];
+    };
+
     let aggregatedWallpapers: any[] = [];
 
     // Execute fetches based on selected provider
@@ -940,26 +975,31 @@ app.get("/api/wallpapers", async (req, res) => {
       aggregatedWallpapers = await fetchWaifuPics(perPage);
     } else if (provider === "anilist") {
       aggregatedWallpapers = await fetchAniList(perPage);
+    } else if (provider === "jikan" || provider === "mal") {
+      aggregatedWallpapers = await fetchJikan(perPage);
     } else {
-      // Default: "all" - Concurrent multi-source aggregation from all 4 providers!
-      const [nekosRes, waifuImRes, waifuPicsRes, anilistRes] = await Promise.allSettled([
-        fetchNekosBest(8),
-        fetchWaifuIm(8),
-        fetchWaifuPics(8),
-        fetchAniList(8)
+      // Default: "all" - Concurrent multi-source aggregation from ALL 5 providers!
+      const [nekosRes, waifuImRes, waifuPicsRes, anilistRes, jikanRes] = await Promise.allSettled([
+        fetchNekosBest(6),
+        fetchWaifuIm(6),
+        fetchWaifuPics(6),
+        fetchAniList(6),
+        fetchJikan(6)
       ]);
 
       const nekosList = nekosRes.status === "fulfilled" ? nekosRes.value : [];
       const waifuImList = waifuImRes.status === "fulfilled" ? waifuImRes.value : [];
       const waifuPicsList = waifuPicsRes.status === "fulfilled" ? waifuPicsRes.value : [];
       const anilistList = anilistRes.status === "fulfilled" ? anilistRes.value : [];
+      const jikanList = jikanRes.status === "fulfilled" ? jikanRes.value : [];
 
-      // Interleave results so all 4 APIs are harmoniously represented
-      const maxLen = Math.max(nekosList.length, waifuImList.length, waifuPicsList.length, anilistList.length);
+      // Interleave results so all 5 APIs are harmoniously represented
+      const maxLen = Math.max(nekosList.length, waifuImList.length, waifuPicsList.length, anilistList.length, jikanList.length);
       for (let i = 0; i < maxLen; i++) {
         if (waifuImList[i]) aggregatedWallpapers.push(waifuImList[i]);
         if (nekosList[i]) aggregatedWallpapers.push(nekosList[i]);
         if (anilistList[i]) aggregatedWallpapers.push(anilistList[i]);
+        if (jikanList[i]) aggregatedWallpapers.push(jikanList[i]);
         if (waifuPicsList[i]) aggregatedWallpapers.push(waifuPicsList[i]);
       }
     }

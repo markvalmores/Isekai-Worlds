@@ -120,15 +120,75 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok", appName: "Isekai Worlds", timestamp: new Date().toISOString() });
 });
 
-// Cloud Sync endpoints for Mobile & PC synchronization
+// Cloud Sync endpoints for Mobile & PC synchronization with Multi-Profile Support
 const cleanSyncKey = (key: string) => {
   return (key || "").trim().toLowerCase().replace(/[^a-z0-9_-]/g, "");
 };
+
+const MASTER_PROFILES_FILE = path.join(DATA_DIR, "master-profiles.json");
+
+const getMasterProfiles = (): { allProfiles: any[]; activeProfileId?: string } => {
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    if (fs.existsSync(MASTER_PROFILES_FILE)) {
+      const content = fs.readFileSync(MASTER_PROFILES_FILE, "utf-8");
+      return JSON.parse(content);
+    }
+  } catch (e) {
+    console.warn("Failed to read master profiles:", e);
+  }
+  return { allProfiles: [] };
+};
+
+const saveMasterProfiles = (profiles: any[], activeId?: string) => {
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    fs.writeFileSync(
+      MASTER_PROFILES_FILE,
+      JSON.stringify({ allProfiles: profiles, activeProfileId: activeId, lastUpdated: new Date().toISOString() }, null, 2),
+      "utf-8"
+    );
+  } catch (e) {
+    console.warn("Failed to save master profiles:", e);
+  }
+};
+
+// GET all existing synchronized profiles across the server
+app.get("/api/sync/all-profiles", (req, res) => {
+  try {
+    const data = getMasterProfiles();
+    res.json({ success: true, allProfiles: data.allProfiles || [], activeProfileId: data.activeProfileId });
+  } catch (error: any) {
+    console.error("Get all profiles error:", error);
+    res.status(500).json({ error: "Failed to get all profiles", details: error.message });
+  }
+});
+
+// POST update/synchronize all profiles
+app.post("/api/sync/all-profiles", (req, res) => {
+  try {
+    const { allProfiles, activeProfileId } = req.body;
+    if (!Array.isArray(allProfiles)) {
+      return res.status(400).json({ error: "allProfiles must be an array" });
+    }
+    saveMasterProfiles(allProfiles, activeProfileId);
+    res.json({ success: true, count: allProfiles.length, message: "All profiles synchronized successfully" });
+  } catch (error: any) {
+    console.error("Save all profiles error:", error);
+    res.status(500).json({ error: "Failed to sync all profiles", details: error.message });
+  }
+});
 
 app.post("/api/sync/save", (req, res) => {
   try {
     const {
       syncKey,
+      allProfiles,
+      activeProfileId,
       profile,
       settings,
       amvPlaylist,
@@ -143,18 +203,32 @@ app.post("/api/sync/save", (req, res) => {
       adminState,
       dailyRewardsState
     } = req.body;
-    const cleanKey = cleanSyncKey(syncKey);
-    if (!cleanKey) {
-      return res.status(400).json({ error: "Invalid syncKey. Use letters, numbers, hyphens or underscores." });
-    }
+    const cleanKey = cleanSyncKey(syncKey) || "isekai-default";
 
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
 
+    // Also update master profiles if provided
+    if (Array.isArray(allProfiles) && allProfiles.length > 0) {
+      saveMasterProfiles(allProfiles, activeProfileId || profile?.id);
+    } else if (profile && profile.id) {
+      const existing = getMasterProfiles();
+      const list = existing.allProfiles || [];
+      const idx = list.findIndex((p: any) => p.id === profile.id);
+      if (idx >= 0) {
+        list[idx] = profile;
+      } else {
+        list.push(profile);
+      }
+      saveMasterProfiles(list, profile.id);
+    }
+
     const syncFile = path.join(DATA_DIR, `sync-${cleanKey}.json`);
     const payload = {
       syncKey: cleanKey,
+      allProfiles: allProfiles || (profile ? [profile] : []),
+      activeProfileId: activeProfileId || profile?.id || null,
       profile: profile || null,
       settings: settings || null,
       amvPlaylist: amvPlaylist || null,
@@ -172,7 +246,7 @@ app.post("/api/sync/save", (req, res) => {
     };
 
     fs.writeFileSync(syncFile, JSON.stringify(payload, null, 2), "utf-8");
-    res.json({ success: true, message: `State synced successfully for '${cleanKey}' to all devices`, lastSynced: payload.lastSynced });
+    res.json({ success: true, message: `All state & profiles hardcode synchronized for '${cleanKey}' everywhere`, lastSynced: payload.lastSynced });
   } catch (error: any) {
     console.error("Cloud sync save error:", error);
     res.status(500).json({ error: "Failed to save cloud sync state", details: error.message });
@@ -182,10 +256,7 @@ app.post("/api/sync/save", (req, res) => {
 app.get("/api/sync/load", (req, res) => {
   try {
     const syncKey = req.query.syncKey as string;
-    const cleanKey = cleanSyncKey(syncKey);
-    if (!cleanKey) {
-      return res.status(400).json({ error: "Invalid syncKey" });
-    }
+    const cleanKey = cleanSyncKey(syncKey) || "isekai-default";
 
     const syncFile = path.join(DATA_DIR, `sync-${cleanKey}.json`);
     if (fs.existsSync(syncFile)) {
@@ -193,6 +264,20 @@ app.get("/api/sync/load", (req, res) => {
       const parsed = JSON.parse(content);
       return res.json({ success: true, data: parsed });
     } else {
+      // Return master profiles if available
+      const master = getMasterProfiles();
+      if (master.allProfiles && master.allProfiles.length > 0) {
+        return res.json({
+          success: true,
+          data: {
+            syncKey: cleanKey,
+            allProfiles: master.allProfiles,
+            activeProfileId: master.activeProfileId,
+            profile: master.allProfiles.find((p: any) => p.id === master.activeProfileId) || master.allProfiles[0],
+            lastSynced: new Date().toISOString()
+          }
+        });
+      }
       return res.status(404).json({ success: false, error: "Sync data not found for this key" });
     }
   } catch (error: any) {

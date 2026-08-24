@@ -33,6 +33,7 @@ import { AdminLoginModal } from "./components/AdminLoginModal";
 import { CommandPaletteModal } from "./components/CommandPaletteModal";
 import { LiveWallpaperModal } from "./components/LiveWallpaperModal";
 import { generateRandomUserProfile } from "./utils/randomProfile";
+import { universalSync } from "./utils/syncManager";
 import { FloatingLanguageWidget } from "./components/FloatingLanguageWidget";
 import { SettingsModal } from "./components/SettingsModal";
 import { DailyMissionsModal } from "./components/DailyMissionsModal";
@@ -156,17 +157,37 @@ export default function App() {
     return () => clearInterval(pingInterval);
   }, [sessionId]);
 
-  // User Profile State
-  const [profile, setProfile] = useState<UserProfile>(() => {
+  // User All Profiles & Active Profile State
+  const [allProfiles, setAllProfiles] = useState<UserProfile[]>(() => {
+    const stored = universalSync.getStoredProfiles();
+    if (stored.allProfiles.length > 0) return stored.allProfiles;
     try {
       const saved = localStorage.getItem("isekai_user_profile");
-      if (saved) return JSON.parse(saved);
-    } catch {
-      // Default
-    }
-    const newRandomProfile = generateRandomUserProfile();
-    localStorage.setItem("isekai_user_profile", JSON.stringify(newRandomProfile));
-    return newRandomProfile;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return [parsed];
+      }
+    } catch {}
+    const newRandom = generateRandomUserProfile();
+    return [newRandom];
+  });
+
+  const [activeProfileId, setActiveProfileId] = useState<string>(() => {
+    const stored = universalSync.getStoredProfiles();
+    if (stored.activeId) return stored.activeId;
+    try {
+      const saved = localStorage.getItem("isekai_user_profile");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.id) return parsed.id;
+      }
+    } catch {}
+    return allProfiles[0]?.id || `user-${Date.now()}`;
+  });
+
+  const [profile, setProfile] = useState<UserProfile>(() => {
+    const found = allProfiles.find((p) => p.id === activeProfileId);
+    return found || allProfiles[0] || generateRandomUserProfile();
   });
 
   // App Settings State
@@ -274,9 +295,9 @@ export default function App() {
   // Cloud Sync state and handlers
   const [syncKey, setSyncKey] = useState<string>(() => {
     try {
-      return localStorage.getItem("isekai_sync_key") || "";
+      return localStorage.getItem("isekai_sync_key") || "isekai-default";
     } catch {
-      return "";
+      return "isekai-default";
     }
   });
 
@@ -288,204 +309,218 @@ export default function App() {
     }
   });
 
+  // Universal Real-time Cloud & Firestore Subscription
+  useEffect(() => {
+    const unsub = universalSync.subscribe((payload) => {
+      if (payload.allProfiles && payload.allProfiles.length > 0) {
+        setAllProfiles(payload.allProfiles);
+        if (payload.activeProfileId) {
+          setActiveProfileId(payload.activeProfileId);
+          const active = payload.allProfiles.find((p) => p.id === payload.activeProfileId) || payload.allProfiles[0];
+          setProfile(active);
+        }
+      }
+      if (payload.settings) {
+        setSettings((prev) => ({ ...prev, ...payload.settings }));
+      }
+      if (typeof payload.activeSeconds === "number") {
+        setActiveSeconds(payload.activeSeconds);
+      }
+      if (payload.lastSynced) {
+        setLastSyncedTime(payload.lastSynced);
+      }
+    });
+
+    return () => unsub();
+  }, []);
+
+  // Initial load from cloud and Firestore on startup
+  useEffect(() => {
+    universalSync.loadFromEverywhere(syncKey).then((res) => {
+      if (res.success && res.data) {
+        if (res.data.allProfiles && res.data.allProfiles.length > 0) {
+          setAllProfiles(res.data.allProfiles);
+          if (res.data.activeProfileId) {
+            setActiveProfileId(res.data.activeProfileId);
+            const active = res.data.allProfiles.find((p) => p.id === res.data.activeProfileId) || res.data.allProfiles[0];
+            setProfile(active);
+          }
+        }
+        if (res.data.settings) {
+          setSettings((prev) => ({ ...prev, ...res.data?.settings }));
+        }
+        if (res.data.lastSynced) {
+          setLastSyncedTime(res.data.lastSynced);
+        }
+      }
+    });
+  }, []);
+
   const handleCloudSave = async (key: string): Promise<{ success: boolean; message: string; lastSynced?: string }> => {
-    const cleanKey = key.trim().toLowerCase().replace(/[^a-z0-9_-]/g, "");
-    if (!cleanKey) {
-      return { success: false, message: "Invalid key format." };
+    const cleanKey = (key || syncKey || "isekai-default").trim().toLowerCase().replace(/[^a-z0-9_-]/g, "");
+    const res = await universalSync.syncEverythingEverywhere({
+      allProfiles,
+      activeProfileId,
+      profile,
+      settings,
+      activeSeconds,
+      syncKey: cleanKey
+    });
+
+    if (res.success) {
+      setSyncKey(cleanKey);
+      setLastSyncedTime(res.lastSynced);
     }
-
-    try {
-      // Read custom AMV playlist from localStorage
-      let amvPlaylist = [];
-      try {
-        const savedPlaylist = localStorage.getItem("isekai_amv_playlist");
-        if (savedPlaylist) amvPlaylist = JSON.parse(savedPlaylist);
-      } catch (e) {
-        console.warn("Failed to read AMV playlist for cloud sync:", e);
-      }
-
-      // Read custom AMV playlist ID
-      const amvPlaylistId = localStorage.getItem("isekai_amv_playlist_id") || "PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu";
-
-      // Read card inventory
-      let inventory = [];
-      try {
-        const savedInv = localStorage.getItem("isekai_card_inventory");
-        if (savedInv) inventory = JSON.parse(savedInv);
-      } catch (e) {}
-
-      // Read game comments
-      let gameComments = null;
-      try {
-        const savedComms = localStorage.getItem("isekai_game_comments");
-        if (savedComms) gameComments = JSON.parse(savedComms);
-      } catch (e) {}
-
-      // Read saved wallpapers, gifs, watch history
-      let savedWallpapers = null;
-      let savedGifs = null;
-      let watchHistory = null;
-      try {
-        const sw = localStorage.getItem("isekai_saved_wallpapers");
-        if (sw) savedWallpapers = JSON.parse(sw);
-        const sg = localStorage.getItem("isekai_saved_gifs");
-        if (sg) savedGifs = JSON.parse(sg);
-        const wh = localStorage.getItem("isekai_watch_history");
-        if (wh) watchHistory = JSON.parse(wh);
-      } catch (e) {}
-
-      const res = await fetch("/api/sync/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          syncKey: cleanKey,
-          profile,
-          settings,
-          amvPlaylist,
-          amvPlaylistId,
-          activeSeconds,
-          inventory,
-          gameComments,
-          savedWallpapers,
-          savedGifs,
-          watchHistory
-        })
-      });
-
-      const data = await res.json();
-      if (res.ok && data.success) {
-        localStorage.setItem("isekai_sync_key", cleanKey);
-        localStorage.setItem("isekai_last_synced", data.lastSynced);
-        setSyncKey(cleanKey);
-        setLastSyncedTime(data.lastSynced);
-        return { success: true, message: data.message, lastSynced: data.lastSynced };
-      } else {
-        return { success: false, message: data.error || "Failed to save state to server." };
-      }
-    } catch (err: any) {
-      console.error("Cloud sync save fetch error:", err);
-      return { success: false, message: err.message || "Network error occurred." };
-    }
+    return res;
   };
 
   const handleCloudLoad = async (key: string): Promise<{ success: boolean; error?: string }> => {
-    const cleanKey = key.trim().toLowerCase().replace(/[^a-z0-9_-]/g, "");
-    if (!cleanKey) {
-      return { success: false, error: "Invalid key format." };
-    }
-
-    try {
-      const res = await fetch(`/api/sync/load?syncKey=${encodeURIComponent(cleanKey)}`);
-      const resJson = await res.json();
-
-      if (res.ok && resJson.success && resJson.data) {
-        const payload = resJson.data;
-
-        // Apply to localStorage & React state
-        if (payload.profile) {
-          localStorage.setItem("isekai_user_profile", JSON.stringify(payload.profile));
-          setProfile(payload.profile);
+    const cleanKey = (key || syncKey || "isekai-default").trim().toLowerCase().replace(/[^a-z0-9_-]/g, "");
+    const res = await universalSync.loadFromEverywhere(cleanKey);
+    if (res.success && res.data) {
+      if (res.data.allProfiles && res.data.allProfiles.length > 0) {
+        setAllProfiles(res.data.allProfiles);
+        if (res.data.activeProfileId) {
+          setActiveProfileId(res.data.activeProfileId);
+          const active = res.data.allProfiles.find((p) => p.id === res.data.activeProfileId) || res.data.allProfiles[0];
+          setProfile(active);
         }
-        if (payload.settings) {
-          localStorage.setItem("isekai_app_settings", JSON.stringify(payload.settings));
-          setSettings(payload.settings);
-        }
-        if (payload.amvPlaylist) {
-          localStorage.setItem("isekai_amv_playlist", JSON.stringify(payload.amvPlaylist));
-        }
-        if (payload.amvPlaylistId) {
-          localStorage.setItem("isekai_amv_playlist_id", payload.amvPlaylistId);
-        }
-        if (payload.inventory) {
-          localStorage.setItem("isekai_card_inventory", JSON.stringify(payload.inventory));
-        }
-        if (payload.gameComments) {
-          localStorage.setItem("isekai_game_comments", JSON.stringify(payload.gameComments));
-        }
-        if (payload.savedWallpapers) {
-          localStorage.setItem("isekai_saved_wallpapers", JSON.stringify(payload.savedWallpapers));
-        }
-        if (payload.savedGifs) {
-          localStorage.setItem("isekai_saved_gifs", JSON.stringify(payload.savedGifs));
-        }
-        if (payload.watchHistory) {
-          localStorage.setItem("isekai_watch_history", JSON.stringify(payload.watchHistory));
-        }
-        if (typeof payload.activeSeconds === "number") {
-          localStorage.setItem("isekai_active_seconds", payload.activeSeconds.toString());
-          setActiveSeconds(payload.activeSeconds);
-        }
-
-        localStorage.setItem("isekai_sync_key", cleanKey);
-        localStorage.setItem("isekai_last_synced", payload.lastSynced || new Date().toISOString());
-        setSyncKey(cleanKey);
-        setLastSyncedTime(payload.lastSynced || new Date().toISOString());
-
-        return { success: true };
-      } else {
-        return { success: false, error: resJson.error || "No sync data found for this key." };
       }
-    } catch (err: any) {
-      console.error("Cloud sync load fetch error:", err);
-      return { success: false, error: err.message || "Network error occurred." };
+      if (res.data.settings) {
+        setSettings((prev) => ({ ...prev, ...res.data?.settings }));
+      }
+      if (res.data.lastSynced) {
+        setLastSyncedTime(res.data.lastSynced);
+      }
+      return { success: true };
     }
+    return { success: false, error: res.error || "Failed to load sync data." };
   };
 
-  // On mount, auto-sync from cloud if a sync key exists
+  // Continuous auto-sync trigger whenever profile, allProfiles, or settings change
   useEffect(() => {
-    const savedSyncKey = localStorage.getItem("isekai_sync_key");
-    if (savedSyncKey) {
-      fetch(`/api/sync/load?syncKey=${encodeURIComponent(savedSyncKey)}`)
-        .then((res) => res.json())
-        .then((resJson) => {
-          if (resJson.success && resJson.data) {
-            const payload = resJson.data;
-            if (payload.profile) {
-              setProfile(payload.profile);
-              localStorage.setItem("isekai_user_profile", JSON.stringify(payload.profile));
-            }
-            if (payload.settings) {
-              setSettings(payload.settings);
-              localStorage.setItem("isekai_app_settings", JSON.stringify(payload.settings));
-            }
-            if (payload.amvPlaylistId) {
-              localStorage.setItem("isekai_amv_playlist_id", payload.amvPlaylistId);
-            }
-            if (typeof payload.activeSeconds === "number") {
-              setActiveSeconds(payload.activeSeconds);
-              localStorage.setItem("isekai_active_seconds", payload.activeSeconds.toString());
-            }
-            if (payload.lastSynced) {
-              setLastSyncedTime(payload.lastSynced);
-              localStorage.setItem("isekai_last_synced", payload.lastSynced);
-            }
-            console.log("Auto-synced successfully from cloud on mount!");
-          }
-        })
-        .catch((err) => console.warn("Auto-sync on mount failed:", err));
-    }
-  }, []);
+    const timer = setTimeout(() => {
+      universalSync.syncEverythingEverywhere({
+        allProfiles,
+        activeProfileId,
+        profile,
+        settings,
+        activeSeconds,
+        syncKey
+      }).then((res) => {
+        if (res.lastSynced) setLastSyncedTime(res.lastSynced);
+      }).catch(() => {});
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [profile, allProfiles, settings]);
 
-  // Whenever profile or settings changes, auto-save to cloud if a sync key is set (debounced)
-  useEffect(() => {
-    if (syncKey) {
-      const timer = setTimeout(() => {
-        handleCloudSave(syncKey);
-      }, 2000); // 2s debounce to avoid excessive writes
-      return () => clearTimeout(timer);
-    }
-  }, [profile, settings]);
-
-  const updateProfile = (updates: Partial<UserProfile>) => {
-    setProfile((prev) => {
-      const updated = { ...prev, ...updates };
-      try {
-        localStorage.setItem("isekai_user_profile", JSON.stringify(updated));
-      } catch {
-        // Ignore
-      }
-      return updated;
+  // Switch Active Profile Persona
+  const switchProfile = (profileId: string) => {
+    const target = allProfiles.find((p) => p.id === profileId);
+    if (!target) return;
+    sfx.playClick();
+    setActiveProfileId(profileId);
+    setProfile(target);
+    universalSync.saveStoredProfiles(allProfiles, profileId);
+    universalSync.syncEverythingEverywhere({
+      allProfiles,
+      activeProfileId: profileId,
+      profile: target,
+      settings,
+      activeSeconds,
+      syncKey
     });
+  };
+
+  // Create New Persona Profile
+  const createNewProfile = (customData?: Partial<UserProfile>) => {
+    sfx.playBadgeUnlock();
+    const newPersona = {
+      ...generateRandomUserProfile(),
+      id: `persona-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      ...(customData || {})
+    };
+    const updatedProfiles = [newPersona, ...allProfiles];
+    setAllProfiles(updatedProfiles);
+    setActiveProfileId(newPersona.id);
+    setProfile(newPersona);
+    universalSync.saveStoredProfiles(updatedProfiles, newPersona.id);
+    universalSync.syncEverythingEverywhere({
+      allProfiles: updatedProfiles,
+      activeProfileId: newPersona.id,
+      profile: newPersona,
+      settings,
+      activeSeconds,
+      syncKey
+    });
+  };
+
+  // Duplicate / Clone Persona Profile
+  const duplicateProfile = (profileId: string) => {
+    const target = allProfiles.find((p) => p.id === profileId);
+    if (!target) return;
+    sfx.playBadgeUnlock();
+    const cloned: UserProfile = {
+      ...target,
+      id: `persona-clone-${Date.now()}`,
+      username: `${target.username} (Alt)`,
+      customStatus: `Cloned Persona of ${target.username}`
+    };
+    const updatedProfiles = [cloned, ...allProfiles];
+    setAllProfiles(updatedProfiles);
+    setActiveProfileId(cloned.id);
+    setProfile(cloned);
+    universalSync.saveStoredProfiles(updatedProfiles, cloned.id);
+    universalSync.syncEverythingEverywhere({
+      allProfiles: updatedProfiles,
+      activeProfileId: cloned.id,
+      profile: cloned,
+      settings,
+      activeSeconds,
+      syncKey
+    });
+  };
+
+  // Delete Persona Profile
+  const deleteProfile = (profileId: string) => {
+    if (allProfiles.length <= 1) {
+      alert("At least one traveler persona must exist!");
+      return;
+    }
+    sfx.playClick();
+    const updatedProfiles = allProfiles.filter((p) => p.id !== profileId);
+    let nextActiveId = activeProfileId;
+    let nextActive = profile;
+    if (activeProfileId === profileId) {
+      nextActiveId = updatedProfiles[0].id;
+      nextActive = updatedProfiles[0];
+    }
+    setAllProfiles(updatedProfiles);
+    setActiveProfileId(nextActiveId);
+    setProfile(nextActive);
+    universalSync.saveStoredProfiles(updatedProfiles, nextActiveId);
+    universalSync.syncEverythingEverywhere({
+      allProfiles: updatedProfiles,
+      activeProfileId: nextActiveId,
+      profile: nextActive,
+      settings,
+      activeSeconds,
+      syncKey
+    });
+  };
+
+  // Update Profile & Sync to allProfiles
+  const updateProfile = (updates: Partial<UserProfile>) => {
+    const updatedActive = { ...profile, ...updates };
+    setProfile(updatedActive);
+    const updatedProfiles = allProfiles.map((p) =>
+      p.id === updatedActive.id ? updatedActive : p
+    );
+    if (!updatedProfiles.some((p) => p.id === updatedActive.id)) {
+      updatedProfiles.unshift(updatedActive);
+    }
+    setAllProfiles(updatedProfiles);
+    universalSync.saveStoredProfiles(updatedProfiles, updatedActive.id);
   };
 
   const updateSettings = (updates: Partial<AppSettings>) => {
@@ -680,10 +715,19 @@ export default function App() {
         {currentPage === "profile" && (
           <ProfileDashboard
             profile={profile}
+            allProfiles={allProfiles}
             updateProfile={updateProfile}
+            switchProfile={switchProfile}
+            createNewProfile={createNewProfile}
+            duplicateProfile={duplicateProfile}
+            deleteProfile={deleteProfile}
             activeSeconds={activeSeconds}
             userRank={userRank}
             openSocialAuthModal={() => setIsSocialAuthOpen(true)}
+            lastSyncedTime={lastSyncedTime}
+            onForceSyncAll={async () => {
+              await handleCloudSave(syncKey);
+            }}
           />
         )}
 

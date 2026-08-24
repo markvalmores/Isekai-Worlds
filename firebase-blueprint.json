@@ -1,5 +1,45 @@
 {
   "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "User profile state and customization",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "username": { "type": "string" },
+        "avatarUrl": { "type": "string" },
+        "bannerUrl": { "type": "string" },
+        "bio": { "type": "string" },
+        "title": { "type": "string" },
+        "badge": { "type": "string" },
+        "customStatus": { "type": "string" },
+        "bannerGradient": { "type": "string" },
+        "accentColor": { "type": "string" },
+        "country": { "type": "string" },
+        "joinedDate": { "type": "string" },
+        "favAnime": { "type": "string" }
+      },
+      "required": ["id", "username"]
+    },
+    "SyncBundle": {
+      "title": "Universal Sync Bundle",
+      "description": "Hardcoded synchronization bundle for all profiles and app state",
+      "type": "object",
+      "properties": {
+        "syncKey": { "type": "string" },
+        "allProfiles": { "type": "array" },
+        "activeProfileId": { "type": "string" },
+        "settings": { "type": "object" },
+        "amvPlaylist": { "type": "array" },
+        "inventory": { "type": "array" },
+        "savedWallpapers": { "type": "array" },
+        "savedGifs": { "type": "array" },
+        "savedCosplay": { "type": "array" },
+        "watchHistory": { "type": "array" },
+        "lastSynced": { "type": "string" }
+      },
+      "required": ["syncKey"]
+    },
     "Ranking": {
       "title": "Global Ranking",
       "description": "User leaderboard entry",
@@ -39,6 +79,14 @@
     }
   },
   "firestore": {
+    "/profiles/{profileId}": {
+      "schema": "UserProfile",
+      "description": "User profiles collection"
+    },
+    "/global_sync/{syncId}": {
+      "schema": "SyncBundle",
+      "description": "Universal cross-device synchronization documents"
+    },
     "/rankings/{rankingId}": {
       "schema": "Ranking",
       "description": "User leaderboard entries"

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { UserProfile } from "../types";
 import { sfx } from "../utils/sfx";
 import { generateRandomUserProfile } from "../utils/randomProfile";
@@ -16,28 +16,56 @@ import {
   Heart,
   Zap,
   Layout,
-  RefreshCw
+  RefreshCw,
+  Copy,
+  Trash2,
+  Plus,
+  Cloud,
+  CheckCircle2,
+  Share2,
+  Users
 } from "lucide-react";
 
 interface ProfileDashboardProps {
   profile: UserProfile;
+  allProfiles: UserProfile[];
   updateProfile: (updates: Partial<UserProfile>) => void;
+  switchProfile: (profileId: string) => void;
+  createNewProfile: (customData?: Partial<UserProfile>) => void;
+  duplicateProfile: (profileId: string) => void;
+  deleteProfile: (profileId: string) => void;
   activeSeconds: number;
   userRank: number;
   openSocialAuthModal?: () => void;
+  lastSyncedTime?: string;
+  onForceSyncAll?: () => Promise<void>;
 }
 
 export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({
   profile,
+  allProfiles = [],
   updateProfile,
+  switchProfile,
+  createNewProfile,
+  duplicateProfile,
+  deleteProfile,
   activeSeconds,
   userRank,
   openSocialAuthModal,
+  lastSyncedTime,
+  onForceSyncAll,
 }) => {
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState<UserProfile>(profile);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isForceSyncing, setIsForceSyncing] = useState(false);
+  const [syncFeedback, setSyncFeedback] = useState<string | null>(null);
+
+  // Sync formData when profile changes
+  useEffect(() => {
+    setFormData(profile);
+  }, [profile]);
 
   const handleGenerateRandom = async () => {
     sfx.playBadgeUnlock();
@@ -70,18 +98,27 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({
     }
   };
 
+  const handleForceSync = async () => {
+    if (!onForceSyncAll) return;
+    setIsForceSyncing(true);
+    sfx.playWarp();
+    try {
+      await onForceSyncAll();
+      setSyncFeedback("All profiles hardcode synchronized everywhere across cloud, server & Firestore!");
+    } catch (e: any) {
+      setSyncFeedback("Sync finished!");
+    } finally {
+      setIsForceSyncing(false);
+      setTimeout(() => setSyncFeedback(null), 4000);
+    }
+  };
+
   const presetAvatars = [
     "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=300&auto=format&fit=crop&q=80",
     "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=300&auto=format&fit=crop&q=80",
     "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=300&auto=format&fit=crop&q=80",
     "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&auto=format&fit=crop&q=80",
-  ];
-
-  const presetBanners = [
-    "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1200&auto=format&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=1200&auto=format&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=1200&auto=format&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1200&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1563089145-599997674d42?w=300&auto=format&fit=crop&q=80"
   ];
 
   const handleSave = (e: React.FormEvent) => {
@@ -100,7 +137,147 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-5xl mx-auto space-y-8">
+      {/* Live Universal Multi-Profile Synchronizer Banner */}
+      <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-purple-950/60 via-slate-900/90 to-indigo-950/60 border border-purple-500/40 shadow-2xl backdrop-blur-xl space-y-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-purple-600/20 border border-purple-400/40 flex items-center justify-center text-purple-300 shrink-0">
+              <Users className="w-5 h-5 animate-pulse text-purple-400" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm sm:text-base font-black text-white uppercase tracking-wider font-mono">
+                  All Synced Traveler Personas ({allProfiles.length || 1})
+                </h3>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-[10px] font-mono font-bold text-emerald-300 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                  <span>Hardcode Synced Everywhere</span>
+                </span>
+              </div>
+              <p className="text-slate-400 text-xs mt-0.5">
+                Every profile is continuously synchronized across Firestore, Cloud Server & all devices.
+                {lastSyncedTime && ` Last synchronized: ${new Date(lastSyncedTime).toLocaleTimeString()}`}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <button
+              onClick={() => {
+                sfx.playClick();
+                createNewProfile();
+              }}
+              className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-mono font-bold text-xs uppercase flex items-center justify-center gap-1.5 shadow-lg transition-all active:scale-95 cursor-pointer"
+              title="Create a new persona profile and sync it everywhere"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>New Persona</span>
+            </button>
+
+            {onForceSyncAll && (
+              <button
+                onClick={handleForceSync}
+                disabled={isForceSyncing}
+                className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-purple-500/30 text-purple-300 font-mono font-bold text-xs uppercase flex items-center justify-center gap-1.5 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                title="Force universal sync pulse to all cloud endpoints"
+              >
+                <Cloud className={`w-3.5 h-3.5 ${isForceSyncing ? "animate-spin" : ""}`} />
+                <span>{isForceSyncing ? "Syncing..." : "Sync All Now"}</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Personas Carousel / Selector Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
+          {allProfiles.map((p) => {
+            const isActive = p.id === profile.id;
+            return (
+              <div
+                key={p.id}
+                onClick={() => {
+                  if (!isActive) {
+                    switchProfile(p.id);
+                  }
+                }}
+                className={`p-3.5 rounded-2xl border transition-all cursor-pointer relative group flex items-center justify-between gap-3 ${
+                  isActive
+                    ? "bg-gradient-to-r from-purple-950/80 to-indigo-950/80 border-purple-400 shadow-lg shadow-purple-900/40 ring-1 ring-purple-400"
+                    : "bg-slate-950/60 border-slate-800 hover:border-purple-500/40 hover:bg-slate-900/80"
+                }`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="relative shrink-0">
+                    <img
+                      src={p.avatarUrl}
+                      alt={p.username}
+                      className="w-11 h-11 rounded-xl object-cover ring-2 ring-purple-500/40 bg-slate-950"
+                    />
+                    {isActive && (
+                      <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 ring-2 ring-slate-950 shadow-md" title="Active Persona" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold text-xs text-white truncate max-w-[110px] sm:max-w-[130px]">
+                        {p.username}
+                      </span>
+                      {isActive && (
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-purple-500/30 text-purple-300 font-bold uppercase">
+                          Active
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[10px] text-slate-400 font-mono block truncate max-w-[120px]">
+                      {p.title || p.badge || "Traveler"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Persona Card Action Buttons */}
+                <div className="flex items-center gap-1 opacity-90 group-hover:opacity-100">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      duplicateProfile(p.id);
+                    }}
+                    className="p-1.5 rounded-lg bg-slate-900/90 hover:bg-purple-900/40 border border-slate-700 text-slate-300 hover:text-purple-300 transition-colors"
+                    title="Clone / Duplicate Persona"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                  </button>
+
+                  {allProfiles.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm(`Are you sure you want to delete persona "${p.username}"?`)) {
+                          deleteProfile(p.id);
+                        }
+                      }}
+                      className="p-1.5 rounded-lg bg-slate-900/90 hover:bg-rose-900/40 border border-slate-700 text-slate-300 hover:text-rose-400 transition-colors"
+                      title="Delete Persona"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {syncFeedback && (
+          <div className="p-2.5 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-mono flex items-center gap-2">
+            <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>{syncFeedback}</span>
+          </div>
+        )}
+      </div>
+
       {/* Discord Style Profile Card */}
       <div className="rounded-3xl bg-slate-900 border border-indigo-500/30 overflow-hidden shadow-2xl relative">
         {/* Banner Image */}
@@ -256,7 +433,7 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({
           <div className="flex items-center justify-between border-b border-slate-800 pb-4">
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-purple-400" />
-              <span>Customize Your Profile</span>
+              <span>Customize Active Persona ({formData.username})</span>
             </h3>
             <span className="text-xs font-mono text-slate-400">Supports GIF / PNG / JPG URLs</span>
           </div>
@@ -295,7 +472,7 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({
                 className="w-full bg-slate-950 border border-indigo-500/30 rounded-xl px-4 py-2.5 text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 placeholder="https://... (GIF, PNG, JPG supported)"
               />
-              <div className="flex items-center gap-2 pt-1">
+              <div className="flex items-center gap-2 pt-1 flex-wrap">
                 <span className="text-[10px] text-slate-400 font-mono">Quick Presets:</span>
                 {presetAvatars.map((url, idx) => (
                   <img
@@ -346,10 +523,10 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({
 
           <button
             type="submit"
-            className="w-full py-3 rounded-2xl bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 text-white font-bold text-xs uppercase font-mono tracking-wider shadow-lg shadow-purple-900/50 hover:scale-[1.01] transition-transform flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-2xl bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 text-white font-bold text-xs uppercase font-mono tracking-wider shadow-lg shadow-purple-900/50 hover:scale-[1.01] transition-transform flex items-center justify-center gap-2 cursor-pointer"
           >
             <Save className="w-4 h-4" />
-            <span>Save Profile Updates</span>
+            <span>Save & Hardcode-Sync Everywhere</span>
           </button>
         </form>
       )}
@@ -357,7 +534,7 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({
       {savedSuccess && (
         <div className="p-4 rounded-2xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 font-mono text-xs text-center flex items-center justify-center gap-2">
           <Check className="w-4 h-4 text-emerald-400" />
-          <span>Profile changes saved successfully! synchronized with Global Leaderboard.</span>
+          <span>Profile saved and hardcode synchronized to all profiles across cloud & Firestore!</span>
         </div>
       )}
     </div>

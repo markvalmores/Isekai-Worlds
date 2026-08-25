@@ -900,7 +900,7 @@ export default function App() {
 
       {/* Floating Cookie Consent Notification */}
       {!settings.cookiesAccepted && (
-        <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 z-40 max-w-md p-4 rounded-2xl bg-slate-900/90 border border-purple-500/40 backdrop-blur-xl shadow-2xl flex items-center justify-between gap-4">
+        <div className="fixed bottom-24 right-4 z-40 max-w-md p-4 rounded-2xl bg-slate-900/90 border border-purple-500/40 backdrop-blur-xl shadow-2xl flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 text-xs">
             <Cookie className="w-5 h-5 text-amber-400 shrink-0" />
             <span className="text-slate-300">

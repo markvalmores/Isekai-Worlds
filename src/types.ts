@@ -213,4 +213,17 @@ export interface CommunityPost {
   isPinned?: boolean;
 }
 
+export interface CosplayItem {
+  id: string;
+  title: string;
+  character: string;
+  artist: string;
+  imageUrl: string;
+  thumbUrl: string;
+  likes: number;
+  series: string;
+  source: string;
+  tags: string[];
+}
+
 

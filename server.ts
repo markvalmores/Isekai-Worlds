@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
+import { fetchLiveAnimeCosplay } from "./src/utils/animeApi";
 
 const app = express();
 const PORT = 3000;
@@ -1367,85 +1368,17 @@ app.get("/api/cosplay", async (req, res) => {
     }
 
     // 2. High Quality Curated Real Cosplay Photography Fallback Engine
-    const fallbackCosplay = [
-      {
-        id: "cos-fallback-1",
-        title: "Micro Bikini & Armor 2B Sword Pose",
-        character: "2B (YoRHa No. 2 Type B)",
-        cosplayer: "@NierCosplayLab",
-        imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1200&auto=format&fit=crop&q=80",
-        thumbUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
-        likes: 4820,
-        series: "NieR:Automata",
-        source: "Isekai Cosplay Vault",
-        tags: ["NieR", "Android", "Cyberpunk", "Katana"]
-      },
-      {
-        id: "cos-fallback-2",
-        title: "Cyberpunk Lucy Neon Alley Shoot",
-        character: "Lucy (Lucyna Kushinada)",
-        cosplayer: "@NightCityVibe",
-        imageUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=1200&auto=format&fit=crop&q=80",
-        thumbUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&auto=format&fit=crop&q=80",
-        likes: 6190,
-        series: "Edgerunners",
-        source: "Isekai Cosplay Vault",
-        tags: ["Cyberpunk", "Netrunner", "Neon", "Anime"]
-      },
-      {
-        id: "cos-fallback-3",
-        title: "Gojo Satoru Limitless Expansion",
-        character: "Gojo Satoru",
-        cosplayer: "@JujutsuSorcerer",
-        imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&auto=format&fit=crop&q=80",
-        thumbUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80",
-        likes: 3940,
-        series: "Jujutsu Kaisen",
-        source: "Isekai Cosplay Vault",
-        tags: ["JJK", "Domain", "Blindfold", "Anime"]
-      },
-      {
-        id: "cos-fallback-4",
-        title: "Rem Maid Uniform Cherry Blossom Studio",
-        character: "Rem",
-        cosplayer: "@SubaruLoverRem",
-        imageUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=1200&auto=format&fit=crop&q=80",
-        thumbUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&auto=format&fit=crop&q=80",
-        likes: 5210,
-        series: "Re:Zero",
-        source: "Isekai Cosplay Vault",
-        tags: ["ReZero", "Maid", "BlueHair", "Waifu"]
-      },
-      {
-        id: "cos-fallback-5",
-        title: "Demon Slayer Nezuko Bamboo Mouthpiece",
-        character: "Nezuko Kamado",
-        cosplayer: "@KimetsuCraft",
-        imageUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=1200&auto=format&fit=crop&q=80",
-        thumbUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&auto=format&fit=crop&q=80",
-        likes: 7430,
-        series: "Demon Slayer",
-        source: "Isekai Cosplay Vault",
-        tags: ["DemonSlayer", "Kimono", "Anime", "Kawaii"]
-      },
-      {
-        id: "cos-fallback-6",
-        title: "Genshin Impact Raiden Shogun Musou No Hitotachi",
-        character: "Raiden Shogun (Ei)",
-        cosplayer: "@InazumaArchon",
-        imageUrl: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=1200&auto=format&fit=crop&q=80",
-        thumbUrl: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400&auto=format&fit=crop&q=80",
-        likes: 8900,
-        series: "Genshin Impact",
-        source: "Isekai Cosplay Vault",
-        tags: ["Genshin", "Electro", "Sword", "Cosplay"]
+    try {
+      const liveCosplays = await fetchLiveAnimeCosplay({ query: q, category: category, page: page, limit: 12 });
+      if (liveCosplays && liveCosplays.length > 0) {
+        cosplayList = [...cosplayList, ...liveCosplays];
       }
-    ];
-
+    } catch (e) {
+      console.warn("Live cosplay fetch error:", e);
+    }
+    
     if (cosplayList.length === 0) {
-      cosplayList = fallbackCosplay;
-    } else {
-      cosplayList = [...cosplayList, ...fallbackCosplay];
+      // No fallback provided
     }
 
     // Force HTTPS
@@ -1617,6 +1550,22 @@ app.get("/api/profile/random", async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: "Failed to generate random profile" });
+  }
+});
+
+app.get("/api/cosplay", async (req, res) => {
+  try {
+    const q = (req.query.q as string) || "";
+    const cat = (req.query.category as string) || "all";
+    const page = parseInt((req.query.page as string) || "1", 10);
+    const limit = 24;
+
+    const cosplays = await fetchLiveAnimeCosplay({ query: q, category: cat, page, limit });
+
+    res.json({ cosplays });
+  } catch (error: any) {
+    console.error("Error in /api/cosplay:", error);
+    res.status(500).json({ error: "Failed to fetch cosplay data", details: error.message });
   }
 });
 

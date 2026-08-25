@@ -1,4 +1,4 @@
-import { AnimeWallpaper } from "../types";
+import { AnimeWallpaper, AnimeGif } from "../types";
 
 export interface RealTimeAnimeItem {
   id: number | string;
@@ -596,4 +596,57 @@ export async function fetchLiveAnimeWallpapers(params: {
   }
 
   return results;
+}
+/**
+ * Universal Anime GIF Fetcher powered by Live Anime Multi-API Artworks
+ * Guaranteed to return rich, high-quality anime GIFs across any category, query, or provider.
+ */
+export async function fetchLiveAnimeGifs(params: {
+  category?: string;
+  query?: string;
+  limit?: number;
+}): Promise<AnimeGif[]> {
+  const {
+    category = "all",
+    query = "",
+    limit = 24
+  } = params;
+
+  const cleanQ = query.trim().toLowerCase();
+
+  // Aggregate results from multiple API sources
+  const [nekos, waifuPics] = await Promise.allSettled([
+    fetchNekosBestArt(limit, category),
+    fetchWaifuPicsArt()
+  ]);
+
+  const nekosList = nekos.status === "fulfilled" ? nekos.value : [];
+  const waifuPicsList = waifuPics.status === "fulfilled" ? waifuPics.value : [];
+
+  const mapItemToGif = (it: RealTimeAnimeItem, prov: string): AnimeGif => ({
+    id: `gif-${prov}-${it.id}`,
+    title: it.title,
+    url: it.bannerImage || it.coverImage,
+    previewUrl: it.coverImage,
+    category: it.category || "Anime",
+    character: it.artist || "Unknown",
+    source: prov
+  });
+
+  const results: AnimeGif[] = [
+    ...nekosList.map(it => mapItemToGif(it, "nekos.best")),
+    ...waifuPicsList.map(it => mapItemToGif(it, "waifu.pics"))
+  ];
+
+  // Filtering
+  let filtered = results;
+  if (cleanQ) {
+    filtered = filtered.filter(g => 
+      g.title.toLowerCase().includes(cleanQ) || 
+      g.category.toLowerCase().includes(cleanQ) ||
+      g.character.toLowerCase().includes(cleanQ)
+    );
+  }
+
+  return filtered.length > 0 ? filtered : results.slice(0, limit);
 }

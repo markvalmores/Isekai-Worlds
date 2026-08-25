@@ -1,5 +1,5 @@
 import { AnimeWallpaper, AnimeGif } from "../types";
-import { fetchLiveAnimeWallpapers } from "./animeApi";
+import { fetchLiveAnimeWallpapers, fetchLiveAnimeGifs } from "./animeApi";
 
 export interface AMVVideo {
   id: string;
@@ -267,12 +267,13 @@ export async function fetchWallpapersApi(
 }
 
 /**
- * Robust GIF query with automatic fallbacks
+ * Robust GIF query powered by Live Anime Multi-API Artworks
  */
 export async function fetchGifsApi(query: string, page: number): Promise<{ gifs: AnimeGif[]; hasMore: boolean }> {
+  // 1. Try server-side aggregation first with short timeout
   try {
     const url = `/api/gifs?q=${encodeURIComponent(query)}&page=${page}`;
-    const response = await fetchWithRetry(url, {}, 2, 800);
+    const response = await fetchWithRetry(url, {}, 1, 500);
     if (response.ok) {
       const data = await response.json();
       if (data.gifs && Array.isArray(data.gifs) && data.gifs.length > 0) {
@@ -280,10 +281,23 @@ export async function fetchGifsApi(query: string, page: number): Promise<{ gifs:
       }
     }
   } catch (err) {
-    console.error("fetchGifsApi failed, using fallback GIFs:", err);
+    // Expected on network blips, fall through to direct live anime APIs
   }
 
-  // Fallback category matching
+  // 2. Direct browser-level live anime GIF engine
+  try {
+    const liveGifs = await fetchLiveAnimeGifs({
+      query,
+      limit: 24
+    });
+    if (liveGifs && liveGifs.length > 0) {
+      return { gifs: liveGifs, hasMore: false };
+    }
+  } catch (err) {
+    console.error("fetchLiveAnimeGifs error:", err);
+  }
+
+  // 3. Fallback category matching
   const q = query.toLowerCase();
   const matched = FALLBACK_GIFS.filter(
     (g) => g.title.toLowerCase().includes(q) || g.category.toLowerCase().includes(q)

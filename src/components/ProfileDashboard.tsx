@@ -64,8 +64,10 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({
 
   // Sync formData when profile changes
   useEffect(() => {
-    setFormData(profile);
-  }, [profile]);
+    if (!editing) {
+      setFormData(profile);
+    }
+  }, [profile, editing]);
 
   const handleGenerateRandom = async () => {
     sfx.playBadgeUnlock();

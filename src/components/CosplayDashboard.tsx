@@ -12,16 +12,18 @@ import {
   deleteDoc,
   serverTimestamp
 } from "firebase/firestore";
-import { CosplayItem } from "../types";
+import { UserProfile, CosplayItem } from "../types";
 import { Cosplay } from "./Cosplay";
 import { LightBox } from "./LightBox";
 
 interface CosplayDashboardProps {
+  profile: UserProfile;
+  updateProfile: (updates: Partial<UserProfile>) => void;
   onAddCoins: (amount: number, reason: string) => void;
   isGoldMode?: boolean;
 }
 
-export function CosplayDashboard({ onAddCoins, isGoldMode = false }: CosplayDashboardProps) {
+export function CosplayDashboard({ profile, updateProfile, onAddCoins, isGoldMode = false }: CosplayDashboardProps) {
   const [cosplayList, setCosplayList] = useState<CosplayItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
@@ -30,43 +32,16 @@ export function CosplayDashboard({ onAddCoins, isGoldMode = false }: CosplayDash
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [selectedCosplay, setSelectedCosplay] = useState<CosplayItem | null>(null);
 
-  // Bookmarked Cosplay items
-  const [savedCosplayIds, setSavedCosplayIds] = useState<string[]>([]);
+  const favoriteCosplayIds = profile.favoriteCosplayIds || [];
   
   // Intersection observer to load more items
   const observerTarget = React.useRef(null);
 
-  // Load active profile from localStorage for Firebase sync fallback
-  const [activeProfile] = useState(() => {
-    try {
-      const saved = localStorage.getItem("isekai_user_profile");
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return {
-      id: "u-anon-" + Math.random().toString(36).substring(2, 8),
-      username: "Isekai Voyager"
-    };
-  });
-
   // Real-time Firestore synchronization for saved cosplays
+  // Sync now handled via profile management
   useEffect(() => {
-    if (!activeProfile?.id) return;
-    const favsRef = collection(db, "saved_cosplay");
-    const qFavs = query(favsRef, where("userId", "==", activeProfile.id));
-
-    const unsubscribe = onSnapshot(qFavs, (snapshot) => {
-      const list: string[] = [];
-      snapshot.forEach((doc) => {
-        const d = doc.data();
-        if (d.cosplayId) list.push(d.cosplayId);
-      });
-      setSavedCosplayIds(list);
-    }, (err) => {
-      console.warn("Firestore saved_cosplay sync error:", err);
-    });
-
-    return () => unsubscribe();
-  }, [activeProfile?.id]);
+    // No-op - Favorites are now managed via profile state
+  }, [profile.id]);
 
   // Liked Cosplay items
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
@@ -131,39 +106,21 @@ export function CosplayDashboard({ onAddCoins, isGoldMode = false }: CosplayDash
     fetchCosplayFeed(searchQuery, activeCategory, 1, false);
   };
 
-  const toggleBookmark = async (item: CosplayItem) => {
+  const toggleBookmark = (item: CosplayItem) => {
     sfx.playClick();
-    if (!activeProfile?.id) return;
-
-    const favoriteDocId = `${activeProfile.id}_${item.id}`;
-    const docRef = doc(db, "saved_cosplay", favoriteDocId);
-
-    const isBookmarked = savedCosplayIds.includes(item.id);
-
-    try {
-      if (isBookmarked) {
-        await deleteDoc(docRef);
-      } else {
-        await setDoc(docRef, {
-          userId: activeProfile.id,
-          username: activeProfile.username || "Voyager",
-          cosplayId: item.id,
-          title: item.title || "Cosplay Shoot",
-          character: item.character || "",
-          artist: item.artist || "",
-          imageUrl: item.imageUrl,
-          thumbUrl: item.thumbUrl || item.imageUrl,
-          series: item.series || "",
-          createdAt: serverTimestamp()
-        });
-        onAddCoins(15, "Bookmarked Cosplay Photo (+15 Coins)");
-      }
-    } catch (err) {
-      console.error("Failed to sync cosplay bookmark with Firestore:", err);
-      setSavedCosplayIds((prev) =>
-        prev.includes(item.id) ? prev.filter((id) => id !== item.id) : [...prev, item.id]
-      );
+    
+    const currentFavorites = profile.favoriteCosplayIds || [];
+    const isBookmarked = currentFavorites.includes(item.id);
+    
+    let updatedFavorites: string[];
+    if (isBookmarked) {
+      updatedFavorites = currentFavorites.filter((id) => id !== item.id);
+    } else {
+      updatedFavorites = [...currentFavorites, item.id];
+      onAddCoins(15, "Bookmarked Cosplay Photo (+15 Coins)");
     }
+    
+    updateProfile({ favoriteCosplayIds: updatedFavorites });
   };
 
   const toggleLike = (id: string) => {
@@ -228,7 +185,7 @@ export function CosplayDashboard({ onAddCoins, isGoldMode = false }: CosplayDash
               { id: "anime", label: "🌸 Anime Series" },
               { id: "gaming", label: "🎮 Gaming & RPG" },
               { id: "vtuber", label: "👑 VTubers & Idols" },
-              { id: "bookmarked", label: `⭐ Saved (${savedCosplayIds.length})` }
+              { id: "bookmarked", label: `⭐ Favorites (${favoriteCosplayIds.length})` }
             ].map((cat) => (
               <button
                 key={cat.id}
@@ -278,9 +235,9 @@ export function CosplayDashboard({ onAddCoins, isGoldMode = false }: CosplayDash
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {cosplayList
-            .filter((item) => activeCategory !== "bookmarked" || savedCosplayIds.includes(item.id))
+            .filter((item) => activeCategory !== "bookmarked" || favoriteCosplayIds.includes(item.id))
             .map((item) => {
-              const isSaved = savedCosplayIds.includes(item.id);
+              const isSaved = favoriteCosplayIds.includes(item.id);
               const isLiked = likedIds.has(item.id);
 
               return (
@@ -354,7 +311,7 @@ export function CosplayDashboard({ onAddCoins, isGoldMode = false }: CosplayDash
                   onClick={() => toggleBookmark(selectedCosplay)}
                   className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2"
                 >
-                  <Bookmark className="w-4 h-4" /> {savedCosplayIds.includes(selectedCosplay.id) ? "Remove from Saved" : "Save to Favorites"}
+                  <Bookmark className="w-4 h-4" /> {favoriteCosplayIds.includes(selectedCosplay.id) ? "Remove from Favorites" : "Save to Favorites"}
                 </button>
               </div>
             </div>

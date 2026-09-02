@@ -36,6 +36,7 @@ export const DICTIONARY: Record<LanguageCode, Record<string, string>> = {
     watch: "Watch Anime",
     radio: "Radio Gaga",
     amv: "Anime MVs",
+    movies: "Movies",
     games: "Play Games",
     roms: "Retro ROMs",
     cards: "Card Games",

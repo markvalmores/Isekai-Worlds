@@ -16,7 +16,8 @@ export type PageView =
   | "games"
   | "roms"
   | "cards"
-  | "vercel";
+  | "vercel"
+  | "cinemax";
 
 export type LanguageCode =
   | "en"
@@ -59,6 +60,7 @@ export interface UserProfile {
   socialAccounts?: SocialAccounts;
   verifiedSocial?: boolean;
   loginMethod?: string;
+  favoriteCosplayIds?: string[];
 }
 
 export interface LeaderboardEntry {

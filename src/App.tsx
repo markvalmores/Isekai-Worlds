@@ -40,6 +40,7 @@ import { DailyMissionsModal } from "./components/DailyMissionsModal";
 import { DonationCreditsModal } from "./components/DonationCreditsModal";
 import { SocialAuthModal } from "./components/SocialAuthModal";
 import { VercelAppsDashboard } from "./components/VercelAppsDashboard";
+import { CineMax } from "./components/CineMax";
 import { Cookie, Check, Sparkles, Tv } from "lucide-react";
 
 export default function App() {
@@ -276,7 +277,8 @@ export default function App() {
       games: "Arcade Games Portal",
       roms: "Retro ROMs Vault",
       cards: "Anime Card Games Arena",
-      vercel: "Vercel APPs & Games"
+      vercel: "Vercel APPs & Games",
+      cinemax: "Movies"
     };
 
     setTargetPageName(names[page] || "Isekai Realm");
@@ -690,6 +692,8 @@ export default function App() {
 
         {currentPage === "cosplay" && (
           <CosplayDashboard
+            profile={profile}
+            updateProfile={updateProfile}
             onAddCoins={handleAddCoins}
             isGoldMode={isGold}
           />
@@ -780,6 +784,10 @@ export default function App() {
             onAddCoins={handleAddCoins}
             isGoldMode={isGold}
           />
+        )}
+
+        {currentPage === "cinemax" && (
+          <CineMax />
         )}
       </main>
 

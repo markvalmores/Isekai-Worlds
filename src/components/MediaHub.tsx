@@ -236,7 +236,7 @@ export const MediaHub: React.FC<MediaHubProps> = ({
             <div className="relative rounded-2xl overflow-hidden aspect-video border border-purple-500/30 shadow-lg">
               <iframe
                 className="w-full h-full border-0"
-                src="https://www.youtube.com/embed/MiKh4DobhTk"
+                src="https://www.youtube.com/embed/videoseries?list=RDCLAK5uy_n5FoHMsgkIT-MtNKJGwiHE0Ei09QH1zW0"
                 title="YouTube music player"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen

@@ -497,6 +497,16 @@ app.get("/api/amv/playlist", async (req, res) => {
                 animeTitle = title.split(" [")[0].trim();
               }
 
+              const isPlayable = renderer.isPlayable !== false;
+              const isDeleted = title.toLowerCase().includes("deleted video") || title.toLowerCase().includes("[deleted video]");
+              const isPrivate = title.toLowerCase().includes("private video") || title.toLowerCase().includes("[private video]");
+              const isUnavailable = !isPlayable || isDeleted || isPrivate;
+              
+              let status: "ready" | "broken" | "deleted" | "private" = "ready";
+              if (isDeleted) status = "deleted";
+              else if (isPrivate) status = "private";
+              else if (!isPlayable) status = "broken";
+
               videos.push({
                 id: videoId,
                 title,
@@ -507,7 +517,9 @@ app.get("/api/amv/playlist", async (req, res) => {
                 type: "curated",
                 duration,
                 views,
-                vibe: "epic"
+                vibe: "epic",
+                isBroken: isUnavailable,
+                status
               });
             }
           } else {

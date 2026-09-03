@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { 
   Play, 
   Pause, 
@@ -35,7 +35,12 @@ import {
   Zap,
   Check,
   X,
-  ShieldAlert
+  ShieldAlert,
+  AlertOctagon,
+  Ban,
+  ExternalLink,
+  Eye,
+  RefreshCcw
 } from "lucide-react";
 import { sfx } from "../utils/sfx";
 import { fetchAmvPlaylistApi, cleanPlaylistId } from "../utils/api";
@@ -47,12 +52,14 @@ interface AMVVideo {
   url: string;
   embedUrl: string;
   thumbnail: string;
-  type: "curated" | "api_promo" | "api_music";
+  type: "curated" | "search" | "ai" | "api_promo" | "api_music" | "local";
   duration?: string;
   views?: string;
   vibe?: "hype" | "epic" | "sad" | "chill" | "all";
   malId?: number;
   verified?: boolean;
+  isBroken?: boolean;
+  status?: string;
 }
 
 const CURATED_AMVS: AMVVideo[] = [
@@ -243,6 +250,7 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
     const saved = localStorage.getItem("isekai_amv_broken_ids");
     return saved ? new Set(JSON.parse(saved)) : new Set();
   });
+  const [playlistStatusFilter, setPlaylistStatusFilter] = useState<"all" | "working" | "broken">("all");
   const [autoSkipBroken, setAutoSkipBroken] = useState<boolean>(() => {
     return localStorage.getItem("isekai_amv_auto_skip") !== "false";
   });
@@ -252,21 +260,33 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
   const [skipNotice, setSkipNotice] = useState<{ title: string; reason: string; nextTitle?: string } | null>(null);
   const [trackSearchQuery, setTrackSearchQuery] = useState("");
 
-  const isFirstRender = useRef(true);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+
+  // Sync to local storage
   useEffect(() => {
-    localStorage.setItem("isekai_amv_playlist_id", playlistId);
-    localStorage.setItem("isekai_amv_player_mode", playerMode);
-    localStorage.setItem("isekai_amv_auto_skip", String(autoSkipBroken));
-    localStorage.setItem("isekai_amv_auto_play_next", String(autoPlayNext));
-    localStorage.setItem("isekai_amv_broken_ids", JSON.stringify(Array.from(brokenVideoIds)));
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
+    try {
+      localStorage.setItem("isekai_amv_playlist_id", playlistId);
+      localStorage.setItem("isekai_amv_player_mode", playerMode);
+      localStorage.setItem("isekai_amv_auto_skip", String(autoSkipBroken));
+      localStorage.setItem("isekai_amv_auto_play_next", String(autoPlayNext));
+      localStorage.setItem("isekai_amv_broken_ids", JSON.stringify(Array.from(brokenVideoIds)));
+    } catch (e) {
+      // Ignore quota error
     }
-    if (onCloudSave && syncKey) {
-      onCloudSave(syncKey);
-    }
-  }, [playlistId, playerMode, autoSkipBroken, autoPlayNext, brokenVideoIds, onCloudSave, syncKey]);
+  }, [playlistId, playerMode, autoSkipBroken, autoPlayNext, brokenVideoIds]);
+
+  // Debounced cloud save to prevent UI freeze
+  const cloudSaveTimer = useRef<any>(null);
+  useEffect(() => {
+    if (!onCloudSave || !syncKey) return;
+    if (cloudSaveTimer.current) clearTimeout(cloudSaveTimer.current);
+    cloudSaveTimer.current = setTimeout(() => {
+      onCloudSave(syncKey).catch(() => {});
+    }, 1200);
+    return () => {
+      if (cloudSaveTimer.current) clearTimeout(cloudSaveTimer.current);
+    };
+  }, [playlistId, playerMode, autoSkipBroken, autoPlayNext, onCloudSave, syncKey]);
 
   // Playlist state
   const [myPlaylist, setMyPlaylist] = useState<AMVVideo[]>(() => {
@@ -337,6 +357,25 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
         if (videos && videos.length > 0) {
           setCuratedVideos(videos as any);
           setSelectedVideo(videos[0] as any);
+
+          // Automatically flag broken, private, or deleted videos from scraper
+          const detectedBroken = videos
+            .filter((v: any) => 
+              v.isBroken || 
+              v.status === "deleted" || 
+              v.status === "private" || 
+              v.status === "broken" ||
+              (v.title && (v.title.toLowerCase().includes("deleted video") || v.title.toLowerCase().includes("private video")))
+            )
+            .map((v: any) => v.id);
+
+          if (detectedBroken.length > 0) {
+            setBrokenVideoIds((prev) => {
+              const next = new Set(prev);
+              detectedBroken.forEach((id) => next.add(id));
+              return next;
+            });
+          }
         }
       } catch (err) {
         console.error("Failed to load live playlist:", err);
@@ -635,8 +674,8 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
     alert(`Copied link to clipboard: ${selectedVideo.title}`);
   };
 
-  // Get active display feed based on Tab selection & Vibe filter
-  const getDisplayFeed = () => {
+  // Get active display feed based on Tab selection & Vibe filter (memoized to eliminate re-render freezing)
+  const displayFeed = useMemo(() => {
     if (activeTab === "curated") {
       if (vibeFilter === "all") return curatedVideos;
       return curatedVideos.filter((item) => item.vibe === vibeFilter);
@@ -645,10 +684,44 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
     if (activeTab === "recent") return recentVideos;
     if (activeTab === "my-playlist") return myPlaylist;
     if (activeTab === "ai-match") return aiMatchedVideos;
-    return [];
-  };
+    return curatedVideos;
+  }, [activeTab, vibeFilter, curatedVideos, popularVideos, recentVideos, myPlaylist, aiMatchedVideos]);
 
-  const displayFeed = getDisplayFeed();
+  const activeTracklist = useMemo(() => {
+    return displayFeed && displayFeed.length > 0 ? displayFeed : curatedVideos;
+  }, [displayFeed, curatedVideos]);
+
+  // Helper to send commands directly to the embedded YouTube iframe
+  const sendIframeCommand = useCallback((func: string, args: any[] = []) => {
+    try {
+      if (iframeRef.current && iframeRef.current.contentWindow) {
+        iframeRef.current.contentWindow.postMessage(
+          JSON.stringify({
+            event: "command",
+            func,
+            args
+          }),
+          "*"
+        );
+      }
+    } catch {
+      // safe ignore
+    }
+  }, []);
+
+  // Synchronized refs to keep event listener lightweight & lag-free
+  const selectedVideoRef = useRef(selectedVideo);
+  selectedVideoRef.current = selectedVideo;
+  const activeListRef = useRef(activeTracklist);
+  activeListRef.current = activeTracklist;
+  const brokenIdsRef = useRef(brokenVideoIds);
+  brokenIdsRef.current = brokenVideoIds;
+  const autoSkipRef = useRef(autoSkipBroken);
+  autoSkipRef.current = autoSkipBroken;
+  const autoPlayNextRef = useRef(autoPlayNext);
+  autoPlayNextRef.current = autoPlayNext;
+  const playerModeRef = useRef(playerMode);
+  playerModeRef.current = playerMode;
 
   // Helper to retry/unflag a broken video
   const retryTrack = (videoId: string) => {
@@ -660,8 +733,22 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
     });
   };
 
+  // Helper to manually toggle broken/unavailable flag on any track
+  const toggleFlagBroken = (videoId: string) => {
+    sfx.playClick();
+    setBrokenVideoIds((prev) => {
+      const nextSet = new Set(prev);
+      if (nextSet.has(videoId)) {
+        nextSet.delete(videoId);
+      } else {
+        nextSet.add(videoId);
+      }
+      return nextSet;
+    });
+  };
+
   // Skip current track manually or automatically
-  const handleAutoSkip = (video: AMVVideo, reason: string) => {
+  const handleAutoSkip = useCallback((video: AMVVideo, reason: string) => {
     if (!video || !video.id) return;
 
     // Mark current video as broken
@@ -671,7 +758,7 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
       return nextSet;
     });
 
-    if (!autoSkipBroken) {
+    if (!autoSkipRef.current) {
       setSkipNotice({
         title: video.title,
         reason: `${reason} (Auto-skip is disabled)`
@@ -679,14 +766,15 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
       return;
     }
 
-    const activeList = displayFeed.length > 0 ? displayFeed : curatedVideos;
+    const activeList = activeListRef.current;
+    if (!activeList || activeList.length === 0) return;
     const currentIndex = activeList.findIndex((v) => v.id === video.id);
-    
+
     // Find next working track in loop
     let nextTrack: AMVVideo | null = null;
     for (let i = 1; i <= activeList.length; i++) {
       const candidate = activeList[(currentIndex + i) % activeList.length];
-      if (candidate && candidate.id !== video.id && !brokenVideoIds.has(candidate.id)) {
+      if (candidate && candidate.id !== video.id && !brokenIdsRef.current.has(candidate.id)) {
         nextTrack = candidate;
         break;
       }
@@ -712,19 +800,26 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
     setTimeout(() => {
       setSkipNotice(null);
     }, 5000);
-  };
+  }, []);
 
-  // Play next track in list
-  const playNextTrack = (manual = false) => {
-    const activeList = displayFeed.length > 0 ? displayFeed : curatedVideos;
-    if (activeList.length === 0) return;
+  // Play next track in list or playlist
+  const playNextTrack = useCallback((manual = false) => {
+    if (playerModeRef.current === "playlist") {
+      sendIframeCommand("nextVideo");
+      sfx.playWarp();
+      return;
+    }
 
-    const currentIndex = activeList.findIndex((v) => v.id === selectedVideo.id);
+    const activeList = activeListRef.current;
+    if (!activeList || activeList.length === 0) return;
+
+    const currentVid = selectedVideoRef.current;
+    const currentIndex = activeList.findIndex((v) => v.id === currentVid?.id);
     let nextTrack: AMVVideo | null = null;
 
     for (let i = 1; i <= activeList.length; i++) {
       const candidate = activeList[(currentIndex + i) % activeList.length];
-      if (candidate && (manual || !autoSkipBroken || !brokenVideoIds.has(candidate.id))) {
+      if (candidate && (manual || !autoSkipRef.current || !brokenIdsRef.current.has(candidate.id))) {
         nextTrack = candidate;
         break;
       }
@@ -733,22 +828,28 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
     if (nextTrack) {
       sfx.playWarp();
       setSelectedVideo(nextTrack);
-      setPlayerMode("video");
     }
-  };
+  }, [sendIframeCommand]);
 
-  // Play previous track in list
-  const playPrevTrack = () => {
-    const activeList = displayFeed.length > 0 ? displayFeed : curatedVideos;
-    if (activeList.length === 0) return;
+  // Play previous track in list or playlist
+  const playPrevTrack = useCallback(() => {
+    if (playerModeRef.current === "playlist") {
+      sendIframeCommand("previousVideo");
+      sfx.playWarp();
+      return;
+    }
 
-    const currentIndex = activeList.findIndex((v) => v.id === selectedVideo.id);
+    const activeList = activeListRef.current;
+    if (!activeList || activeList.length === 0) return;
+
+    const currentVid = selectedVideoRef.current;
+    const currentIndex = activeList.findIndex((v) => v.id === currentVid?.id);
     let prevTrack: AMVVideo | null = null;
 
     for (let i = 1; i <= activeList.length; i++) {
       const prevIndex = (currentIndex - i + activeList.length) % activeList.length;
       const candidate = activeList[prevIndex];
-      if (candidate && (!autoSkipBroken || !brokenVideoIds.has(candidate.id))) {
+      if (candidate && (!autoSkipRef.current || !brokenIdsRef.current.has(candidate.id))) {
         prevTrack = candidate;
         break;
       }
@@ -757,19 +858,36 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
     if (prevTrack) {
       sfx.playWarp();
       setSelectedVideo(prevTrack);
-      setPlayerMode("video");
     }
-  };
+  }, [sendIframeCommand]);
 
   // Manual skip button action
-  const skipCurrentTrack = (reason = "User skipped broken track") => {
-    handleAutoSkip(selectedVideo, reason);
-  };
+  const skipCurrentTrack = useCallback((reason = "User skipped broken track") => {
+    if (playerModeRef.current === "playlist") {
+      sendIframeCommand("nextVideo");
+      setSkipNotice({
+        title: "Playlist Item",
+        reason: "Advanced to next item in YouTube playlist."
+      });
+      setTimeout(() => setSkipNotice(null), 3000);
+      return;
+    }
+    if (selectedVideoRef.current) {
+      handleAutoSkip(selectedVideoRef.current, reason);
+    }
+  }, [handleAutoSkip, sendIframeCommand]);
 
-  // YouTube Iframe PostMessage Listener for Errors and Auto-Next on Ended
+  // Direct track play helper
+  const playTrackDirect = useCallback((video: AMVVideo) => {
+    sfx.playWarp();
+    setSelectedVideo(video);
+    setPlayerMode("video");
+  }, []);
+
+  // YouTube Iframe PostMessage Listener for Errors and Auto-Next on Ended (Optimized & Non-Blocking)
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      // YouTube message verification
+      // YouTube message origin check
       if (
         typeof event.origin === "string" &&
         !event.origin.includes("youtube.com") &&
@@ -781,6 +899,7 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
       try {
         let payload = event.data;
         if (typeof payload === "string") {
+          if (!payload.startsWith("{") && !payload.includes('"event"')) return;
           try {
             payload = JSON.parse(payload);
           } catch {
@@ -809,25 +928,27 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
           else if (errorCode === 2) reason = "Invalid video parameters";
           else if (errorCode === 5) reason = "HTML5 playback error";
 
-          if (playerMode === "video") {
-            handleAutoSkip(selectedVideo, reason);
+          if (playerModeRef.current === "video" && selectedVideoRef.current) {
+            handleAutoSkip(selectedVideoRef.current, reason);
+          } else if (playerModeRef.current === "playlist") {
+            sendIframeCommand("nextVideo");
           }
         }
 
         // Check Video Ended (State 0) -> Auto Advance
         if (payload.event === "onStateChange" && payload.info === 0) {
-          if (autoPlayNext && playerMode === "video") {
+          if (autoPlayNextRef.current && playerModeRef.current === "video") {
             playNextTrack();
           }
         }
-      } catch (err) {
+      } catch {
         // Safe fail
       }
     };
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [selectedVideo, autoSkipBroken, autoPlayNext, displayFeed, brokenVideoIds, playerMode]);
+  }, [handleAutoSkip, playNextTrack, sendIframeCommand]);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-16">
@@ -1064,7 +1185,9 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
             <div className="aspect-video w-full rounded-2xl bg-black overflow-hidden border border-slate-900 relative z-10 shadow-inner">
               {playerMode === "playlist" ? (
                 <iframe
-                  src={`https://www.youtube.com/embed/videoseries?list=${cleanPlaylistId(playlistId)}&enablejsapi=1&wmode=opaque`}
+                  ref={iframeRef}
+                  key={`pl-${cleanPlaylistId(playlistId)}`}
+                  src={`https://www.youtube.com/embed/videoseries?list=${cleanPlaylistId(playlistId)}&enablejsapi=1&autoplay=1&wmode=opaque`}
                   title="YouTube Playlist Embed"
                   className="w-full h-full"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -1072,6 +1195,8 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
                 />
               ) : selectedVideo.id ? (
                 <iframe
+                  ref={iframeRef}
+                  key={`vid-${selectedVideo.id}`}
                   src={`https://www.youtube.com/embed/${selectedVideo.id}?enablejsapi=1&autoplay=1&wmode=opaque`}
                   title={selectedVideo.title}
                   className="w-full h-full"
@@ -1184,189 +1309,320 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
             </div>
           </div>
 
-          {/* Interactive Playlist Tracklist - Pick Which MV to Watch */}
+          {/* Full Scrollable Anime Playlist Catalog - No Thumbnails & Red Broken Highlighting */}
           <div className="p-6 rounded-3xl bg-slate-900/60 border border-indigo-500/15 space-y-4 mt-6 shadow-xl backdrop-blur-xl">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-800">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-rose-600 to-indigo-600 flex items-center justify-center text-white shadow-md">
-                  <ListMusic className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-black text-white uppercase tracking-tight flex items-center gap-2">
-                    Playlist Tracklist <span className="text-[10px] font-mono text-rose-400 font-normal px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/20">PICK MV</span>
-                  </h3>
-                  <p className="text-[11px] text-slate-400">
-                    Click any AMV below to watch instantly • Auto-skips broken / dead videos
-                  </p>
-                </div>
-              </div>
+            {(() => {
+              const activeList = displayFeed.length > 0 ? displayFeed : curatedVideos;
+              
+              const isItemBroken = (v: AMVVideo) => {
+                return (
+                  brokenVideoIds.has(v.id) ||
+                  v.isBroken === true ||
+                  v.status === "deleted" ||
+                  v.status === "private" ||
+                  v.status === "broken" ||
+                  (v.title && (v.title.toLowerCase().includes("deleted video") || v.title.toLowerCase().includes("private video")))
+                );
+              };
 
-              {/* In-Tracklist Filter Input */}
-              <div className="w-full sm:w-64 relative">
-                <input
-                  type="text"
-                  placeholder="Filter playlist tracks..."
-                  value={trackSearchQuery}
-                  onChange={(e) => setTrackSearchQuery(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-rose-500/40 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none font-mono"
-                />
-                {trackSearchQuery && (
-                  <button
-                    onClick={() => setTrackSearchQuery("")}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-            </div>
+              const totalCount = activeList.length;
+              const brokenCount = activeList.filter(isItemBroken).length;
+              const workingCount = totalCount - brokenCount;
 
-            {/* Tracklist Items List */}
-            <div className="space-y-2 max-h-[480px] overflow-y-auto pr-1 no-scrollbar">
-              {(() => {
-                const activeList = displayFeed.length > 0 ? displayFeed : curatedVideos;
-                const filteredTracks = activeList.filter((track) => {
-                  if (!trackSearchQuery) return true;
-                  const q = trackSearchQuery.toLowerCase();
-                  return (
-                    track.title.toLowerCase().includes(q) ||
-                    track.animeTitle.toLowerCase().includes(q) ||
-                    (track.vibe && track.vibe.toLowerCase().includes(q))
-                  );
-                });
+              const filteredTracks = activeList.filter((track) => {
+                const broken = isItemBroken(track);
+                if (playlistStatusFilter === "working" && broken) return false;
+                if (playlistStatusFilter === "broken" && !broken) return false;
 
-                if (filteredTracks.length === 0) {
-                  return (
-                    <div className="py-12 text-center text-slate-500 text-xs font-mono uppercase">
-                      No matching anime music videos found in this queue.
+                if (!trackSearchQuery) return true;
+                const q = trackSearchQuery.toLowerCase();
+                return (
+                  track.title.toLowerCase().includes(q) ||
+                  track.animeTitle.toLowerCase().includes(q) ||
+                  (track.vibe && track.vibe.toLowerCase().includes(q))
+                );
+              });
+
+              return (
+                <>
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-rose-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shrink-0">
+                        <ListMusic className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="text-sm font-black text-white uppercase tracking-tight">
+                            Anime Playlist Catalog
+                          </h3>
+                          <span className="text-[10px] font-mono text-indigo-300 font-semibold px-2 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20">
+                            {totalCount} TRACKS
+                          </span>
+                          {brokenCount > 0 && (
+                            <span className="text-[10px] font-mono text-red-300 font-bold px-2 py-0.5 rounded-md bg-red-500/20 border border-red-500/40 animate-pulse flex items-center gap-1">
+                              <AlertOctagon className="w-3 h-3 text-red-400" />
+                              {brokenCount} BROKEN / GONE
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-slate-400 font-mono">
+                          Playlist: <span className="text-slate-300 font-bold">{cleanPlaylistId(playlistId)}</span> • Broken/Deleted items highlighted in <strong className="text-red-400">RED</strong>
+                        </p>
+                      </div>
                     </div>
-                  );
-                }
 
-                return filteredTracks.map((video, idx) => {
-                  const isCurrent = selectedVideo.id === video.id && playerMode === "video";
-                  const isBroken = brokenVideoIds.has(video.id);
-
-                  return (
-                    <div
-                      key={video.id}
-                      className={`group p-2.5 rounded-2xl border transition-all flex items-center gap-3 relative ${
-                        isCurrent
-                          ? "bg-gradient-to-r from-rose-950/50 via-slate-900 to-indigo-950/50 border-rose-500/50 shadow-lg shadow-rose-950/20"
-                          : isBroken
-                          ? "bg-rose-950/15 border-rose-500/20 opacity-65 hover:opacity-100"
-                          : "bg-slate-950/50 border-slate-800/80 hover:bg-slate-800/40 hover:border-slate-700"
-                      }`}
-                    >
-                      {/* Track Number / Equalizer */}
-                      <div className="w-7 text-center font-mono text-xs font-bold text-slate-500 shrink-0">
-                        {isCurrent ? (
-                          <div className="flex items-end justify-center gap-0.5 h-4">
-                            <span className="w-1 bg-rose-500 h-2 animate-pulse" />
-                            <span className="w-1 bg-rose-400 h-4 animate-pulse delay-75" />
-                            <span className="w-1 bg-indigo-500 h-3 animate-pulse delay-150" />
-                          </div>
-                        ) : (
-                          <span>{(idx + 1).toString().padStart(2, "0")}</span>
-                        )}
+                    {/* Filter & Search Bar */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      {/* Filter Status Tabs */}
+                      <div className="flex items-center bg-slate-950 border border-slate-800 rounded-xl p-0.5">
+                        <button
+                          onClick={() => { sfx.playClick(); setPlaylistStatusFilter("all"); }}
+                          className={`px-2.5 py-1 rounded-lg text-[10px] font-mono uppercase font-bold transition-all ${
+                            playlistStatusFilter === "all"
+                              ? "bg-slate-800 text-white shadow"
+                              : "text-slate-400 hover:text-white"
+                          }`}
+                        >
+                          All ({totalCount})
+                        </button>
+                        <button
+                          onClick={() => { sfx.playClick(); setPlaylistStatusFilter("working"); }}
+                          className={`px-2.5 py-1 rounded-lg text-[10px] font-mono uppercase font-bold transition-all ${
+                            playlistStatusFilter === "working"
+                              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                              : "text-slate-400 hover:text-white"
+                          }`}
+                        >
+                          Ready ({workingCount})
+                        </button>
+                        <button
+                          onClick={() => { sfx.playClick(); setPlaylistStatusFilter("broken"); }}
+                          className={`px-2.5 py-1 rounded-lg text-[10px] font-mono uppercase font-bold transition-all flex items-center gap-1 ${
+                            playlistStatusFilter === "broken"
+                              ? "bg-red-500/30 text-red-200 border border-red-500/50 font-black shadow"
+                              : "text-red-400 hover:text-red-300"
+                          }`}
+                        >
+                          <AlertTriangle className="w-3 h-3" />
+                          Broken ({brokenCount})
+                        </button>
                       </div>
 
-                      {/* Video Thumbnail */}
+                      {/* Search Filter Box */}
+                      <div className="w-full sm:w-56 relative">
+                        <input
+                          type="text"
+                          placeholder="Filter tracks or anime..."
+                          value={trackSearchQuery}
+                          onChange={(e) => setTrackSearchQuery(e.target.value)}
+                          className="w-full bg-slate-950 border border-slate-800 focus:border-rose-500/50 rounded-xl pl-3 pr-7 py-1 text-xs text-white placeholder-slate-600 focus:outline-none font-mono"
+                        />
+                        {trackSearchQuery ? (
+                          <button
+                            onClick={() => setTrackSearchQuery("")}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        ) : null}
+                      </div>
+
                       <button
                         onClick={() => {
                           sfx.playWarp();
-                          setSelectedVideo(video);
-                          setPlayerMode("video");
+                          const cleaned = cleanPlaylistId(playlistId);
+                          fetchAmvPlaylistApi(cleaned).then((videos) => {
+                            if (videos && videos.length > 0) {
+                              setCuratedVideos(videos);
+                              const detected = videos.filter(isItemBroken).map(v => v.id);
+                              if (detected.length > 0) {
+                                setBrokenVideoIds(prev => {
+                                  const next = new Set(prev);
+                                  detected.forEach(id => next.add(id));
+                                  return next;
+                                });
+                              }
+                            }
+                          });
                         }}
-                        className="w-20 h-12 rounded-xl overflow-hidden bg-slate-900 relative flex-shrink-0 border border-slate-800 block text-left"
+                        className="p-1.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white transition-all"
+                        title="Re-sync and reload playlist"
                       >
-                        <img
-                          src={video.thumbnail}
-                          alt=""
-                          referrerPolicy="no-referrer"
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                        <div className="absolute inset-0 bg-slate-950/30 group-hover:bg-slate-950/10 flex items-center justify-center transition-colors">
-                          <Play className={`w-4 h-4 fill-current ${isCurrent ? "text-rose-400" : "text-white opacity-80"}`} />
-                        </div>
+                        <RefreshCcw className={`w-3.5 h-3.5 ${isPlaylistLoading ? "animate-spin text-rose-400" : ""}`} />
                       </button>
-
-                      {/* Video Details */}
-                      <div 
-                        onClick={() => {
-                          sfx.playWarp();
-                          setSelectedVideo(video);
-                          setPlayerMode("video");
-                        }}
-                        className="min-w-0 flex-1 space-y-0.5 cursor-pointer"
-                      >
-                        <div className="flex items-center gap-2">
-                          <h4 className={`text-xs font-black truncate uppercase tracking-tight transition-colors ${
-                            isCurrent ? "text-rose-300 font-extrabold" : "text-white group-hover:text-rose-200"
-                          }`}>
-                            {video.title}
-                          </h4>
-                        </div>
-                        <p className="text-[10px] text-indigo-400 truncate">
-                          {video.animeTitle}
-                        </p>
-                        <div className="flex items-center gap-1.5 pt-0.5">
-                          {video.vibe && (
-                            <span className="text-[8px] font-mono text-slate-400 bg-slate-900 px-1.5 py-0.5 rounded uppercase border border-slate-800">
-                              {video.vibe}
-                            </span>
-                          )}
-
-                          {isCurrent ? (
-                            <span className="inline-flex items-center gap-1 text-[8px] font-mono text-rose-300 bg-rose-500/20 border border-rose-500/30 px-1.5 py-0.5 rounded font-bold uppercase">
-                              ▶ Playing
-                            </span>
-                          ) : isBroken ? (
-                            <span className="inline-flex items-center gap-1 text-[8px] font-mono text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded font-bold uppercase">
-                              ⚠️ Skipped / Error
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-0.5 text-[8px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded font-bold uppercase">
-                              <CheckCircle2 className="w-2.5 h-2.5" /> Ready
-                            </span>
-                          )}
-
-                          {video.duration && (
-                            <span className="text-[8px] font-mono text-slate-500 ml-auto">
-                              {video.duration}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex items-center gap-1 shrink-0">
-                        {isBroken && (
-                          <button
-                            onClick={() => retryTrack(video.id)}
-                            className="px-2 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-[9px] font-mono font-bold text-amber-300 uppercase transition-all"
-                            title="Un-flag and retry this video"
-                          >
-                            Retry
-                          </button>
-                        )}
-                        <button
-                          onClick={() => togglePlaylist(video)}
-                          className={`p-2 rounded-xl transition-all ${
-                            myPlaylist.some((item) => item.id === video.id)
-                              ? "text-rose-400 bg-rose-500/10 hover:bg-rose-500/20"
-                              : "text-slate-500 hover:text-slate-300 hover:bg-slate-900"
-                          }`}
-                          title="Bookmark to My Playlist"
-                        >
-                          <Heart className={`w-3.5 h-3.5 ${myPlaylist.some((item) => item.id === video.id) ? "fill-rose-500" : ""}`} />
-                        </button>
-                      </div>
                     </div>
-                  );
-                });
-              })()}
-            </div>
+                  </div>
+
+                  {/* Scrollable List of Anime Playlist Tracks (No Thumbnails) */}
+                  <div className="space-y-1.5 max-h-[580px] overflow-y-auto pr-1 no-scrollbar">
+                    {filteredTracks.length === 0 ? (
+                      <div className="py-12 text-center text-slate-500 text-xs font-mono uppercase bg-slate-950/40 rounded-2xl border border-slate-900">
+                        No anime tracks matched the current filter ({playlistStatusFilter}).
+                      </div>
+                    ) : (
+                      filteredTracks.map((video, idx) => {
+                        const isCurrent = selectedVideo.id === video.id && playerMode === "video";
+                        const isBroken = isItemBroken(video);
+
+                        return (
+                          <div
+                            key={video.id}
+                            className={`group px-3.5 py-2.5 rounded-2xl border transition-all flex items-center gap-3 relative ${
+                              isBroken
+                                ? "bg-red-950/40 border-red-500/70 text-red-200 shadow-md shadow-red-950/30"
+                                : isCurrent
+                                ? "bg-gradient-to-r from-rose-950/50 via-slate-900 to-indigo-950/50 border-rose-500/50 shadow-lg shadow-rose-950/20"
+                                : "bg-slate-950/60 border-slate-800/80 hover:bg-slate-800/50 hover:border-slate-700 text-slate-300"
+                            }`}
+                          >
+                            {/* Track Number / Equalizer or Warning Icon */}
+                            <div className="w-8 text-center font-mono text-xs font-bold shrink-0 flex items-center justify-center">
+                              {isBroken ? (
+                                <AlertOctagon className="w-4 h-4 text-red-400 animate-pulse" />
+                              ) : isCurrent ? (
+                                <div className="flex items-end justify-center gap-0.5 h-4">
+                                  <span className="w-1 bg-rose-500 h-2 animate-pulse" />
+                                  <span className="w-1 bg-rose-400 h-4 animate-pulse delay-75" />
+                                  <span className="w-1 bg-indigo-500 h-3 animate-pulse delay-150" />
+                                </div>
+                              ) : (
+                                <span className="text-slate-500 group-hover:text-slate-300 transition-colors">
+                                  {(idx + 1).toString().padStart(2, "0")}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Play Button Trigger */}
+                            <button
+                              onClick={() => {
+                                sfx.playWarp();
+                                setSelectedVideo(video);
+                                setPlayerMode("video");
+                              }}
+                              className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-all ${
+                                isBroken
+                                  ? "bg-red-900/40 text-red-300 border border-red-500/40 hover:bg-red-800/50"
+                                  : isCurrent
+                                  ? "bg-rose-600 text-white shadow-md shadow-rose-950/50"
+                                  : "bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800"
+                              }`}
+                              title={isBroken ? "Play broken/deleted video anyway" : "Play AMV track"}
+                            >
+                              <Play className={`w-3.5 h-3.5 fill-current ${isCurrent ? "text-white" : ""}`} />
+                            </button>
+
+                            {/* Track Meta Details (No Thumbnail) */}
+                            <div
+                              onClick={() => {
+                                sfx.playWarp();
+                                setSelectedVideo(video);
+                                setPlayerMode("video");
+                              }}
+                              className="min-w-0 flex-1 space-y-1 cursor-pointer"
+                            >
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <h4
+                                  className={`text-xs font-bold uppercase tracking-tight truncate max-w-full ${
+                                    isBroken
+                                      ? "text-red-200 font-extrabold line-through decoration-red-500/60"
+                                      : isCurrent
+                                      ? "text-rose-300 font-extrabold"
+                                      : "text-white group-hover:text-rose-200"
+                                  }`}
+                                >
+                                  {video.title}
+                                </h4>
+
+                                {isBroken ? (
+                                  <span className="inline-flex items-center gap-1 text-[9px] font-mono font-black text-red-300 bg-red-600/30 border border-red-500/60 px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
+                                    <AlertOctagon className="w-2.5 h-2.5 text-red-400" />
+                                    DELETED / BROKEN / GONE
+                                  </span>
+                                ) : isCurrent ? (
+                                  <span className="inline-flex items-center gap-1 text-[8px] font-mono text-rose-300 bg-rose-500/20 border border-rose-500/30 px-1.5 py-0.5 rounded font-bold uppercase">
+                                    ▶ Playing
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-0.5 text-[8px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded font-bold uppercase">
+                                    <CheckCircle2 className="w-2.5 h-2.5" /> Ready
+                                  </span>
+                                )}
+                              </div>
+
+                              <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                                <span className="text-indigo-400 font-medium truncate">
+                                  {video.animeTitle}
+                                </span>
+                                {video.vibe && (
+                                  <span className="text-[8px] font-mono text-slate-400 bg-slate-900 px-1.5 py-0.2 rounded uppercase border border-slate-800">
+                                    {video.vibe}
+                                  </span>
+                                )}
+                                {video.duration && (
+                                  <span className="text-[9px] font-mono text-slate-500 ml-auto flex items-center gap-1">
+                                    <Clock className="w-2.5 h-2.5" /> {video.duration}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              {/* Toggle/Unflag Broken Button */}
+                              <button
+                                onClick={() => toggleFlagBroken(video.id)}
+                                className={`px-2 py-1 rounded-xl text-[9px] font-mono font-bold uppercase transition-all flex items-center gap-1 border ${
+                                  isBroken
+                                    ? "bg-red-900/40 hover:bg-red-850 text-red-200 border-red-500/40"
+                                    : "bg-slate-900 text-slate-400 hover:text-red-400 border-slate-800 hover:border-red-500/30"
+                                }`}
+                                title={isBroken ? "Unflag as broken (Mark ready)" : "Flag as broken/deleted"}
+                              >
+                                {isBroken ? (
+                                  <>
+                                    <Check className="w-3 h-3 text-emerald-400" />
+                                    <span>Unflag</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <AlertTriangle className="w-3 h-3 text-slate-500 group-hover:text-red-400" />
+                                    <span>Flag Red</span>
+                                  </>
+                                )}
+                              </button>
+
+                              {/* External Link to YouTube to test directly */}
+                              <a
+                                href={video.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="p-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white transition-colors"
+                                title="Open on YouTube in new tab"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                              </a>
+
+                              {/* Bookmark Button */}
+                              <button
+                                onClick={() => togglePlaylist(video)}
+                                className={`p-1.5 rounded-xl transition-all ${
+                                  myPlaylist.some((item) => item.id === video.id)
+                                    ? "text-rose-400 bg-rose-500/10 hover:bg-rose-500/20"
+                                    : "text-slate-500 hover:text-slate-300 hover:bg-slate-900"
+                                }`}
+                                title="Bookmark to My Playlist"
+                              >
+                                <Heart className={`w-3.5 h-3.5 ${myPlaylist.some((item) => item.id === video.id) ? "fill-rose-500" : ""}`} />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </>
+              );
+            })()}
           </div>
 
           {/* Interactive scratchpad for user lyrics and comments */}
@@ -1670,6 +1926,14 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
                   // Regular tab display feed (curated / popular / recent / favorites / ai-match)
                   displayFeed.map((video) => {
                     const isCurrent = selectedVideo.id === video.id;
+                    const isBroken = 
+                      brokenVideoIds.has(video.id) ||
+                      video.isBroken === true ||
+                      video.status === "deleted" ||
+                      video.status === "private" ||
+                      video.status === "broken" ||
+                      (video.title && (video.title.toLowerCase().includes("deleted video") || video.title.toLowerCase().includes("private video")));
+
                     return (
                       <button
                         key={video.id}
@@ -1679,12 +1943,14 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
                           setPlayerMode("video");
                         }}
                         className={`w-full text-left p-2.5 rounded-2xl border transition-all flex items-start gap-3 group ${
-                          isCurrent && playerMode === "video"
+                          isBroken
+                            ? "bg-red-950/40 border-red-500/60 text-red-200"
+                            : isCurrent && playerMode === "video"
                             ? "bg-gradient-to-r from-rose-950/40 to-indigo-950/40 border-rose-500/40 shadow-lg"
                             : "bg-slate-950/40 border-slate-800 hover:bg-slate-800/40 hover:border-slate-700"
                         }`}
                       >
-                        <div className="w-20 h-12 rounded-xl overflow-hidden bg-slate-900 relative flex-shrink-0 border border-slate-800">
+                        <div className="w-16 h-11 rounded-xl overflow-hidden bg-slate-900 relative flex-shrink-0 border border-slate-800">
                           <img
                             src={video.thumbnail}
                             alt=""
@@ -1692,24 +1958,36 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                           <div className="absolute inset-0 bg-slate-950/35 flex items-center justify-center">
-                            <Play className="w-4.5 h-4.5 text-white fill-current opacity-80" />
+                            {isBroken ? (
+                              <AlertOctagon className="w-4 h-4 text-red-400" />
+                            ) : (
+                              <Play className="w-4 h-4 text-white fill-current opacity-80" />
+                            )}
                           </div>
                         </div>
 
                         <div className="min-w-0 flex-1 space-y-0.5">
-                          <h4 className="text-xs font-black text-white truncate uppercase tracking-tight group-hover:text-rose-300 transition-colors">
+                          <h4 className={`text-xs font-black truncate uppercase tracking-tight transition-colors ${
+                            isBroken ? "text-red-200 line-through decoration-red-500/60" : "text-white group-hover:text-rose-300"
+                          }`}>
                             {video.title}
                           </h4>
                           <p className="text-[10px] text-indigo-400 truncate">
                             {video.animeTitle}
                           </p>
-                          <div className="flex items-center gap-1.5">
-                            {video.vibe && (
-                              <span className="text-[8px] font-mono text-slate-500 bg-slate-900 px-1 py-0.5 rounded uppercase">
-                                {video.vibe}
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            {isBroken ? (
+                              <span className="inline-flex items-center gap-0.5 text-[8px] font-mono text-red-300 bg-red-500/20 border border-red-500/30 px-1.5 py-0.2 rounded font-bold uppercase">
+                                ⚠️ Broken / Gone
                               </span>
+                            ) : (
+                              video.vibe && (
+                                <span className="text-[8px] font-mono text-slate-500 bg-slate-900 px-1 py-0.5 rounded uppercase">
+                                  {video.vibe}
+                                </span>
+                              )
                             )}
-                            {video.verified && (
+                            {video.verified && !isBroken && (
                               <span className="inline-flex items-center gap-0.5 text-[8px] font-mono text-emerald-400 bg-emerald-500/10 px-1 py-0.5 rounded font-bold uppercase">
                                 <CheckCircle2 className="w-2.5 h-2.5" /> Verified
                               </span>

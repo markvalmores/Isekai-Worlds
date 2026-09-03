@@ -169,6 +169,34 @@ class SoundManager {
     }
   }
 
+  // Warning tone
+  public playWarning() {
+    if (!this.enabled) return;
+    try {
+      this.initCtx();
+      if (!this.ctx) return;
+
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(400, now);
+      osc.frequency.linearRampToValueAtTime(300, now + 0.12);
+
+      gain.gain.setValueAtTime(this.volume * 0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.12);
+    } catch {
+      // Ignore
+    }
+  }
+
   // Error buzzer sound
   public playError() {
     if (!this.enabled) return;

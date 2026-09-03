@@ -12,6 +12,8 @@ export interface AMVVideo {
   duration?: string;
   views?: string;
   vibe?: "hype" | "epic" | "sad" | "chill" | "all";
+  isBroken?: boolean;
+  status?: string;
 }
 
 // Global high-reliability fallback wallpapers

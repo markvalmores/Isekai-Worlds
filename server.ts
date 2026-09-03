@@ -440,7 +440,23 @@ app.post("/api/amv/check-videos", async (req, res) => {
 // 2d. Dynamic YouTube Playlist Scraper/Loader Endpoint
 app.get("/api/amv/playlist", async (req, res) => {
   try {
-    const playlistId = (req.query.playlistId as string) || "PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu";
+    let rawPlaylistId = (req.query.playlistId as string) || "PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu";
+    rawPlaylistId = rawPlaylistId.trim();
+    if (rawPlaylistId.includes("youtube.com") || rawPlaylistId.includes("youtu.be")) {
+      try {
+        const urlObj = new URL(rawPlaylistId);
+        const listParam = urlObj.searchParams.get("list");
+        if (listParam) rawPlaylistId = listParam;
+      } catch {}
+    }
+    if (rawPlaylistId.includes("list=")) {
+      const parts = rawPlaylistId.split("list=");
+      if (parts[1]) rawPlaylistId = parts[1];
+    }
+    if (rawPlaylistId.includes("&")) rawPlaylistId = rawPlaylistId.split("&")[0];
+    if (rawPlaylistId.includes("?")) rawPlaylistId = rawPlaylistId.split("?")[0];
+    const playlistId = rawPlaylistId || "PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu";
+
     const url = `https://www.youtube.com/playlist?list=${encodeURIComponent(playlistId)}`;
     
     const fetchRes = await fetch(url, {

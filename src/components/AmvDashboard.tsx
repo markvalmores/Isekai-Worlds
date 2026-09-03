@@ -212,6 +212,11 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // Player mode state: playlist embed vs single video embed
+  const [playerMode, setPlayerMode] = useState<"playlist" | "video">(() => {
+    return (localStorage.getItem("isekai_amv_player_mode") as "playlist" | "video") || "playlist";
+  });
+
   // AI-Powered search states
   const [aiSearchQuery, setAiSearchQuery] = useState("");
   const [aiRecommendations, setAiRecommendations] = useState<any[]>([]);
@@ -228,6 +233,7 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
   const isFirstRender = useRef(true);
   useEffect(() => {
     localStorage.setItem("isekai_amv_playlist_id", playlistId);
+    localStorage.setItem("isekai_amv_player_mode", playerMode);
     if (isFirstRender.current) {
       isFirstRender.current = false;
       return;
@@ -235,7 +241,7 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
     if (onCloudSave && syncKey) {
       onCloudSave(syncKey);
     }
-  }, [playlistId, onCloudSave, syncKey]);
+  }, [playlistId, playerMode, onCloudSave, syncKey]);
 
   // Playlist state
   const [myPlaylist, setMyPlaylist] = useState<AMVVideo[]>(() => {
@@ -672,42 +678,63 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
       </div>
 
       {/* Dynamic Playlist Customizer Bar */}
-      {activeTab === "curated" && (
-        <div className="p-4 rounded-3xl bg-slate-900/60 border border-indigo-500/10 flex flex-col sm:flex-row items-center justify-between gap-4 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-400">
-              <Sparkles className="w-4 h-4 animate-pulse" />
-            </div>
-            <div className="text-left">
-              <span className="text-[9px] font-mono text-slate-450 uppercase block tracking-wider">Active YouTube AMV Playlist:</span>
-              <span className="text-xs text-white font-bold font-mono">
-                {playlistId === "PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu" ? "Default Curated AMV Playlist" : `Custom Playlist (${playlistId})`}
-              </span>
-            </div>
+      <div className="p-4 rounded-3xl bg-slate-900/60 border border-indigo-500/10 flex flex-col sm:flex-row items-center justify-between gap-4 backdrop-blur-xl shadow-xl">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-400">
+            <Sparkles className="w-4 h-4 animate-pulse" />
           </div>
-
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <input
-              type="text"
-              placeholder="Paste custom Playlist ID (e.g., PLjNlQ2...)"
-              value={playlistId}
-              onChange={(e) => setPlaylistId(e.target.value)}
-              className="w-full sm:w-64 bg-slate-950 border border-slate-800 focus:border-rose-500/50 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none font-mono transition-all"
-            />
-            <button
-              onClick={() => {
-                sfx.playWarp();
-                setPlaylistId("PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu");
-              }}
-              disabled={playlistId === "PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu"}
-              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-300 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1 shrink-0"
-              title="Reset to default playlist"
-            >
-              Reset
-            </button>
+          <div className="text-left">
+            <span className="text-[9px] font-mono text-slate-400 uppercase block tracking-wider">
+              {playerMode === "playlist" ? "Active Embedded Playlist:" : "Active Playlist Reference:"}
+            </span>
+            <span className="text-xs text-white font-bold font-mono">
+              {cleanPlaylistId(playlistId) === "PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu" 
+                ? "Curated High-Octane Anime Playlist (PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu)" 
+                : `Custom Playlist (${cleanPlaylistId(playlistId)})`}
+            </span>
           </div>
         </div>
-      )}
+
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <input
+            type="text"
+            placeholder="Paste Playlist URL or ID (e.g., https://youtube.com/playlist?list=...)"
+            value={playlistId}
+            onChange={(e) => {
+              const cleaned = cleanPlaylistId(e.target.value);
+              setPlaylistId(cleaned);
+            }}
+            className="w-full sm:w-64 bg-slate-950 border border-slate-800 focus:border-rose-500/50 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none font-mono transition-all"
+          />
+          <button
+            onClick={() => {
+              sfx.playWarp();
+              setPlayerMode("playlist");
+            }}
+            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold uppercase transition-all flex items-center gap-1.5 shrink-0 ${
+              playerMode === "playlist"
+                ? "bg-rose-600 text-white shadow-md shadow-rose-950/40"
+                : "bg-slate-800 hover:bg-slate-700 text-slate-200"
+            }`}
+            title="Embed and play this playlist directly"
+          >
+            <Tv2 className="w-3.5 h-3.5" />
+            <span>Embed Playlist</span>
+          </button>
+          <button
+            onClick={() => {
+              sfx.playWarp();
+              setPlaylistId("PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu");
+              setPlayerMode("playlist");
+            }}
+            disabled={cleanPlaylistId(playlistId) === "PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu"}
+            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-300 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1 shrink-0"
+            title="Reset to default playlist"
+          >
+            Reset
+          </button>
+        </div>
+      </div>
 
       {/* Main Grid: Player on left/top, query directories & search results on right */}
       <div className={`grid grid-cols-1 ${theaterMode ? "lg:grid-cols-1" : "lg:grid-cols-3"} gap-6 transition-all duration-300`}>
@@ -726,22 +753,59 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
               />
             )}
 
-            {/* Video Header Stats */}
+            {/* Video / Playlist Header Stats & Mode Selector */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10">
               <div className="space-y-0.5">
                 <span className="text-[10px] font-mono text-rose-400 font-bold uppercase tracking-widest block">
-                  NOW REPRODUCING IN HIGH RESOLUTION
+                  {playerMode === "playlist" ? "EMBEDDED YOUTUBE PLAYLIST STREAM" : "NOW REPRODUCING IN HIGH RESOLUTION"}
                 </span>
                 <h2 className="text-lg font-black text-white uppercase tracking-tight line-clamp-1">
-                  {selectedVideo.title}
+                  {playerMode === "playlist" 
+                    ? `Active Playlist: ${cleanPlaylistId(playlistId)}`
+                    : selectedVideo.title}
                 </h2>
                 <p className="text-xs text-slate-400">
-                  Origin: <strong className="text-indigo-400">{selectedVideo.animeTitle}</strong>
+                  {playerMode === "playlist" ? (
+                    <span>
+                      Mode: <strong className="text-emerald-400">Continuous Full Playlist Embed</strong> • Works universally across all instances & servers
+                    </span>
+                  ) : (
+                    <span>
+                      Origin: <strong className="text-indigo-400">{selectedVideo.animeTitle}</strong>
+                    </span>
+                  )}
                 </p>
               </div>
 
-              {/* Theater Mode Control toggles */}
-              <div className="flex items-center gap-2 self-start sm:self-auto">
+              {/* Player Mode Switcher and Theater Mode Control toggles */}
+              <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+                <div className="flex items-center bg-slate-900/90 border border-slate-800 p-1 rounded-xl">
+                  <button
+                    onClick={() => { sfx.playClick(); setPlayerMode("playlist"); }}
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold uppercase transition-all flex items-center gap-1 ${
+                      playerMode === "playlist"
+                        ? "bg-gradient-to-r from-rose-600 to-indigo-600 text-white shadow"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                    title="Embed entire YouTube playlist"
+                  >
+                    <Tv2 className="w-3 h-3" />
+                    <span>Playlist Embed</span>
+                  </button>
+                  <button
+                    onClick={() => { sfx.playClick(); setPlayerMode("video"); }}
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold uppercase transition-all flex items-center gap-1 ${
+                      playerMode === "video"
+                        ? "bg-gradient-to-r from-rose-600 to-indigo-600 text-white shadow"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                    title="Embed single selected video"
+                  >
+                    <Play className="w-3 h-3" />
+                    <span>Single Video</span>
+                  </button>
+                </div>
+
                 <button
                   onClick={() => setAmbientGlow(!ambientGlow)}
                   className={`px-2.5 py-1.5 rounded-lg border text-[10px] font-mono font-bold uppercase transition-all ${
@@ -765,9 +829,17 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
 
             {/* Responsive Iframe Frame Container */}
             <div className="aspect-video w-full rounded-2xl bg-black overflow-hidden border border-slate-900 relative z-10 shadow-inner">
-              {selectedVideo.id ? (
+              {playerMode === "playlist" ? (
                 <iframe
-                  src={selectedVideo.embedUrl}
+                  src={`https://www.youtube.com/embed/videoseries?list=${cleanPlaylistId(playlistId)}&enablejsapi=1&wmode=opaque`}
+                  title="YouTube Playlist Embed"
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : selectedVideo.id ? (
+                <iframe
+                  src={selectedVideo.embedUrl || `https://www.youtube.com/embed/${selectedVideo.id}?enablejsapi=1&wmode=opaque`}
                   title={selectedVideo.title}
                   className="w-full h-full"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -783,24 +855,62 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
 
             {/* Quick Interaction Buttons Bar */}
             <div className="flex flex-wrap items-center justify-between gap-4 p-3 bg-slate-900/50 border border-slate-800 rounded-2xl relative z-10">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => togglePlaylist(selectedVideo)}
-                  className={`px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase transition-all flex items-center gap-2 ${
-                    myPlaylist.some((item) => item.id === selectedVideo.id)
-                      ? "bg-rose-500/20 border border-rose-500/40 text-rose-300"
-                      : "bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700"
-                  }`}
-                >
-                  <Heart className={`w-3.5 h-3.5 ${myPlaylist.some((item) => item.id === selectedVideo.id) ? "fill-rose-500 text-rose-500" : ""}`} />
-                  <span>
-                    {myPlaylist.some((item) => item.id === selectedVideo.id) ? "In Playlist" : "Add Playlist"}
-                  </span>
-                </button>
+              <div className="flex items-center gap-2 flex-wrap">
+                {playerMode === "video" ? (
+                  <>
+                    <button
+                      onClick={() => togglePlaylist(selectedVideo)}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold uppercase transition-all flex items-center gap-2 ${
+                        myPlaylist.some((item) => item.id === selectedVideo.id)
+                          ? "bg-rose-500/20 border border-rose-500/40 text-rose-300"
+                          : "bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700"
+                      }`}
+                    >
+                      <Heart className={`w-3.5 h-3.5 ${myPlaylist.some((item) => item.id === selectedVideo.id) ? "fill-rose-500 text-rose-500" : ""}`} />
+                      <span>
+                        {myPlaylist.some((item) => item.id === selectedVideo.id) ? "In Playlist" : "Add to My List"}
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        sfx.playClick();
+                        setPlayerMode("playlist");
+                      }}
+                      className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-rose-600/80 to-indigo-600/80 hover:from-rose-500 hover:to-indigo-500 text-white text-xs font-mono font-bold uppercase transition-all flex items-center gap-1.5"
+                      title="Switch back to full continuous playlist player"
+                    >
+                      <Tv2 className="w-3.5 h-3.5" />
+                      <span>Embed Full Playlist</span>
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => {
+                      sfx.playClick();
+                      if (curatedVideos.length > 0) {
+                        setSelectedVideo(curatedVideos[0]);
+                        setPlayerMode("video");
+                      }
+                    }}
+                    className="px-3.5 py-1.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white text-xs font-mono font-bold uppercase transition-all flex items-center gap-1.5"
+                    title="Switch to single video player"
+                  >
+                    <Play className="w-3.5 h-3.5 text-rose-400" />
+                    <span>Play Individual AMV</span>
+                  </button>
+                )}
 
                 <button
-                  onClick={handleShare}
-                  className="px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white text-xs font-mono font-bold uppercase transition-all flex items-center gap-2"
+                  onClick={() => {
+                    sfx.playWarp();
+                    const shareUrl = playerMode === "playlist"
+                      ? `https://youtube.com/playlist?list=${cleanPlaylistId(playlistId)}`
+                      : selectedVideo.url;
+                    navigator.clipboard.writeText(shareUrl);
+                    alert(`Copied link to clipboard:\n${shareUrl}`);
+                  }}
+                  className="px-3.5 py-1.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white text-xs font-mono font-bold uppercase transition-all flex items-center gap-1.5"
                 >
                   <Share2 className="w-3.5 h-3.5" />
                   <span>Share</span>
@@ -808,18 +918,27 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
               </div>
 
               {/* View/Duration specs */}
-              <div className="flex items-center gap-3 text-xs font-mono text-slate-500">
-                {selectedVideo.duration && (
-                  <span className="flex items-center gap-1 bg-slate-950/60 px-2 py-1 rounded border border-slate-900">
-                    <Clock className="w-3.5 h-3.5 text-indigo-400" />
-                    {selectedVideo.duration}
+              <div className="flex items-center gap-3 text-xs font-mono text-slate-400">
+                {playerMode === "playlist" ? (
+                  <span className="flex items-center gap-1.5 bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                    YouTube Embed Playlist Active
                   </span>
-                )}
-                {selectedVideo.views && (
-                  <span className="flex items-center gap-1 bg-slate-950/60 px-2 py-1 rounded border border-slate-900">
-                    <ThumbsUp className="w-3.5 h-3.5 text-rose-400" />
-                    {selectedVideo.views} views
-                  </span>
+                ) : (
+                  <>
+                    {selectedVideo.duration && (
+                      <span className="flex items-center gap-1 bg-slate-950/60 px-2 py-1 rounded border border-slate-900">
+                        <Clock className="w-3.5 h-3.5 text-indigo-400" />
+                        {selectedVideo.duration}
+                      </span>
+                    )}
+                    {selectedVideo.views && (
+                      <span className="flex items-center gap-1 bg-slate-950/60 px-2 py-1 rounded border border-slate-900">
+                        <ThumbsUp className="w-3.5 h-3.5 text-rose-400" />
+                        {selectedVideo.views} views
+                      </span>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -1078,9 +1197,13 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
                     return (
                       <button
                         key={video.id}
-                        onClick={() => { sfx.playWarp(); setSelectedVideo(video); }}
+                        onClick={() => {
+                          sfx.playWarp();
+                          setSelectedVideo(video);
+                          setPlayerMode("video");
+                        }}
                         className={`w-full text-left p-2.5 rounded-2xl border transition-all flex items-center gap-3 group ${
-                          isCurrent
+                          isCurrent && playerMode === "video"
                              ? "bg-gradient-to-r from-rose-950/40 to-indigo-950/40 border-rose-500/40 shadow-lg"
                              : "bg-slate-950/40 border-slate-800 hover:bg-slate-800/40 hover:border-slate-700"
                         }`}
@@ -1125,9 +1248,13 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
                     return (
                       <button
                         key={video.id}
-                        onClick={() => { sfx.playWarp(); setSelectedVideo(video); }}
+                        onClick={() => {
+                          sfx.playWarp();
+                          setSelectedVideo(video);
+                          setPlayerMode("video");
+                        }}
                         className={`w-full text-left p-2.5 rounded-2xl border transition-all flex items-start gap-3 group ${
-                          isCurrent
+                          isCurrent && playerMode === "video"
                             ? "bg-gradient-to-r from-rose-950/40 to-indigo-950/40 border-rose-500/40 shadow-lg"
                             : "bg-slate-950/40 border-slate-800 hover:bg-slate-800/40 hover:border-slate-700"
                         }`}

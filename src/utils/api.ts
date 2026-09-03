@@ -211,7 +211,13 @@ export function cleanPlaylistId(playlistId: string): string {
     // Ignore URL parse error and fall back to manual cleaning
   }
 
-  // Handle manual queries containing sharing parameters, e.g., 'PLjN...&si=...'
+  // Handle manual queries containing sharing parameters, e.g., 'list=PLjN...&si=...'
+  if (cleaned.includes("list=")) {
+    const parts = cleaned.split("list=");
+    if (parts[1]) {
+      cleaned = parts[1];
+    }
+  }
   if (cleaned.includes("&")) {
     cleaned = cleaned.split("&")[0];
   }
@@ -219,7 +225,7 @@ export function cleanPlaylistId(playlistId: string): string {
     cleaned = cleaned.split("?")[0];
   }
 
-  return cleaned;
+  return cleaned || "PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu";
 }
 
 /**

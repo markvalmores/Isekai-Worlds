@@ -2,7 +2,7 @@ import React from "react";
 import { AppSettings, PageView } from "../types";
 import { getTranslation } from "../utils/i18n";
 import { sfx } from "../utils/sfx";
-import { Heart, Shield, Cpu, RefreshCw, Cookie, Sparkles, Check } from "lucide-react";
+import { Heart, Shield, ShieldCheck, Cpu, RefreshCw, Cookie, Sparkles, Check, Lock } from "lucide-react";
 
 interface FooterProps {
   settings: AppSettings;
@@ -10,6 +10,7 @@ interface FooterProps {
   setCurrentPage: (page: PageView) => void;
   clearCache: () => void;
   openDonationsModal?: () => void;
+  openChildSafetyModal?: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
@@ -18,6 +19,7 @@ export const Footer: React.FC<FooterProps> = ({
   setCurrentPage,
   clearCache,
   openDonationsModal,
+  openChildSafetyModal,
 }) => {
   return (
     <footer className="mt-20 border-t border-indigo-500/20 bg-slate-950/90 backdrop-blur-xl text-slate-400 py-12 px-4 sm:px-6 lg:px-8">
@@ -118,15 +120,39 @@ export const Footer: React.FC<FooterProps> = ({
                 RTX & AI Frame Generation
               </button>
             </li>
+            {openChildSafetyModal && (
+              <li>
+                <button
+                  onClick={() => { sfx.playClick(); openChildSafetyModal(); }}
+                  className="text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1.5 font-semibold"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Child Safety Policy & Guidelines</span>
+                </button>
+              </li>
+            )}
           </ul>
         </div>
 
         {/* Column 3: Utilities & Cache */}
         <div>
           <h4 className="text-xs font-bold font-mono tracking-wider text-purple-300 uppercase mb-4">
-            System & Cache Controls
+            System & Safety Controls
           </h4>
           <div className="space-y-3 text-xs">
+            {openChildSafetyModal && (
+              <button
+                onClick={() => {
+                  sfx.playClick();
+                  openChildSafetyModal();
+                }}
+                className="w-full py-2 px-3 bg-blue-950/40 hover:bg-blue-900/50 border border-blue-500/40 rounded-xl text-blue-200 flex items-center justify-center gap-2 transition-all font-semibold"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
+                <span>Child Safety & COPPA Rules</span>
+              </button>
+            )}
+
             <button
               onClick={() => {
                 sfx.playClick();
@@ -172,8 +198,22 @@ export const Footer: React.FC<FooterProps> = ({
 
       {/* Bottom Legal & Specs */}
       <div className="max-w-7xl mx-auto pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-300 gap-4">
-        <div>
-          © {new Date().getFullYear()} <strong className="text-slate-200">Isekai Worlds</strong>. All Rights Reserved. Powered by Gemini AI & RTX Shader Engine.
+        <div className="flex flex-wrap items-center gap-2">
+          <span>© {new Date().getFullYear()} <strong className="text-slate-200">Isekai Worlds</strong>. All Rights Reserved.</span>
+          {openChildSafetyModal && (
+            <>
+              <span>•</span>
+              <button
+                onClick={() => {
+                  sfx.playClick();
+                  openChildSafetyModal();
+                }}
+                className="text-blue-400 hover:text-blue-300 underline underline-offset-2 font-medium"
+              >
+                Child Safety Policy & Guidelines
+              </button>
+            </>
+          )}
         </div>
         <div className="flex items-center gap-4 text-slate-300 font-mono text-[11px]">
           <span>v2.5 Ultra-Multi</span>

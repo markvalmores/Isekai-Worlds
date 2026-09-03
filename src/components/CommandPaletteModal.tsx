@@ -46,6 +46,7 @@ interface CommandPaletteModalProps {
   openDailyModal: () => void;
   openAdminModal: () => void;
   openTvRemote: () => void;
+  openChildSafetyModal?: () => void;
 }
 
 interface CommandItem {
@@ -123,7 +124,8 @@ export function CommandPaletteModal({
   openSettingsModal,
   openDailyModal,
   openAdminModal,
-  openTvRemote
+  openTvRemote,
+  openChildSafetyModal
 }: CommandPaletteModalProps) {
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -366,6 +368,21 @@ export function CommandPaletteModal({
       icon: <ShieldCheck className="w-4 h-4 text-emerald-400" />,
       keywords: ["admin", "god", "passcode", "cheat", "unlock"],
       action: () => { openAdminModal(); onClose(); }
+    },
+    {
+      id: "action-child-safety",
+      category: "System Actions",
+      label: "Child Safety Policy & Guidelines",
+      description: "Zero tolerance CSAM policy, COPPA rules & official protection hotlines",
+      icon: <ShieldCheck className="w-4 h-4 text-blue-400" />,
+      keywords: ["child", "safety", "policy", "guidelines", "coppa", "csam", "ncmec", "iwf", "hotline", "protection", "rules"],
+      badge: "Policy",
+      action: () => {
+        if (openChildSafetyModal) {
+          openChildSafetyModal();
+        }
+        onClose();
+      }
     },
     {
       id: "action-settings",

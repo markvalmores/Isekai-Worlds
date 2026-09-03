@@ -41,6 +41,7 @@ import { DonationCreditsModal } from "./components/DonationCreditsModal";
 import { SocialAuthModal } from "./components/SocialAuthModal";
 import { VercelAppsDashboard } from "./components/VercelAppsDashboard";
 import { CineMax } from "./components/CineMax";
+import { ChildSafetyModal } from "./components/ChildSafetyModal";
 import { Cookie, Check, Sparkles, Tv } from "lucide-react";
 
 export default function App() {
@@ -57,6 +58,14 @@ export default function App() {
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isLiveWallpaperOpen, setIsLiveWallpaperOpen] = useState(false);
   const [isSocialAuthOpen, setIsSocialAuthOpen] = useState(false);
+  const [isChildSafetyOpen, setIsChildSafetyOpen] = useState<boolean>(() => {
+    try {
+      const acknowledged = localStorage.getItem("isekai_child_safety_acknowledged");
+      return !acknowledged;
+    } catch {
+      return false;
+    }
+  });
 
   // Admin God Mode State
   const [isAdmin, setIsAdmin] = useState<boolean>(() => {
@@ -644,6 +653,7 @@ export default function App() {
         openCommandPalette={() => setIsCommandPaletteOpen(true)}
         openLiveWallpaperModal={() => setIsLiveWallpaperOpen(true)}
         openSocialAuthModal={() => setIsSocialAuthOpen(true)}
+        openChildSafetyModal={() => setIsChildSafetyOpen(true)}
         isAdmin={isAdmin}
         liveActiveUsers={liveActiveUsers}
         liveTotalVisits={liveTotalVisits}
@@ -888,6 +898,7 @@ export default function App() {
         openDailyModal={() => setIsDailyOpen(true)}
         openAdminModal={() => setIsAdminOpen(true)}
         openTvRemote={() => setIsTvRemoteOpen(!isTvRemoteOpen)}
+        openChildSafetyModal={() => setIsChildSafetyOpen(true)}
       />
 
       {/* Web App Live & Custom Wallpaper Engine Modal */}
@@ -904,6 +915,22 @@ export default function App() {
         onClose={() => setIsSocialAuthOpen(false)}
         userProfile={profile}
         updateProfile={updateProfile}
+      />
+
+      {/* Child Safety Policy & Community Guidelines Modal */}
+      <ChildSafetyModal
+        isOpen={isChildSafetyOpen}
+        onClose={() => setIsChildSafetyOpen(false)}
+        onAcknowledge={() => {
+          // Acknowledged callback
+        }}
+        isMandatoryFirstOpen={(() => {
+          try {
+            return !localStorage.getItem("isekai_child_safety_acknowledged");
+          } catch {
+            return false;
+          }
+        })()}
       />
 
       {/* Floating Cookie Consent Notification */}
@@ -941,6 +968,7 @@ export default function App() {
           setCurrentPage={handlePageChange}
           clearCache={clearCache}
           openDonationsModal={() => setIsDonationsOpen(true)}
+          openChildSafetyModal={() => setIsChildSafetyOpen(true)}
         />
       )}
     </div>

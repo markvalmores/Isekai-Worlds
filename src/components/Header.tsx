@@ -54,6 +54,7 @@ interface HeaderProps {
   openCommandPalette?: () => void;
   openLiveWallpaperModal?: () => void;
   openSocialAuthModal?: () => void;
+  openChildSafetyModal?: () => void;
   isAdmin?: boolean;
   liveActiveUsers?: number;
   liveTotalVisits?: number;
@@ -76,6 +77,7 @@ export const Header: React.FC<HeaderProps> = ({
   openCommandPalette,
   openLiveWallpaperModal,
   openSocialAuthModal,
+  openChildSafetyModal,
   isAdmin = false,
   liveActiveUsers = 1,
   liveTotalVisits = 1,
@@ -235,6 +237,21 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Tv className="w-3.5 h-3.5 text-purple-400" />
               <span className="hidden sm:inline">TV Remote</span>
+            </button>
+          )}
+
+          {/* Child Safety Policy & Guidelines Button */}
+          {openChildSafetyModal && (
+            <button
+              onClick={() => {
+                sfx.playClick();
+                openChildSafetyModal();
+              }}
+              className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-500/20 border border-blue-400/50 text-blue-300 hover:scale-105 transition-all font-bold"
+              title="Child Safety Policy & Community Guidelines (Zero Tolerance CSAM)"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
+              <span>Safety Policy</span>
             </button>
           )}
 

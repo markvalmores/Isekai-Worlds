@@ -29,7 +29,7 @@ export function AdminLoginModal({
     e.preventDefault();
     setErrorMsg("");
 
-    if (passcode.trim() === "121997mdvgou#") {
+    if (passcode.trim() === "Markols#1997") {
       sfx.playBadgeUnlock();
       setIsAdmin(true);
       localStorage.setItem("isekai_admin_mode", "true");

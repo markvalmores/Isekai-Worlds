@@ -261,7 +261,7 @@ export const HomeHeroView: React.FC<HomeHeroViewProps> = ({
         <div className="p-6 rounded-2xl bg-slate-900/80 border border-indigo-500/20">
           <div className="w-full h-64 rounded-xl overflow-hidden bg-slate-950 border border-slate-800">
              <iframe
-                src="https://www.youtube.com/embed/DiDeUBQbmUQ"
+                src="https://www.youtube.com/embed/Mz3hFjnySiA"
                 className="w-full h-full border-none"
                 title="Featured Usagyuuun Movie"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

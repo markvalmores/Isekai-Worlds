@@ -1058,18 +1058,6 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
                     <Tv2 className="w-3 h-3" />
                     <span>Playlist Embed</span>
                   </button>
-                  <button
-                    onClick={() => { sfx.playClick(); setPlayerMode("video"); }}
-                    className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold uppercase transition-all flex items-center gap-1 ${
-                      playerMode === "video"
-                        ? "bg-gradient-to-r from-rose-600 to-indigo-600 text-white shadow"
-                        : "text-slate-400 hover:text-white"
-                    }`}
-                    title="Embed single selected video"
-                  >
-                    <Play className="w-3 h-3" />
-                    <span>Single Video</span>
-                  </button>
                 </div>
 
                 <button
@@ -1620,90 +1608,10 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
                       </button>
                     );
                   })
-                ) : displayFeed.length === 0 ? (
+                ) : (
                   <div className="py-12 text-center text-slate-500 text-xs font-mono uppercase">
                     Your custom playlist or matching feed is empty.
                   </div>
-                ) : (
-                  // Regular tab display feed (curated / popular / recent / favorites / ai-match)
-                  displayFeed.map((video) => {
-                    const isCurrent = selectedVideo.id === video.id;
-                    const isBroken = 
-                      brokenVideoIds.has(video.id) ||
-                      video.isBroken === true ||
-                      video.status === "deleted" ||
-                      video.status === "private" ||
-                      video.status === "broken" ||
-                      (video.title && (video.title.toLowerCase().includes("deleted video") || video.title.toLowerCase().includes("private video")));
-
-                    return (
-                      <button
-                        key={video.id}
-                        onClick={() => {
-                          sfx.playWarp();
-                          setSelectedVideo(video);
-                          setPlayerMode("video");
-                        }}
-                        className={`w-full text-left p-2.5 rounded-2xl border transition-all flex items-start gap-3 group ${
-                          isBroken
-                            ? "bg-red-950/40 border-red-500/60 text-red-200"
-                            : isCurrent && playerMode === "video"
-                            ? "bg-gradient-to-r from-rose-950/40 to-indigo-950/40 border-rose-500/40 shadow-lg"
-                            : "bg-slate-950/40 border-slate-800 hover:bg-slate-800/40 hover:border-slate-700"
-                        }`}
-                      >
-                        <div className="w-16 h-11 rounded-xl overflow-hidden bg-slate-900 relative flex-shrink-0 border border-slate-800">
-                          <img
-                            src={video.thumbnail}
-                            alt=""
-                            referrerPolicy="no-referrer"
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                          <div className="absolute inset-0 bg-slate-950/35 flex items-center justify-center">
-                            {isBroken ? (
-                              <AlertOctagon className="w-4 h-4 text-red-400" />
-                            ) : (
-                              <Play className="w-4 h-4 text-white fill-current opacity-80" />
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="min-w-0 flex-1 space-y-0.5">
-                          <h4 className={`text-xs font-black truncate uppercase tracking-tight transition-colors ${
-                            isBroken ? "text-red-200 line-through decoration-red-500/60" : "text-white group-hover:text-rose-300"
-                          }`}>
-                            {video.title}
-                          </h4>
-                          <p className="text-[10px] text-indigo-400 truncate">
-                            {video.animeTitle}
-                          </p>
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            {isBroken ? (
-                              <span className="inline-flex items-center gap-0.5 text-[8px] font-mono text-red-300 bg-red-500/20 border border-red-500/30 px-1.5 py-0.2 rounded font-bold uppercase">
-                                ⚠️ Broken / Gone
-                              </span>
-                            ) : (
-                              video.vibe && (
-                                <span className="text-[8px] font-mono text-slate-500 bg-slate-900 px-1 py-0.5 rounded uppercase">
-                                  {video.vibe}
-                                </span>
-                              )
-                            )}
-                            {video.verified && !isBroken && (
-                              <span className="inline-flex items-center gap-0.5 text-[8px] font-mono text-emerald-400 bg-emerald-500/10 px-1 py-0.5 rounded font-bold uppercase">
-                                <CheckCircle2 className="w-2.5 h-2.5" /> Verified
-                              </span>
-                            )}
-                            {video.duration && (
-                              <span className="text-[8px] font-mono text-slate-500 ml-auto">
-                                {video.duration}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })
                 )}
               </div>
             )}

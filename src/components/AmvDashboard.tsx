@@ -147,6 +147,8 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
   const [playlistId, setPlaylistId] = useState(() => {
     return localStorage.getItem("isekai_amv_playlist_id") || "PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu";
   });
+  const [playlistId2, setPlaylistId2] = useState("PLzSjbEiFKZ_w9zWXjVSTLi5FUlcPHwQCc");
+  const [activePlaylistId, setActivePlaylistId] = useState(localStorage.getItem("isekai_amv_playlist_id") || "PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu");
   const [isPlaylistLoading, setIsPlaylistLoading] = useState(false);
 
   // Auto-Skip & Resilience Engine states
@@ -925,13 +927,25 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
         </div>
 
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <button
+            onClick={() => setActivePlaylistId(playlistId)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold uppercase transition-all ${activePlaylistId === playlistId ? "bg-rose-600 text-white" : "bg-slate-800 text-slate-300"}`}
+          >
+            Playlist 1
+          </button>
+          <button
+            onClick={() => setActivePlaylistId(playlistId2)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold uppercase transition-all ${activePlaylistId === playlistId2 ? "bg-rose-600 text-white" : "bg-slate-800 text-slate-300"}`}
+          >
+            Playlist 2
+          </button>
           <input
             type="text"
-            placeholder="Paste Playlist URL or ID (e.g., https://youtube.com/playlist?list=...)"
-            value={playlistId}
+            placeholder="Paste Playlist URL or ID"
+            value={activePlaylistId}
             onChange={(e) => {
               const cleaned = cleanPlaylistId(e.target.value);
-              setPlaylistId(cleaned);
+              setActivePlaylistId(cleaned);
             }}
             className="w-full sm:w-64 bg-slate-950 border border-slate-800 focus:border-rose-500/50 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none font-mono transition-all"
           />
@@ -1090,8 +1104,8 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
               {playerMode === "playlist" ? (
                 <iframe
                   ref={iframeRef}
-                  key={`pl-${cleanPlaylistId(playlistId)}`}
-                  src={`https://www.youtube.com/embed/videoseries?list=${cleanPlaylistId(playlistId)}&autoplay=1&enablejsapi=1`}
+                  key={`pl-${cleanPlaylistId(activePlaylistId)}`}
+                  src={`https://www.youtube.com/embed/videoseries?list=${cleanPlaylistId(activePlaylistId)}&autoplay=1&enablejsapi=1`}
                   title="YouTube Playlist Embed"
                   className="w-full h-full"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -1164,7 +1178,7 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
                   onClick={() => {
                     sfx.playWarp();
                     const shareUrl = playerMode === "playlist"
-                      ? `https://youtube.com/playlist?list=${cleanPlaylistId(playlistId)}`
+                      ? `https://youtube.com/playlist?list=${cleanPlaylistId(activePlaylistId)}`
                       : selectedVideo.url;
                     navigator.clipboard.writeText(shareUrl);
                     alert(`Copied link to clipboard:\n${shareUrl}`);
@@ -1270,7 +1284,7 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
                           )}
                         </div>
                         <p className="text-[11px] text-slate-400 font-mono">
-                          Playlist: <span className="text-slate-300 font-bold">{cleanPlaylistId(playlistId)}</span> • Broken/Deleted items highlighted in <strong className="text-red-400">RED</strong>
+                          Playlist: <span className="text-slate-300 font-bold">{cleanPlaylistId(activePlaylistId)}</span> • Broken/Deleted items highlighted in <strong className="text-red-400">RED</strong>
                         </p>
                       </div>
                     </div>

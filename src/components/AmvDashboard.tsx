@@ -1271,20 +1271,14 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
                           <h3 className="text-sm font-black text-white uppercase tracking-tight">
-                            Anime Playlist Catalog
+                            Watch History
                           </h3>
                           <span className="text-[10px] font-mono text-indigo-300 font-semibold px-2 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20">
-                            {totalCount} TRACKS
+                            RECENT
                           </span>
-                          {brokenCount > 0 && (
-                            <span className="text-[10px] font-mono text-red-300 font-bold px-2 py-0.5 rounded-md bg-red-500/20 border border-red-500/40 animate-pulse flex items-center gap-1">
-                              <AlertOctagon className="w-3 h-3 text-red-400" />
-                              {brokenCount} BROKEN / GONE
-                            </span>
-                          )}
                         </div>
                         <p className="text-[11px] text-slate-400 font-mono">
-                          Playlist: <span className="text-slate-300 font-bold">{cleanPlaylistId(activePlaylistId)}</span> • Broken/Deleted items highlighted in <strong className="text-red-400">RED</strong>
+                          Viewed items in this session.
                         </p>
                       </div>
                     </div>
@@ -1688,7 +1682,7 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-mono font-bold text-slate-300 tracking-wider uppercase flex items-center gap-2">
                 <Database className="w-4 h-4 text-indigo-400" />
-                {searchedAnimeId ? "Anime Videos" : activeTab === "ai-match" ? "AI Vibe Matches" : "Media Catalog"}
+                {searchedAnimeId ? "Anime Videos" : activeTab === "ai-match" ? "AI Vibe Matches" : "Current Video Playing"}
               </h3>
               <span className="text-[9px] font-mono text-slate-500">
                 {searchResults.length > 0 && !searchedAnimeId ? `${searchResults.length} Anime results` : `${displayFeed.length} items`}

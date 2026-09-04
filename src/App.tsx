@@ -41,8 +41,10 @@ import { DonationCreditsModal } from "./components/DonationCreditsModal";
 import { SocialAuthModal } from "./components/SocialAuthModal";
 import { VercelAppsDashboard } from "./components/VercelAppsDashboard";
 import { CineMax } from "./components/CineMax";
+import { HistoryDashboard } from "./components/HistoryDashboard";
 import { ChildSafetyModal } from "./components/ChildSafetyModal";
 import { Cookie, Check, Sparkles, Tv } from "lucide-react";
+import { trackHistory } from "./lib/historyService";
 
 export default function App() {
   // Page View State
@@ -267,6 +269,8 @@ export default function App() {
   // Handle Page Change with Transition Screen
   const handlePageChange = (page: PageView) => {
     if (page === currentPage) return;
+    
+    trackHistory("browse", window.location.href, page);
 
     const names: Record<PageView, string> = {
       home: "Portal Hub",
@@ -287,7 +291,8 @@ export default function App() {
       roms: "Retro ROMs Vault",
       cards: "Anime Card Games Arena",
       vercel: "Vercel APPs & Games",
-      cinemax: "Movies"
+      cinemax: "Movies",
+      history: "History Dashboard"
     };
 
     setTargetPageName(names[page] || "Isekai Realm");
@@ -798,6 +803,9 @@ export default function App() {
 
         {currentPage === "cinemax" && (
           <CineMax />
+        )}
+        {currentPage === "history" && (
+          <HistoryDashboard />
         )}
       </main>
 

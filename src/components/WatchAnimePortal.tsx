@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { trackHistory } from "../lib/historyService";
 import { 
   Tv, 
   ExternalLink, 
@@ -241,6 +242,7 @@ export function WatchAnimePortal() {
     };
 
     setCurrentVideo(newStream);
+    trackHistory("watch", newStream.url, newStream.title);
     setIsPlaying(false);
     setCustomUrl("");
     setCustomTitle("");

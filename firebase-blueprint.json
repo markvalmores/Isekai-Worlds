@@ -1,103 +1,27 @@
 {
   "entities": {
-    "UserProfile": {
-      "title": "User Profile",
-      "description": "User profile state and customization",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "username": { "type": "string" },
-        "avatarUrl": { "type": "string" },
-        "bannerUrl": { "type": "string" },
-        "bio": { "type": "string" },
-        "title": { "type": "string" },
-        "badge": { "type": "string" },
-        "customStatus": { "type": "string" },
-        "bannerGradient": { "type": "string" },
-        "accentColor": { "type": "string" },
-        "country": { "type": "string" },
-        "joinedDate": { "type": "string" },
-        "favAnime": { "type": "string" }
-      },
-      "required": ["id", "username"]
-    },
-    "SyncBundle": {
-      "title": "Universal Sync Bundle",
-      "description": "Hardcoded synchronization bundle for all profiles and app state",
-      "type": "object",
-      "properties": {
-        "syncKey": { "type": "string" },
-        "allProfiles": { "type": "array" },
-        "activeProfileId": { "type": "string" },
-        "settings": { "type": "object" },
-        "amvPlaylist": { "type": "array" },
-        "inventory": { "type": "array" },
-        "savedWallpapers": { "type": "array" },
-        "savedGifs": { "type": "array" },
-        "savedCosplay": { "type": "array" },
-        "watchHistory": { "type": "array" },
-        "lastSynced": { "type": "string" }
-      },
-      "required": ["syncKey"]
-    },
-    "Ranking": {
-      "title": "Global Ranking",
-      "description": "User leaderboard entry",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "username": { "type": "string" },
-        "secondsLogged": { "type": "number" },
-        "registeredAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["id", "username", "secondsLogged"]
-    },
-    "Favorite": {
-      "title": "Favorite App/Game",
-      "description": "User's favorite app or game",
+    "HistoryEntry": {
+      "title": "History Entry",
+      "description": "An entry for watch or browsing history",
       "type": "object",
       "properties": {
         "userId": { "type": "string" },
-        "appId": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["userId", "appId"]
-    },
-    "Video": {
-      "title": "UTube Video",
-      "description": "Video uploaded to UTube",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "title": { "type": "string" },
-        "description": { "type": "string" },
+        "type": { "type": "string", "enum": ["watch", "browse"] },
         "url": { "type": "string" },
-        "authorId": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "title": { "type": "string" },
+        "timestamp": { "type": "number" }
       },
-      "required": ["id", "title", "url", "authorId"]
+      "required": ["userId", "type", "url", "title", "timestamp"]
     }
   },
   "firestore": {
-    "/profiles/{profileId}": {
-      "schema": "UserProfile",
-      "description": "User profiles collection"
+    "/users/{userId}/watchHistory/{entryId}": {
+      "schema": "HistoryEntry",
+      "description": "Watch history for a user"
     },
-    "/global_sync/{syncId}": {
-      "schema": "SyncBundle",
-      "description": "Universal cross-device synchronization documents"
-    },
-    "/rankings/{rankingId}": {
-      "schema": "Ranking",
-      "description": "User leaderboard entries"
-    },
-    "/favorites/{favoriteId}": {
-      "schema": "Favorite",
-      "description": "User favorites"
-    },
-    "/videos/{videoId}": {
-      "schema": "Video",
-      "description": "UTube videos"
+    "/users/{userId}/browsingHistory/{entryId}": {
+      "schema": "HistoryEntry",
+      "description": "Browsing history for a user"
     }
   }
 }

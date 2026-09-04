@@ -17,7 +17,8 @@ export type PageView =
   | "roms"
   | "cards"
   | "vercel"
-  | "cinemax";
+  | "cinemax"
+  | "history";
 
 export type LanguageCode =
   | "en"

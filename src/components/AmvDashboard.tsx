@@ -1187,7 +1187,7 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
                 <iframe
                   ref={iframeRef}
                   key={`pl-${cleanPlaylistId(playlistId)}`}
-                  src={`https://www.youtube.com/embed/videoseries?list=${cleanPlaylistId(playlistId)}&enablejsapi=1&autoplay=1&wmode=opaque`}
+                  src={`https://www.youtube.com/embed/videoseries?list=${cleanPlaylistId(playlistId)}&autoplay=1&enablejsapi=1`}
                   title="YouTube Playlist Embed"
                   className="w-full h-full"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

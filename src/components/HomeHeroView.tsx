@@ -250,6 +250,31 @@ export const HomeHeroView: React.FC<HomeHeroViewProps> = ({
         </div>
       </section>
 
+      {/* Featured Movies Section */}
+      <section className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xl font-black uppercase tracking-wider text-white flex items-center gap-2">
+            <Film className="w-5 h-5 text-purple-500" />
+            <span>Featured Movies</span>
+          </h3>
+        </div>
+        <div className="p-6 rounded-2xl bg-slate-900/80 border border-indigo-500/20">
+          <div className="w-full h-64 rounded-xl overflow-hidden bg-slate-950 border border-slate-800">
+             <iframe
+                src="https://www.youtube.com/embed/DiDeUBQbmUQ"
+                className="w-full h-full border-none"
+                title="Featured Usagyuuun Movie"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+          </div>
+          <div className="mt-4">
+              <h4 className="text-lg font-bold text-white">Usagyuuun Featured Movie</h4>
+              <p className="text-xs text-slate-400 mt-1">Featured Usagyuuun animation.</p>
+          </div>
+        </div>
+      </section>
+
       {/* Feature Highlighting Grid: Live Feeds & RTX Hardware Specs */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Live Anime Feed Teaser */}

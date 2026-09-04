@@ -148,6 +148,7 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
     return localStorage.getItem("isekai_amv_playlist_id") || "PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu";
   });
   const [playlistId2, setPlaylistId2] = useState("PLzSjbEiFKZ_w9zWXjVSTLi5FUlcPHwQCc");
+  const [playlistId3, setPlaylistId3] = useState("PLODmH4ThctzZFoZ2BGGFMziYh0YnwC80n");
   const [activePlaylistId, setActivePlaylistId] = useState(localStorage.getItem("isekai_amv_playlist_id") || "PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu");
   const [isPlaylistLoading, setIsPlaylistLoading] = useState(false);
 
@@ -962,6 +963,12 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
             className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold uppercase transition-all ${activePlaylistId === playlistId2 ? "bg-rose-600 text-white" : "bg-slate-800 text-slate-300"}`}
           >
             Playlist 2
+          </button>
+          <button
+            onClick={() => setActivePlaylistId(playlistId3)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold uppercase transition-all ${activePlaylistId === playlistId3 ? "bg-rose-600 text-white" : "bg-slate-800 text-slate-300"}`}
+          >
+            Playlist 3
           </button>
           <input
             type="text"

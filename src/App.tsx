@@ -24,7 +24,7 @@ import { RadioGagaAMV } from "./components/AmvDashboard";
 import { PlayGamesDashboard } from "./components/PlayGamesDashboard";
 import { RomsDashboard } from "./components/RomsDashboard";
 import { CardGamesDashboard } from "./components/CardGamesDashboard";
-import { CosplayDashboard } from "./components/CosplayDashboard";
+import { SakuraCentralEmbed } from "./components/SakuraCentralEmbed";
 import { AchievementsDashboard } from "./components/AchievementsDashboard";
 import { AniCommunity } from "./components/AniCommunity";
 import { DailyLoginModal } from "./components/DailyLoginModal";
@@ -706,12 +706,7 @@ export default function App() {
         {currentPage === "gifs" && <GifGallery />}
 
         {currentPage === "cosplay" && (
-          <CosplayDashboard
-            profile={profile}
-            updateProfile={updateProfile}
-            onAddCoins={handleAddCoins}
-            isGoldMode={isGold}
-          />
+          <SakuraCentralEmbed />
         )}
 
         {currentPage === "media" && (

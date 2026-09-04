@@ -1263,82 +1263,19 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
 
               return (
                 <>
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-800">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-rose-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shrink-0">
-                        <ListMusic className="w-4 h-4" />
-                      </div>
+                  <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800">
+                    <div className="flex items-center gap-4">
+                      <img 
+                        src={selectedVideo.thumbnail} 
+                        alt={selectedVideo.title} 
+                        className="w-20 h-14 rounded-lg object-cover"
+                      />
                       <div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="text-sm font-black text-white uppercase tracking-tight">
-                            Watch History
-                          </h3>
-                          <span className="text-[10px] font-mono text-indigo-300 font-semibold px-2 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20">
-                            RECENT
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-slate-400 font-mono">
-                          Viewed items in this session.
-                        </p>
+                        <h4 className="text-sm font-bold text-white line-clamp-1">{selectedVideo.title}</h4>
+                        <p className="text-xs text-slate-400">{selectedVideo.animeTitle}</p>
                       </div>
                     </div>
-
-                    {/* Filter & Search Bar */}
-                    <div className="flex flex-wrap items-center gap-2">
-                      {/* Filter Status Tabs */}
-                      <div className="flex items-center bg-slate-950 border border-slate-800 rounded-xl p-0.5">
-                        <button
-                          onClick={() => { sfx.playClick(); setPlaylistStatusFilter("all"); }}
-                          className={`px-2.5 py-1 rounded-lg text-[10px] font-mono uppercase font-bold transition-all ${
-                            playlistStatusFilter === "all"
-                              ? "bg-slate-800 text-white shadow"
-                              : "text-slate-400 hover:text-white"
-                          }`}
-                        >
-                          All ({totalCount})
-                        </button>
-                        <button
-                          onClick={() => { sfx.playClick(); setPlaylistStatusFilter("working"); }}
-                          className={`px-2.5 py-1 rounded-lg text-[10px] font-mono uppercase font-bold transition-all ${
-                            playlistStatusFilter === "working"
-                              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                              : "text-slate-400 hover:text-white"
-                          }`}
-                        >
-                          Ready ({workingCount})
-                        </button>
-                        <button
-                          onClick={() => { sfx.playClick(); setPlaylistStatusFilter("broken"); }}
-                          className={`px-2.5 py-1 rounded-lg text-[10px] font-mono uppercase font-bold transition-all flex items-center gap-1 ${
-                            playlistStatusFilter === "broken"
-                              ? "bg-red-500/30 text-red-200 border border-red-500/50 font-black shadow"
-                              : "text-red-400 hover:text-red-300"
-                          }`}
-                        >
-                          <AlertTriangle className="w-3 h-3" />
-                          Broken ({brokenCount})
-                        </button>
-                      </div>
-
-                      {/* Search Filter Box */}
-                      <div className="w-full sm:w-56 relative">
-                        <input
-                          type="text"
-                          placeholder="Filter tracks or anime..."
-                          value={trackSearchQuery}
-                          onChange={(e) => setTrackSearchQuery(e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-800 focus:border-rose-500/50 rounded-xl pl-3 pr-7 py-1 text-xs text-white placeholder-slate-600 focus:outline-none font-mono"
-                        />
-                        {trackSearchQuery ? (
-                          <button
-                            onClick={() => setTrackSearchQuery("")}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        ) : null}
-                      </div>
-
+                    <div className="flex justify-end mt-4">
                       <button
                         onClick={() => {
                           sfx.playWarp();
@@ -1365,203 +1302,33 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
                     </div>
                   </div>
 
-                  {/* Scrollable List of Anime Playlist Tracks (No Thumbnails) */}
-                  <div className="space-y-1.5 max-h-[580px] overflow-y-auto pr-1 no-scrollbar">
-                    {filteredTracks.length === 0 ? (
-                      <div className="py-12 text-center text-slate-500 text-xs font-mono uppercase bg-slate-950/40 rounded-2xl border border-slate-900">
-                        No anime tracks matched the current filter ({playlistStatusFilter}).
-                      </div>
-                    ) : (
-                      filteredTracks.map((video, idx) => {
-                        const isCurrent = selectedVideo.id === video.id && playerMode === "video";
-                        const isBroken = isItemBroken(video);
-
-                        return (
-                          <div
-                            key={video.id}
-                            className={`group px-3.5 py-2.5 rounded-2xl border transition-all flex items-center gap-3 relative ${
-                              isBroken
-                                ? "bg-red-950/40 border-red-500/70 text-red-200 shadow-md shadow-red-950/30"
-                                : isCurrent
-                                ? "bg-gradient-to-r from-rose-950/50 via-slate-900 to-indigo-950/50 border-rose-500/50 shadow-lg shadow-rose-950/20"
-                                : "bg-slate-950/60 border-slate-800/80 hover:bg-slate-800/50 hover:border-slate-700 text-slate-300"
-                            }`}
-                          >
-                            {/* Track Number / Equalizer or Warning Icon */}
-                            <div className="w-8 text-center font-mono text-xs font-bold shrink-0 flex items-center justify-center">
-                              {isBroken ? (
-                                <AlertOctagon className="w-4 h-4 text-red-400 animate-pulse" />
-                              ) : isCurrent ? (
-                                <div className="flex items-end justify-center gap-0.5 h-4">
-                                  <span className="w-1 bg-rose-500 h-2 animate-pulse" />
-                                  <span className="w-1 bg-rose-400 h-4 animate-pulse delay-75" />
-                                  <span className="w-1 bg-indigo-500 h-3 animate-pulse delay-150" />
-                                </div>
-                              ) : (
-                                <span className="text-slate-500 group-hover:text-slate-300 transition-colors">
-                                  {(idx + 1).toString().padStart(2, "0")}
-                                </span>
-                              )}
-                            </div>
-
-                            {/* Play Button Trigger */}
-                            <button
-                              onClick={() => {
-                                sfx.playWarp();
-                                setSelectedVideo(video);
-                                setPlayerMode("video");
-                              }}
-                              className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-all ${
-                                isBroken
-                                  ? "bg-red-900/40 text-red-300 border border-red-500/40 hover:bg-red-800/50"
-                                  : isCurrent
-                                  ? "bg-rose-600 text-white shadow-md shadow-rose-950/50"
-                                  : "bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800"
-                              }`}
-                              title={isBroken ? "Play broken/deleted video anyway" : "Play AMV track"}
-                            >
-                              <Play className={`w-3.5 h-3.5 fill-current ${isCurrent ? "text-white" : ""}`} />
-                            </button>
-
-                            {/* Track Meta Details (No Thumbnail) */}
-                            <div
-                              onClick={() => {
-                                sfx.playWarp();
-                                setSelectedVideo(video);
-                                setPlayerMode("video");
-                              }}
-                              className="min-w-0 flex-1 space-y-1 cursor-pointer"
-                            >
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <h4
-                                  className={`text-xs font-bold uppercase tracking-tight truncate max-w-full ${
-                                    isBroken
-                                      ? "text-red-200 font-extrabold line-through decoration-red-500/60"
-                                      : isCurrent
-                                      ? "text-rose-300 font-extrabold"
-                                      : "text-white group-hover:text-rose-200"
-                                  }`}
-                                >
-                                  {video.title}
-                                </h4>
-
-                                {isBroken ? (
-                                  <span className="inline-flex items-center gap-1 text-[9px] font-mono font-black text-red-300 bg-red-600/30 border border-red-500/60 px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
-                                    <AlertOctagon className="w-2.5 h-2.5 text-red-400" />
-                                    DELETED / BROKEN / GONE
-                                  </span>
-                                ) : isCurrent ? (
-                                  <span className="inline-flex items-center gap-1 text-[8px] font-mono text-rose-300 bg-rose-500/20 border border-rose-500/30 px-1.5 py-0.5 rounded font-bold uppercase">
-                                    ▶ Playing
-                                  </span>
-                                ) : (
-                                  <span className="inline-flex items-center gap-0.5 text-[8px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded font-bold uppercase">
-                                    <CheckCircle2 className="w-2.5 h-2.5" /> Ready
-                                  </span>
-                                )}
-                              </div>
-
-                              <div className="flex items-center gap-2 text-[10px] text-slate-400">
-                                <span className="text-indigo-400 font-medium truncate">
-                                  {video.animeTitle}
-                                </span>
-                                {video.vibe && (
-                                  <span className="text-[8px] font-mono text-slate-400 bg-slate-900 px-1.5 py-0.2 rounded uppercase border border-slate-800">
-                                    {video.vibe}
-                                  </span>
-                                )}
-                                {video.duration && (
-                                  <span className="text-[9px] font-mono text-slate-500 ml-auto flex items-center gap-1">
-                                    <Clock className="w-2.5 h-2.5" /> {video.duration}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="flex items-center gap-1.5 shrink-0">
-                              {/* Toggle/Unflag Broken Button */}
-                              <button
-                                onClick={() => toggleFlagBroken(video.id)}
-                                className={`px-2 py-1 rounded-xl text-[9px] font-mono font-bold uppercase transition-all flex items-center gap-1 border ${
-                                  isBroken
-                                    ? "bg-red-900/40 hover:bg-red-850 text-red-200 border-red-500/40"
-                                    : "bg-slate-900 text-slate-400 hover:text-red-400 border-slate-800 hover:border-red-500/30"
-                                }`}
-                                title={isBroken ? "Unflag as broken (Mark ready)" : "Flag as broken/deleted"}
-                              >
-                                {isBroken ? (
-                                  <>
-                                    <Check className="w-3 h-3 text-emerald-400" />
-                                    <span>Unflag</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <AlertTriangle className="w-3 h-3 text-slate-500 group-hover:text-red-400" />
-                                    <span>Flag Red</span>
-                                  </>
-                                )}
-                              </button>
-
-                              {/* External Link to YouTube to test directly */}
-                              <a
-                                href={video.url}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="p-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white transition-colors"
-                                title="Open on YouTube in new tab"
-                              >
-                                <ExternalLink className="w-3 h-3" />
-                              </a>
-
-                              {/* Bookmark Button */}
-                              <button
-                                onClick={() => togglePlaylist(video)}
-                                className={`p-1.5 rounded-xl transition-all ${
-                                  myPlaylist.some((item) => item.id === video.id)
-                                    ? "text-rose-400 bg-rose-500/10 hover:bg-rose-500/20"
-                                    : "text-slate-500 hover:text-slate-300 hover:bg-slate-900"
-                                }`}
-                                title="Bookmark to My Playlist"
-                              >
-                                <Heart className={`w-3.5 h-3.5 ${myPlaylist.some((item) => item.id === video.id) ? "fill-rose-500" : ""}`} />
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })
-                    )}
+                  {/* Interactive scratchpad for user lyrics and comments */}
+                  <div className="p-6 rounded-3xl bg-slate-900/60 border border-indigo-500/15 relative overflow-hidden mt-6">
+                    <div className="flex items-center gap-2 mb-3">
+                      <FileText className="w-4 h-4 text-rose-400" />
+                      <h3 className="text-xs font-mono font-bold text-slate-200 uppercase tracking-wider">
+                        Vibe Notes & Lyrics scratchpad
+                      </h3>
+                    </div>
+                    <textarea
+                      value={notesText}
+                      onChange={(e) => setNotesText(e.target.value)}
+                      placeholder="Jot down anime titles to watch later, lyrics, thoughts on the AMV, or copy text here while playing..."
+                      className="w-full h-24 bg-slate-950/80 border border-slate-800 rounded-2xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-rose-500/30 transition-all resize-none"
+                    />
+                    <div className="flex justify-between items-center mt-1 text-[10px] text-slate-500 font-mono">
+                      <span>Saved automatically to offline terminal storage</span>
+                      <button
+                        onClick={() => { sfx.playClick(); setNotesText(""); }}
+                        className="text-rose-400 hover:text-rose-300 underline"
+                      >
+                        Clear pad
+                      </button>
+                    </div>
                   </div>
                 </>
               );
             })()}
-          </div>
-
-          {/* Interactive scratchpad for user lyrics and comments */}
-          <div className="p-6 rounded-3xl bg-slate-900/60 border border-indigo-500/15 relative overflow-hidden mt-6">
-            <div className="flex items-center gap-2 mb-3">
-              <FileText className="w-4 h-4 text-rose-400" />
-              <h3 className="text-xs font-mono font-bold text-slate-200 uppercase tracking-wider">
-                Vibe Notes & Lyrics scratchpad
-              </h3>
-            </div>
-            <textarea
-              value={notesText}
-              onChange={(e) => setNotesText(e.target.value)}
-              placeholder="Jot down anime titles to watch later, lyrics, thoughts on the AMV, or copy text here while playing..."
-              className="w-full h-24 bg-slate-950/80 border border-slate-800 rounded-2xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-rose-500/30 transition-all resize-none"
-            />
-            <div className="flex justify-between items-center mt-1 text-[10px] text-slate-500 font-mono">
-              <span>Saved automatically to offline terminal storage</span>
-              <button
-                onClick={() => { sfx.playClick(); setNotesText(""); }}
-                className="text-rose-400 hover:text-rose-300 underline"
-              >
-                Clear pad
-              </button>
-            </div>
-          </div>
-        </div>
 
         {/* Right Side: Navigation feed & Anime metadata search */}
         <div className={theaterMode ? "lg:col-span-1" : "lg:col-span-1"}>
@@ -1918,6 +1685,8 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
               </div>
             )}
           </div>
+        </div>
+    </div>
         </div>
       </div>
     </div>

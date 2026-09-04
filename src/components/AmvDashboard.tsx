@@ -216,6 +216,29 @@ export function RadioGagaAMV({ onCloudSave, syncKey }: RadioGagaAMVProps = {}) {
     }
   };
 
+  // Force removal of the banned AMV from local storage
+  useEffect(() => {
+    const saved = localStorage.getItem("isekai_amv_playlist");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const filtered = parsed.filter(
+            (v: AMVVideo) =>
+              !v.title.includes("Into The Labyrinth") &&
+              !v.animeTitle.includes("Monogatari Series")
+          );
+          if (filtered.length !== parsed.length) {
+            localStorage.setItem("isekai_amv_playlist", JSON.stringify(filtered));
+            setMyPlaylist(filtered);
+          }
+        }
+      } catch (e) {
+        // Ignore JSON parse errors
+      }
+    }
+  }, []);
+
   // Video verification checker layer
   const validateAndFilterVideos = async (videos: AMVVideo[]): Promise<AMVVideo[]> => {
     if (videos.length === 0) return [];

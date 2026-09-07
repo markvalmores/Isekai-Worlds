@@ -26,6 +26,8 @@ import { RomsDashboard } from "./components/RomsDashboard";
 import { CardGamesDashboard } from "./components/CardGamesDashboard";
 import { SakuraCentralEmbed } from "./components/SakuraCentralEmbed";
 import { VocaloidPortal } from "./components/VocaloidPortal";
+import { KaraokePlayerTab } from "./components/KaraokePlayerTab";
+import { DictionaryTab } from "./components/DictionaryTab";
 import { AchievementsDashboard } from "./components/AchievementsDashboard";
 import { AniCommunity } from "./components/AniCommunity";
 import { DailyLoginModal } from "./components/DailyLoginModal";
@@ -281,6 +283,7 @@ export default function App() {
       gifs: "Anime GIFs & Reactions",
       cosplay: "Cosplay & Costume Vault",
       vocaloid: "Vocaloid Multiverse",
+      karaoke: "Karaoke Studio",
       media: "Live Anime Streams",
       leaderboard: "Global Leaderboards",
       profile: "Profile Dashboard",
@@ -294,6 +297,7 @@ export default function App() {
       cards: "Anime Card Games Arena",
       vercel: "Vercel APPs & Games",
       cinemax: "Movies",
+      dictionary: "Google 243 Languages Dictionary",
       history: "History Dashboard"
     };
 
@@ -713,6 +717,14 @@ export default function App() {
 
         {currentPage === "vocaloid" && (
           <VocaloidPortal />
+        )}
+
+        {currentPage === "karaoke" && (
+          <KaraokePlayerTab settings={settings} profile={profile} />
+        )}
+
+        {currentPage === "dictionary" && (
+          <DictionaryTab settings={settings} profile={profile} />
         )}
 
         {currentPage === "media" && (

@@ -6,6 +6,7 @@ export type PageView =
   | "gifs"
   | "cosplay"
   | "vocaloid"
+  | "karaoke"
   | "media"
   | "leaderboard"
   | "profile"
@@ -19,6 +20,7 @@ export type PageView =
   | "cards"
   | "vercel"
   | "cinemax"
+  | "dictionary"
   | "history";
 
 export type LanguageCode =

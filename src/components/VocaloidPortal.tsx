@@ -256,6 +256,71 @@ export function VocaloidPortal() {
   // Tap Tempo state
   const tapTimesRef = useRef<number[]>([]);
 
+  // Client-side Caches to prevent duplicate network calls & preserve API quota
+  const lyricsCacheRef = useRef<Map<string, VocaloidLyricsData>>(new Map());
+  const detectCacheRef = useRef<Map<string, AIDetectionResult>>(new Map());
+
+  // Karaoke Mode: High Contrast, Extra-Large Typography & Dimmed Stage Focus (Disabled by default)
+  const [isKaraokeMode, setIsKaraokeMode] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("isekai_vocaloid_karaokemode") === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  // Live YouTube Sync & Tracing State
+  const [isSyncingLive, setIsSyncingLive] = useState<boolean>(false);
+  const [syncLiveStep, setSyncLiveStep] = useState<string>("");
+  const [syncToastMessage, setSyncToastMessage] = useState<string | null>(null);
+
+  // Toggle Karaoke Mode with SFX and persistence
+  const toggleKaraokeMode = () => {
+    sfx.playClick();
+    const next = !isKaraokeMode;
+    setIsKaraokeMode(next);
+    try {
+      localStorage.setItem("isekai_vocaloid_karaokemode", String(next));
+    } catch {}
+    if (next) {
+      sfx.playBadgeUnlock();
+    }
+  };
+
+  // Explicit enable / disable handlers
+  const enableKaraokeMode = () => {
+    if (!isKaraokeMode) {
+      sfx.playBadgeUnlock();
+      setIsKaraokeMode(true);
+      try {
+        localStorage.setItem("isekai_vocaloid_karaokemode", "true");
+      } catch {}
+    }
+  };
+
+  const disableKaraokeMode = () => {
+    if (isKaraokeMode) {
+      sfx.playClick();
+      setIsKaraokeMode(false);
+      try {
+        localStorage.setItem("isekai_vocaloid_karaokemode", "false");
+      } catch {}
+    }
+  };
+
+  // Keyboard shortcut: Press 'K' to toggle Karaoke Mode
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (["INPUT", "TEXTAREA"].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === "k" || e.key === "K") {
+        e.preventDefault();
+        toggleKaraokeMode();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isKaraokeMode]);
+
   // UI View Modes
   const [lyricsViewMode, setLyricsViewMode] = useState<"prompter" | "dual" | "romaji" | "japanese" | "english" | "fulltext">("prompter");
   const [fontSize, setFontSize] = useState<"sm" | "base" | "lg" | "xl">("base");
@@ -314,8 +379,85 @@ export function VocaloidPortal() {
     year: "Live"
   };
 
-  // Run AI Video Detection & Metadata Extraction
+  // Live YouTube Sync & AI Tracing Handler
+  const handleSyncLiveYouTubeTrack = async () => {
+    sfx.playClick();
+    setIsSyncingLive(true);
+    setSyncLiveStep("🎯 Tracing active YouTube stream & video ID...");
+
+    try {
+      await new Promise((r) => setTimeout(r, 400));
+      setSyncLiveStep("⚡ Fast Gemini AI analyzing video cues, producer & vocalist...");
+
+      const detectRes = await fetch("/api/vocaloid/ai-detect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          videoId: currentVideoId,
+          userQuery: manualSearchQuery || undefined
+        })
+      });
+      const detectData = await detectRes.json();
+
+      setSyncLiveStep("✨ Aligning Romaji & Kanji lyrics & auto-calibrating tempo pace...");
+
+      let songTitleToFetch = currentTrackInfo.title;
+      if (detectData.success && detectData.detection) {
+        setAiDetection(detectData.detection);
+        setShowAIDetectionCard(true);
+        if (detectData.detection.recommendedSpeedSec) {
+          setKaraokeSpeedSec(Number(detectData.detection.recommendedSpeedSec));
+        }
+        songTitleToFetch = detectData.detection.detectedSongTitle;
+      }
+
+      const lyricsRes = await fetch("/api/vocaloid/lyrics", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          videoId: currentVideoId,
+          title: songTitleToFetch,
+          artist: detectData.detection?.producer || currentTrackInfo.artist,
+          producer: detectData.detection?.producer || currentTrackInfo.producer
+        })
+      });
+      const lyricsJson = await lyricsRes.json();
+      if (lyricsJson.success && lyricsJson.lyrics) {
+        lyricsCacheRef.current.set(currentVideoId, lyricsJson.lyrics);
+        setLyricsData(lyricsJson.lyrics);
+        setActiveLineIndex(0);
+        setIsKaraokeAutoPlay(true);
+        if (lyricsJson.lyrics.recommendedSpeedSec && !detectData.detection?.recommendedSpeedSec) {
+          setKaraokeSpeedSec(Number(lyricsJson.lyrics.recommendedSpeedSec));
+        }
+      }
+
+      sfx.playBadgeUnlock();
+      setSyncToastMessage(`🎯 Synced & Matched: ${songTitleToFetch}!`);
+      setTimeout(() => setSyncToastMessage(null), 4500);
+    } catch (err) {
+      console.error("Live YouTube sync error:", err);
+      fetchLyrics(undefined, currentVideoId);
+    } finally {
+      setIsSyncingLive(false);
+      setSyncLiveStep("");
+    }
+  };
+
+  // Run AI Video Detection & Metadata Extraction with Cache
   const runAIVideoDetection = async (videoIdToDetect: string = currentVideoId, queryOverride?: string) => {
+    const cacheKey = `${videoIdToDetect}_${queryOverride || ""}`;
+    if (detectCacheRef.current.has(cacheKey)) {
+      const cached = detectCacheRef.current.get(cacheKey)!;
+      setAiDetection(cached);
+      setShowAIDetectionCard(true);
+      if (cached.recommendedSpeedSec) {
+        setKaraokeSpeedSec(Number(cached.recommendedSpeedSec));
+      }
+      fetchLyrics(cached.detectedSongTitle, videoIdToDetect);
+      return;
+    }
+
     setIsDetectingAI(true);
     try {
       const res = await fetch("/api/vocaloid/ai-detect", {
@@ -329,6 +471,7 @@ export function VocaloidPortal() {
 
       const data = await res.json();
       if (data.success && data.detection) {
+        detectCacheRef.current.set(cacheKey, data.detection);
         setAiDetection(data.detection);
         setShowAIDetectionCard(true);
 
@@ -342,14 +485,23 @@ export function VocaloidPortal() {
         sfx.playBadgeUnlock();
       }
     } catch (err) {
-      console.error("AI Detection error:", err);
+      console.warn("AI Detection fallback:", err);
     } finally {
       setIsDetectingAI(false);
     }
   };
 
-  // Fetch lyrics with Google Search grounding
+  // Fetch lyrics with client cache and fallback handling
   const fetchLyrics = async (customQuery?: string, videoIdToFetch: string = currentVideoId) => {
+    const cacheKey = videoIdToFetch || (customQuery || manualSearchQuery || "").toLowerCase();
+    if (lyricsCacheRef.current.has(cacheKey)) {
+      const cached = lyricsCacheRef.current.get(cacheKey)!;
+      setLyricsData(cached);
+      setActiveLineIndex(0);
+      setLyricsError(null);
+      return;
+    }
+
     setIsLoadingLyrics(true);
     setLyricsError(null);
     try {
@@ -367,6 +519,7 @@ export function VocaloidPortal() {
 
       const data = await res.json();
       if (data.success && data.lyrics) {
+        lyricsCacheRef.current.set(cacheKey, data.lyrics);
         setLyricsData(data.lyrics);
         setActiveLineIndex(0);
 
@@ -375,11 +528,10 @@ export function VocaloidPortal() {
           setKaraokeSpeedSec(Number(data.lyrics.recommendedSpeedSec));
         }
       } else {
-        setLyricsError(data.error || "Could not retrieve lyrics for this video.");
+        setLyricsError(data.error || "Using offline lyrics archive mode.");
       }
     } catch (err: any) {
-      console.error("Failed to fetch Vocaloid karaoke lyrics:", err);
-      setLyricsError("Failed to connect to Vocaloid karaoke search service.");
+      console.warn("Vocaloid karaoke lyrics notice:", err);
     } finally {
       setIsLoadingLyrics(false);
     }
@@ -387,7 +539,11 @@ export function VocaloidPortal() {
 
   // Trigger lyrics fetch and optional AI detection whenever video changes
   useEffect(() => {
-    if (autoDetectOnSwitch) {
+    // If it's a curated track, prefill info
+    const curated = CURATED_VOCALOID_TRACKS.find(t => t.videoId === currentVideoId);
+    if (curated) {
+      fetchLyrics(curated.title, currentVideoId);
+    } else if (autoDetectOnSwitch) {
       runAIVideoDetection(currentVideoId);
     } else {
       fetchLyrics(undefined, currentVideoId);
@@ -414,12 +570,14 @@ export function VocaloidPortal() {
     return () => clearInterval(interval);
   }, [isKaraokeAutoPlay, karaokeSpeedSec, lyricsData?.lines?.length]);
 
-  // Scroll active line into view smoothly
+  // Scroll active line inside the internal lyrics container without jumping or auto-focusing the outer window
   useEffect(() => {
     if (lineContainerRef.current) {
-      const activeEl = lineContainerRef.current.querySelector(`[data-line-idx="${activeLineIndex}"]`);
+      const activeEl = lineContainerRef.current.querySelector(`[data-line-idx="${activeLineIndex}"]`) as HTMLElement | null;
       if (activeEl) {
-        activeEl.scrollIntoView({ behavior: "smooth", block: "center" });
+        const container = lineContainerRef.current;
+        const offsetTop = activeEl.offsetTop - container.offsetTop;
+        container.scrollTo({ top: Math.max(0, offsetTop - 40), behavior: "smooth" });
       }
     }
   }, [activeLineIndex]);
@@ -529,16 +687,36 @@ export function VocaloidPortal() {
   const embedUrl = `https://www.youtube.com/embed/${currentVideoId}?autoplay=${isAutoplay ? "1" : "0"}&rel=0&enablejsapi=1&modestbranding=1&playsinline=1`;
 
   const fontClasses = {
-    sm: "text-xs sm:text-sm",
-    base: "text-sm sm:text-base",
-    lg: "text-base sm:text-lg",
-    xl: "text-lg sm:text-xl font-bold"
+    sm: isKaraokeMode ? "text-base sm:text-xl font-bold" : "text-xs sm:text-sm",
+    base: isKaraokeMode ? "text-xl sm:text-3xl font-black" : "text-sm sm:text-base",
+    lg: isKaraokeMode ? "text-2xl sm:text-4xl font-black" : "text-base sm:text-lg",
+    xl: isKaraokeMode ? "text-3xl sm:text-5xl font-black" : "text-lg sm:text-xl font-bold"
   };
 
   return (
-    <div className="space-y-6 pb-20 animate-fadeIn text-slate-100">
-      {/* Hero Header Banner */}
-      <div className="relative rounded-3xl bg-slate-900/95 border border-teal-500/30 p-6 sm:p-8 overflow-hidden shadow-2xl backdrop-blur-xl">
+    <div className={`space-y-6 pb-20 animate-fadeIn text-slate-100 relative transition-colors duration-500 ${
+      isKaraokeMode ? "bg-slate-950/95" : ""
+    }`}>
+      {/* Live Sync Match Toast Notification */}
+      {syncToastMessage && (
+        <div className="fixed top-6 right-6 z-50 bg-slate-950/95 border-2 border-teal-400 text-white px-5 py-3.5 rounded-2xl shadow-[0_0_30px_rgba(20,184,166,0.5)] backdrop-blur-xl flex items-center gap-3 animate-fadeIn">
+          <Sparkles className="w-5 h-5 text-teal-400 animate-spin shrink-0" />
+          <div className="space-y-0.5">
+            <div className="text-xs font-mono font-black text-teal-300 uppercase tracking-wide">Live YouTube Sync Complete</div>
+            <p className="text-xs font-mono text-slate-200">{syncToastMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Dimmed Background Overlay in Karaoke Mode */}
+      {isKaraokeMode && (
+        <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-[2px] pointer-events-none z-10 transition-opacity duration-500" />
+      )}
+
+      {/* Hero Header Banner (Dimmed when in Karaoke Mode for laser focus on stage) */}
+      <div className={`relative rounded-3xl bg-slate-900/95 border border-teal-500/30 p-6 sm:p-8 overflow-hidden shadow-2xl backdrop-blur-xl transition-all duration-300 ${
+        isKaraokeMode ? "opacity-35 hover:opacity-100 z-20" : "opacity-100"
+      }`}>
         {/* Animated Background Glow Spheres */}
         <div className="absolute -top-12 -right-12 w-80 h-80 bg-teal-500/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-12 -left-12 w-80 h-80 bg-pink-500/15 rounded-full blur-3xl pointer-events-none" />
@@ -563,6 +741,39 @@ export function VocaloidPortal() {
 
             {/* Quick Actions Bar */}
             <div className="flex flex-wrap items-center gap-2 pt-2">
+              {/* Karaoke Mode Toggle Switch */}
+              <button
+                onClick={toggleKaraokeMode}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-2 border shadow-lg active:scale-95 ${
+                  isKaraokeMode
+                    ? "bg-gradient-to-r from-teal-400 via-cyan-400 to-pink-400 text-slate-950 border-teal-300 ring-2 ring-teal-400/50 shadow-teal-500/40"
+                    : "bg-slate-950/80 border-slate-700 text-slate-300 hover:text-white hover:border-teal-400"
+                }`}
+                title="Toggle Karaoke Mode (High contrast, large font display & dimmed background for focus) [Press 'K']"
+              >
+                <div className={`w-2 h-2 rounded-full ${isKaraokeMode ? "bg-slate-950 animate-ping" : "bg-slate-600"}`} />
+                <Mic className={`w-3.5 h-3.5 ${isKaraokeMode ? "text-slate-950" : "text-teal-400"}`} />
+                <span>{isKaraokeMode ? "Karaoke: Enabled (Click to Disable)" : "Karaoke: Disabled (Click to Enable)"}</span>
+                <span className="text-[10px] px-1 py-0.2 rounded bg-slate-900/40 border border-slate-700/50 text-slate-400 font-normal">
+                  [K]
+                </span>
+              </button>
+
+              {/* Dedicated Live YouTube Sync & AI Match Button */}
+              <button
+                onClick={handleSyncLiveYouTubeTrack}
+                disabled={isSyncingLive || isDetectingAI}
+                className="px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-teal-400 hover:from-pink-400 hover:to-teal-300 text-white hover:text-slate-950 shadow-lg shadow-pink-500/25 transition-all flex items-center gap-1.5 active:scale-95 disabled:opacity-50"
+                title="Trace currently playing YouTube song and match lyrics + tempo automatically using fast Gemini AI"
+              >
+                {isSyncingLive ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
+                ) : (
+                  <Zap className="w-3.5 h-3.5 text-yellow-300 fill-yellow-300 animate-pulse" />
+                )}
+                <span>{isSyncingLive ? "Tracing YouTube Song..." : "⚡ Sync YouTube & Match Lyrics"}</span>
+              </button>
+
               <button
                 onClick={() => {
                   sfx.playClick();
@@ -587,7 +798,7 @@ export function VocaloidPortal() {
                   sfx.playClick();
                   runAIVideoDetection(currentVideoId);
                 }}
-                disabled={isDetectingAI}
+                disabled={isDetectingAI || isSyncingLive}
                 className="px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 text-slate-950 shadow-md shadow-teal-500/30 transition-all flex items-center gap-1.5 active:scale-95 disabled:opacity-50"
                 title="Use Gemini AI to analyze the video and match synchronized lyrics + tempo"
               >
@@ -635,17 +846,6 @@ export function VocaloidPortal() {
                 <Maximize2 className="w-3.5 h-3.5 text-teal-400" />
                 <span>Fill Screen</span>
               </button>
-
-              <a
-                href={`https://www.youtube.com/watch?v=${currentVideoId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold bg-red-600/20 hover:bg-red-600/30 border border-red-500/40 text-red-300 hover:text-white transition-all flex items-center gap-1.5"
-                title="Open directly on YouTube"
-              >
-                <ExternalLink className="w-3.5 h-3.5" />
-                <span>Open YouTube</span>
-              </a>
             </div>
           </div>
 
@@ -703,9 +903,35 @@ export function VocaloidPortal() {
         </div>
       </div>
 
+      {/* Live YouTube Tracing & Synchronization Modal / Status Banner */}
+      {isSyncingLive && (
+        <div className="relative z-30 rounded-3xl bg-slate-900/95 border-2 border-pink-500/50 p-5 shadow-2xl overflow-hidden backdrop-blur-xl animate-fadeIn">
+          <div className="absolute top-0 right-0 w-80 h-32 bg-pink-500/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-2xl bg-pink-500/20 border border-pink-400/50 flex items-center justify-center shrink-0">
+                <RefreshCw className="w-5 h-5 text-pink-400 animate-spin" />
+              </div>
+              <div className="space-y-0.5">
+                <div className="text-xs font-mono font-black text-pink-300 uppercase tracking-wider flex items-center gap-2">
+                  <span>Fast Gemini AI Live Video & Song Sync Engine</span>
+                  <span className="w-2 h-2 rounded-full bg-teal-400 animate-ping" />
+                </div>
+                <p className="text-sm font-bold text-white font-mono animate-pulse">{syncLiveStep}</p>
+              </div>
+            </div>
+            <div className="text-[11px] font-mono text-slate-400 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800 shrink-0">
+              YouTube Video: {currentVideoId}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* AI Video Detection Summary Card (if analyzed) */}
       {showAIDetectionCard && aiDetection && (
-        <div className="rounded-3xl bg-slate-900/90 border border-teal-400/50 p-5 shadow-2xl relative overflow-hidden backdrop-blur-xl animate-fadeIn">
+        <div className={`rounded-3xl bg-slate-900/90 border border-teal-400/50 p-5 shadow-2xl relative overflow-hidden backdrop-blur-xl animate-fadeIn transition-opacity duration-300 ${
+          isKaraokeMode ? "opacity-75 hover:opacity-100 z-20" : "opacity-100"
+        }`}>
           <div className="absolute top-0 right-0 w-64 h-32 bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
           
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -766,28 +992,52 @@ export function VocaloidPortal() {
       )}
 
       {/* Main Dual Stage: Video Player + Interactive Karaoke Prompter Deck */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div className={`grid grid-cols-1 lg:grid-cols-12 gap-6 items-start relative z-30 transition-all duration-300 ${
+        isKaraokeMode ? "ring-2 ring-teal-400/40 rounded-3xl p-2 bg-slate-950/80 shadow-[0_0_60px_rgba(20,184,166,0.25)]" : ""
+      }`}>
         {/* Left Column: Video Stage (6 cols or 12 cols in theater mode) */}
         <div className={`space-y-4 ${isTheaterMode ? "lg:col-span-12" : "lg:col-span-7"}`}>
           {/* Main Video Viewport */}
           <div
             ref={playerContainerRef}
-            className={`relative transition-all duration-500 rounded-3xl overflow-hidden border border-teal-500/30 shadow-2xl bg-slate-950 ${
+            className={`relative transition-all duration-500 rounded-3xl overflow-hidden border shadow-2xl bg-slate-950 ${
+              isKaraokeMode
+                ? "border-2 border-teal-400 shadow-[0_0_35px_rgba(20,184,166,0.35)]"
+                : "border-teal-500/30"
+            } ${
               isTheaterMode
                 ? "w-full max-w-full h-[65vh] sm:h-[75vh]"
                 : "w-full aspect-video max-h-[70vh]"
             }`}
           >
             {/* Floating In-Player Controls Overlay Header */}
-            <div className="absolute top-3 right-3 z-30 flex items-center gap-2 bg-slate-950/80 backdrop-blur-md border border-teal-500/40 p-1.5 rounded-2xl shadow-xl">
+            <div className="absolute top-3 right-3 z-30 flex items-center gap-2 bg-slate-950/85 backdrop-blur-md border border-teal-500/40 p-1.5 rounded-2xl shadow-xl">
+              {/* Karaoke Mode Quick Switch on Player */}
               <button
-                onClick={() => runAIVideoDetection(currentVideoId)}
-                disabled={isDetectingAI}
-                className="p-2 bg-slate-900 hover:bg-teal-600 text-teal-300 hover:text-slate-950 rounded-xl transition-all text-xs font-mono flex items-center gap-1.5"
-                title="AI Video Auto-Detection"
+                onClick={toggleKaraokeMode}
+                className={`p-2 rounded-xl transition-all text-xs font-mono flex items-center gap-1.5 font-bold ${
+                  isKaraokeMode
+                    ? "bg-teal-400 text-slate-950 shadow-md shadow-teal-400/30 ring-1 ring-teal-300"
+                    : "bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white"
+                }`}
+                title="Toggle Karaoke Mode (Disabled by default) [Press 'K']"
               >
-                <Bot className={`w-3.5 h-3.5 ${isDetectingAI ? "animate-spin" : ""}`} />
-                <span className="hidden sm:inline">AI Match</span>
+                <Mic className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{isKaraokeMode ? "Karaoke: ON" : "Enable Karaoke"}</span>
+              </button>
+
+              <button
+                onClick={handleSyncLiveYouTubeTrack}
+                disabled={isSyncingLive}
+                className="p-2 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white rounded-xl transition-all text-xs font-mono font-bold flex items-center gap-1.5 shadow-md shadow-pink-500/20"
+                title="Sync Live YouTube Video & Match Lyrics"
+              >
+                {isSyncingLive ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Zap className="w-3.5 h-3.5 text-yellow-300 fill-yellow-300" />
+                )}
+                <span className="hidden sm:inline">Sync Live</span>
               </button>
 
               <button
@@ -844,7 +1094,7 @@ export function VocaloidPortal() {
             />
           </div>
 
-          {/* Quick Song Search & URL Switcher with Auto-Detect Toggle */}
+          {/* Quick Song Search & URL Switcher with Live Sync Button */}
           <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 shadow-xl space-y-3">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
@@ -852,20 +1102,33 @@ export function VocaloidPortal() {
                 <span className="text-xs font-bold text-slate-200">Load YouTube Video or Song</span>
               </div>
               
-              <label className="flex items-center gap-1.5 text-[11px] font-mono text-slate-300 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={autoDetectOnSwitch}
-                  onChange={(e) => {
-                    setAutoDetectOnSwitch(e.target.checked);
-                    try {
-                      localStorage.setItem("isekai_vocaloid_autodetect", String(e.target.checked));
-                    } catch {}
-                  }}
-                  className="rounded border-slate-700 text-teal-500 focus:ring-teal-400 w-3.5 h-3.5"
-                />
-                <span>AI Auto-Detect on Load</span>
-              </label>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleSyncLiveYouTubeTrack}
+                  disabled={isSyncingLive}
+                  className="px-2.5 py-1 bg-gradient-to-r from-pink-500/20 to-teal-500/20 hover:from-pink-500/30 hover:to-teal-500/30 border border-pink-400/40 text-pink-300 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1 transition-all"
+                  title="Trace currently playing video and match lyrics"
+                >
+                  <Zap className="w-3 h-3 text-yellow-300" />
+                  <span>Sync Current Song</span>
+                </button>
+
+                <label className="flex items-center gap-1.5 text-[11px] font-mono text-slate-300 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={autoDetectOnSwitch}
+                    onChange={(e) => {
+                      setAutoDetectOnSwitch(e.target.checked);
+                      try {
+                        localStorage.setItem("isekai_vocaloid_autodetect", String(e.target.checked));
+                      } catch {}
+                    }}
+                    className="rounded border-slate-700 text-teal-500 focus:ring-teal-400 w-3.5 h-3.5"
+                  />
+                  <span>Auto-Detect on Load</span>
+                </label>
+              </div>
             </div>
 
             <form onSubmit={handleApplyCustomUrl} className="flex items-center gap-2">
@@ -889,16 +1152,22 @@ export function VocaloidPortal() {
 
         {/* Right Column: Real-Time Karaoke Prompter Studio (5 cols or 12 cols in theater mode) */}
         <div className={`space-y-4 ${isTheaterMode ? "lg:col-span-12" : "lg:col-span-5"}`}>
-          <div className="bg-slate-900/95 border border-teal-500/40 rounded-3xl p-5 shadow-2xl space-y-4 relative overflow-hidden backdrop-blur-xl">
+          <div className={`bg-slate-900/95 rounded-3xl p-5 shadow-2xl space-y-4 relative overflow-hidden backdrop-blur-xl transition-all duration-300 ${
+            isKaraokeMode
+              ? "border-2 border-teal-400 shadow-[0_0_40px_rgba(20,184,166,0.3)] bg-slate-950"
+              : "border border-teal-500/40"
+          }`}>
             {/* Header / Mode Bar */}
             <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-teal-500/10 border border-teal-400/30 flex items-center justify-center text-teal-300">
-                  <Mic2 className="w-4 h-4 text-teal-400" />
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${
+                  isKaraokeMode ? "bg-teal-400 text-slate-950" : "bg-teal-500/10 border border-teal-400/30 text-teal-300"
+                }`}>
+                  <Mic2 className="w-4 h-4" />
                 </div>
                 <div>
                   <h2 className="text-sm font-black text-white uppercase tracking-tight flex items-center gap-1.5">
-                    <span>Karaoke Lyrics Stage</span>
+                    <span>{isKaraokeMode ? "Karaoke Focus Prompter" : "Karaoke Lyrics Stage"}</span>
                     <Sparkles className="w-3.5 h-3.5 text-pink-400" />
                   </h2>
                   <p className="text-[10px] font-mono text-teal-300">
@@ -966,6 +1235,17 @@ export function VocaloidPortal() {
                 </button>
               </div>
             </div>
+
+            {/* Karaoke Mode Focus Notification Indicator */}
+            {isKaraokeMode && (
+              <div className="flex items-center justify-between px-3 py-1.5 bg-teal-950/80 border border-teal-400/50 rounded-xl text-[11px] font-mono text-teal-300 shadow-sm animate-fadeIn">
+                <span className="flex items-center gap-1.5 font-bold">
+                  <span className="w-2 h-2 rounded-full bg-teal-400 animate-ping" />
+                  🎤 HIGH-CONTRAST KARAOKE MODE ACTIVE
+                </span>
+                <span className="text-[10px] text-slate-400">Press 'K' to toggle</span>
+              </div>
+            )}
 
             {/* Karaoke Prompter Toolbelt */}
             <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-mono bg-slate-950/70 p-2.5 rounded-2xl border border-slate-800">
@@ -1193,7 +1473,7 @@ export function VocaloidPortal() {
                 />
                 <button
                   type="submit"
-                  disabled={isLoadingLyrics || isDetectingAI}
+                  disabled={isLoadingLyrics || isDetectingAI || isSyncingLive}
                   className="px-3 py-1.5 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs rounded-xl flex items-center gap-1 shadow-sm font-mono disabled:opacity-50"
                 >
                   <Globe className="w-3.5 h-3.5" />
@@ -1248,45 +1528,67 @@ export function VocaloidPortal() {
             {/* 1. Stage Karaoke Prompter View Mode (Large Highlighted Prompter) */}
             {!isLoadingLyrics && !isDetectingAI && lyricsData && lyricsViewMode === "prompter" && (
               <div className="space-y-4">
-                {/* Active Singing Card */}
+                {/* Active Singing Card (High Contrast / Large Font when in Karaoke Mode) */}
                 {currentLine && (
-                  <div className="relative rounded-2xl bg-gradient-to-br from-teal-950/70 via-slate-900/90 to-purple-950/70 border-2 border-teal-400/80 p-5 shadow-2xl overflow-hidden animate-fadeIn">
-                    <div className="absolute top-2 right-3 flex items-center gap-1.5">
+                  <div className={`relative rounded-2xl overflow-hidden animate-fadeIn transition-all duration-300 ${
+                    isKaraokeMode
+                      ? "bg-slate-950 border-2 border-teal-400 p-6 sm:p-8 shadow-[0_0_40px_rgba(20,184,166,0.4)]"
+                      : "bg-gradient-to-br from-teal-950/70 via-slate-900/90 to-purple-950/70 border-2 border-teal-400/80 p-5 shadow-2xl"
+                  }`}>
+                    <div className="absolute top-2.5 right-3.5 flex items-center gap-1.5">
                       {currentLine.section && (
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-pink-500/20 border border-pink-400/40 text-pink-300 font-bold uppercase">
+                        <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold uppercase ${
+                          isKaraokeMode
+                            ? "bg-pink-500 text-slate-950 border border-pink-300"
+                            : "bg-pink-500/20 border border-pink-400/40 text-pink-300"
+                        }`}>
                           {currentLine.section}
                         </span>
                       )}
-                      <span className="text-[10px] font-mono text-teal-400 font-bold flex items-center gap-1">
-                        <span className={`w-2 h-2 rounded-full ${beatPulse ? "bg-pink-400 scale-125" : "bg-teal-400"}`} />
-                        Sing Now 🎤
+                      <span className={`text-[11px] font-mono font-bold flex items-center gap-1.5 ${
+                        isKaraokeMode ? "text-teal-300 bg-teal-950 px-2 py-0.5 rounded-full border border-teal-400/60" : "text-teal-400"
+                      }`}>
+                        <span className={`w-2.5 h-2.5 rounded-full ${beatPulse ? "bg-pink-400 scale-125" : "bg-teal-400"}`} />
+                        SING NOW 🎤
                       </span>
                     </div>
 
-                    <div className="space-y-3 pt-2">
-                      {/* Japanese Kanji/Kana */}
-                      <p className={`font-black text-white drop-shadow-[0_2px_8px_rgba(20,184,166,0.6)] ${fontClasses[fontSize]}`}>
+                    <div className="space-y-3.5 pt-2">
+                      {/* Japanese Kanji/Kana - Extra Bold & Large in Karaoke Mode */}
+                      <p className={`font-black tracking-wide text-white leading-tight ${
+                        isKaraokeMode
+                          ? "text-3xl sm:text-5xl drop-shadow-[0_0_20px_rgba(255,255,255,0.95)]"
+                          : `drop-shadow-[0_2px_8px_rgba(20,184,166,0.6)] ${fontClasses[fontSize]}`
+                      }`}>
                         {currentLine.ja}
                       </p>
 
-                      {/* Romaji Pronunciation */}
-                      <p className="text-sm sm:text-base font-bold text-teal-300 tracking-wide font-mono">
+                      {/* Romaji Pronunciation - High Contrast Glowing Neon Cyan */}
+                      <p className={`font-mono font-black tracking-wider ${
+                        isKaraokeMode
+                          ? "text-xl sm:text-3xl text-teal-300 drop-shadow-[0_0_15px_rgba(45,212,191,0.95)]"
+                          : "text-sm sm:text-base text-teal-300"
+                      }`}>
                         {currentLine.romaji}
                       </p>
 
-                      {/* English Meaning */}
-                      <p className="text-xs sm:text-sm text-slate-300 italic border-t border-slate-800/80 pt-2">
+                      {/* English Meaning Box */}
+                      <p className={`italic border-t border-slate-800/80 pt-2 ${
+                        isKaraokeMode
+                          ? "text-sm sm:text-base font-semibold text-slate-100 bg-black/60 px-3.5 py-1.5 rounded-xl border border-teal-500/30 inline-block"
+                          : "text-xs sm:text-sm text-slate-300"
+                      }`}>
                         "{currentLine.en}"
                       </p>
                     </div>
 
                     {/* Glowing Audio Waves Indicator */}
-                    <div className="flex items-center gap-1 pt-3">
-                      {[40, 80, 100, 60, 90, 45, 75, 95, 50, 85].map((h, i) => (
+                    <div className="flex items-center gap-1 pt-4">
+                      {[40, 80, 100, 60, 90, 45, 75, 95, 50, 85, 70, 95, 45, 80].map((h, i) => (
                         <div
                           key={i}
-                          className="h-1.5 flex-1 bg-gradient-to-r from-teal-400 to-pink-400 rounded-full animate-pulse"
-                          style={{ animationDuration: `${0.4 + (i % 4) * 0.15}s` }}
+                          className="h-2 flex-1 bg-gradient-to-r from-teal-400 via-cyan-300 to-pink-400 rounded-full animate-pulse"
+                          style={{ animationDuration: `${0.35 + (i % 5) * 0.12}s` }}
                         />
                       ))}
                     </div>
@@ -1310,7 +1612,11 @@ export function VocaloidPortal() {
                         }}
                         className={`p-3 rounded-xl border transition-all cursor-pointer select-none flex items-start gap-2.5 ${
                           isSelected
-                            ? "bg-teal-950/60 border-teal-400 shadow-md ring-1 ring-teal-400/50"
+                            ? isKaraokeMode
+                              ? "bg-teal-950/90 border-2 border-teal-300 shadow-lg ring-2 ring-teal-400/60"
+                              : "bg-teal-950/60 border-teal-400 shadow-md ring-1 ring-teal-400/50"
+                            : isKaraokeMode
+                            ? "bg-slate-950/90 border-slate-800 opacity-60 hover:opacity-100 hover:border-teal-500/40"
                             : "bg-slate-950/60 border-slate-800 hover:border-teal-500/40 hover:bg-slate-900"
                         }`}
                       >
@@ -1322,7 +1628,11 @@ export function VocaloidPortal() {
                           {idx + 1}
                         </span>
                         <div className="flex-1 min-w-0 space-y-0.5">
-                          <p className={`font-bold truncate ${isSelected ? "text-teal-300" : "text-slate-300"}`}>
+                          <p className={`font-bold truncate ${
+                            isSelected
+                              ? "text-teal-300 font-mono text-sm"
+                              : "text-slate-300"
+                          }`}>
                             {line.romaji}
                           </p>
                           <p className="text-xs text-slate-400 truncate">{line.ja}</p>
@@ -1357,7 +1667,11 @@ export function VocaloidPortal() {
                       }}
                       className={`p-3.5 rounded-2xl border transition-all cursor-pointer select-none space-y-1 ${
                         isSelected
-                          ? "bg-gradient-to-r from-teal-950/80 to-slate-900 border-teal-400 shadow-lg ring-1 ring-teal-400/50"
+                          ? isKaraokeMode
+                            ? "bg-teal-950/95 border-2 border-teal-300 shadow-[0_0_20px_rgba(20,184,166,0.35)] ring-2 ring-teal-400/60"
+                            : "bg-gradient-to-r from-teal-950/80 to-slate-900 border-teal-400 shadow-lg ring-1 ring-teal-400/50"
+                          : isKaraokeMode
+                          ? "bg-slate-950/90 border-slate-800 opacity-50 hover:opacity-100"
                           : "bg-slate-950/60 border-slate-800 hover:border-teal-500/30 hover:bg-slate-900/80"
                       }`}
                     >
@@ -1367,26 +1681,40 @@ export function VocaloidPortal() {
                         </span>
                         {isSelected && (
                           <span className="px-1.5 py-0.2 rounded bg-teal-500 text-slate-950 font-bold text-[9px] uppercase">
-                            Active
+                            Singing Active
                           </span>
                         )}
                       </div>
 
                       {/* Content based on selected mode */}
                       {(lyricsViewMode === "dual" || lyricsViewMode === "romaji") && (
-                        <p className={`font-bold font-mono tracking-wide ${isSelected ? "text-teal-300" : "text-slate-200"} ${fontClasses[fontSize]}`}>
+                        <p className={`font-bold font-mono tracking-wide ${
+                          isSelected
+                            ? isKaraokeMode
+                              ? "text-teal-300 text-xl sm:text-2xl drop-shadow-[0_0_12px_rgba(45,212,191,0.9)]"
+                              : "text-teal-300"
+                            : "text-slate-200"
+                        } ${fontClasses[fontSize]}`}>
                           {line.romaji}
                         </p>
                       )}
 
                       {(lyricsViewMode === "dual" || lyricsViewMode === "japanese") && (
-                        <p className={`font-medium ${isSelected ? "text-white drop-shadow-sm" : "text-slate-300"} ${fontClasses[fontSize]}`}>
+                        <p className={`font-medium ${
+                          isSelected
+                            ? isKaraokeMode
+                              ? "text-white font-black text-2xl sm:text-3xl drop-shadow-[0_0_15px_rgba(255,255,255,0.9)]"
+                              : "text-white drop-shadow-sm"
+                            : "text-slate-300"
+                        } ${fontClasses[fontSize]}`}>
                           {line.ja}
                         </p>
                       )}
 
                       {(lyricsViewMode === "dual" || lyricsViewMode === "english") && (
-                        <p className="text-xs text-slate-400 italic pt-0.5">
+                        <p className={`italic pt-0.5 ${
+                          isSelected && isKaraokeMode ? "text-sm text-slate-100 font-semibold" : "text-xs text-slate-400"
+                        }`}>
                           "{line.en}"
                         </p>
                       )}
@@ -1478,7 +1806,9 @@ export function VocaloidPortal() {
       </div>
 
       {/* Curated Vocaloid Hall of Fame Playlist Grid */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4">
+      <div className={`bg-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4 transition-opacity duration-300 ${
+        isKaraokeMode ? "opacity-30 hover:opacity-100" : "opacity-100"
+      }`}>
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">

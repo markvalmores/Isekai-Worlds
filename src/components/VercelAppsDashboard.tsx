@@ -48,6 +48,16 @@ interface VercelAppItem {
 
 const VERCEL_APPS: VercelAppItem[] = [
   {
+    id: "spiderman-the-verse",
+    title: "Spider-Man: The Verse",
+    url: "https://spidermantheverse.vercel.app/",
+    category: "Games",
+    description: "Multi-dimensional superhero universe interactive portal and action-packed Spider-Verse adventure.",
+    tags: ["Spider-Man", "Action", "Superheroes", "Multiverse"],
+    thumbnail: "https://api.microlink.io/?url=https%3A%2F%2Fspidermantheverse.vercel.app%2F&screenshot=true&meta=false&embed=screenshot.url",
+    featured: true
+  },
+  {
     id: "kawaii-dash",
     title: "Kawaii Dash",
     url: "https://kawaiidash.vercel.app/",

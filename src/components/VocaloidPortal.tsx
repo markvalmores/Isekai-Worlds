@@ -244,6 +244,122 @@ export function VocaloidPortal() {
   const [syncOffsetSec, setSyncOffsetSec] = useState<number>(0.0);
   const [showSpeedPanel, setShowSpeedPanel] = useState<boolean>(false);
   const [beatPulse, setBeatPulse] = useState<boolean>(false);
+
+  // Manual Lyrics / SRT / TXT Upload State
+  const [showManualLyricsModal, setShowManualLyricsModal] = useState<boolean>(false);
+  const [manualPasteText, setManualPasteText] = useState<string>("");
+  const [manualSongTitleInput, setManualSongTitleInput] = useState<string>("");
+
+  const parseManualLyricsInput = (rawText: string, songTitle: string = "Custom Song"): VocaloidLyricsData => {
+    const lines: KaraokeLine[] = [];
+    const rawLines = rawText.split(/\r?\n/);
+    const isSrt = rawText.includes("-->");
+    
+    if (isSrt) {
+      let currentId = 1;
+      let timeOffset = 5;
+      let textBuffer = "";
+      
+      for (let i = 0; i < rawLines.length; i++) {
+        const line = rawLines[i].trim();
+        if (line.includes("-->")) {
+          const parts = line.split("-->");
+          const startPart = parts[0].trim();
+          const timeParts = startPart.split(":");
+          if (timeParts.length >= 3) {
+            const hours = parseFloat(timeParts[0]) || 0;
+            const mins = parseFloat(timeParts[1]) || 0;
+            const secs = parseFloat(timeParts[2].replace(",", ".")) || 0;
+            timeOffset = Math.round((hours * 3600 + mins * 60 + secs) * 10) / 10;
+          }
+        } else if (line === "" || /^\d+$/.test(line)) {
+          if (textBuffer.trim()) {
+            lines.push({
+              id: String(currentId++),
+              section: "Custom SRT",
+              ja: textBuffer.trim(),
+              romaji: textBuffer.trim(),
+              en: textBuffer.trim(),
+              timeOffsetSec: timeOffset
+            });
+            textBuffer = "";
+          }
+        } else {
+          textBuffer += (textBuffer ? " " : "") + line;
+        }
+      }
+      if (textBuffer.trim()) {
+        lines.push({
+          id: String(currentId++),
+          section: "Custom SRT",
+          ja: textBuffer.trim(),
+          romaji: textBuffer.trim(),
+          en: textBuffer.trim(),
+          timeOffsetSec: timeOffset
+        });
+      }
+    } else {
+      const validLines = rawLines.filter(l => l.trim().length > 0);
+      validLines.forEach((l, idx) => {
+        lines.push({
+          id: String(idx + 1),
+          section: idx === 0 ? "Intro" : "Verse",
+          ja: l,
+          romaji: l,
+          en: l,
+          timeOffsetSec: 5 + idx * 4
+        });
+      });
+    }
+
+    return {
+      songTitle,
+      producer: "Manual Upload / Paste",
+      vocalist: "Virtual Singer",
+      bpm: 140,
+      recommendedSpeedSec: 5.0,
+      romajiLyrics: rawText,
+      japaneseLyrics: rawText,
+      englishLyrics: rawText,
+      lines: lines.length > 0 ? lines : [
+        { id: "1", section: "Intro", ja: rawText, romaji: rawText, en: rawText, timeOffsetSec: 5 }
+      ]
+    };
+  };
+
+  const handleApplyManualLyrics = () => {
+    if (!manualPasteText.trim()) return;
+    sfx.playBadgeUnlock();
+
+    const title = manualSongTitleInput.trim() || currentTrackInfo.title || "Custom Manual Lyrics";
+    const parsed = parseManualLyricsInput(manualPasteText, title);
+
+    lyricsCacheRef.current.set(currentVideoId, parsed);
+    setLyricsData(parsed);
+    setActiveLineIndex(0);
+    setIsKaraokeAutoPlay(true);
+    setShowManualLyricsModal(false);
+    setManualPasteText("");
+    setManualSongTitleInput("");
+    setSyncToastMessage("✍️ Manual lyrics & SRT successfully applied and matched!");
+    setTimeout(() => setSyncToastMessage(null), 4000);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      if (content) {
+        setManualPasteText(content);
+        if (!manualSongTitleInput) {
+          setManualSongTitleInput(file.name.replace(/\.[^/.]+$/, ""));
+        }
+      }
+    };
+    reader.readAsText(file);
+  };
   
   // AI Video Detection & Auto-Match State
   const [isDetectingAI, setIsDetectingAI] = useState<boolean>(false);
@@ -1344,8 +1460,8 @@ export function VocaloidPortal() {
           </div>
         </div>
 
-        {/* Right Column: Real-Time Karaoke Prompter Studio (5 cols or 12 cols in theater mode) */}
-        <div className={`space-y-4 ${isTheaterMode || !showLyricsDeck ? "lg:col-span-12" : "lg:col-span-5"}`}>
+        {/* Right Column: Real-Time Karaoke Prompter Studio (Expands to full width in Dark Stage Karaoke Mode) */}
+        <div className={`space-y-4 ${isTheaterMode || isKaraokeMode || !showLyricsDeck ? "lg:col-span-12" : "lg:col-span-5"}`}>
           {!showLyricsDeck ? (
             <div className="bg-slate-900/90 border border-dashed border-teal-500/40 rounded-3xl p-6 text-center shadow-xl backdrop-blur-xl animate-fadeIn space-y-4">
               <div className="inline-flex p-3 rounded-2xl bg-teal-500/10 border border-teal-400/30 text-teal-400">
@@ -1379,11 +1495,19 @@ export function VocaloidPortal() {
               </div>
             </div>
           ) : (
-            <div className={`bg-slate-900/95 rounded-3xl p-5 shadow-2xl space-y-4 relative overflow-hidden backdrop-blur-xl transition-all duration-300 ${
+            <div className={`bg-slate-900/95 rounded-3xl p-5 sm:p-7 shadow-2xl space-y-4 relative overflow-hidden backdrop-blur-xl transition-all duration-500 ${
               isKaraokeMode
-                ? "border-2 border-teal-400 shadow-[0_0_40px_rgba(20,184,166,0.3)] bg-slate-950"
+                ? "border-2 border-teal-400 shadow-[0_0_80px_rgba(20,184,166,0.45)] bg-slate-950 ring-4 ring-teal-400/20"
                 : "border border-teal-500/40"
             }`}>
+              {/* Soft Spotlight Glow Effect Behind Lyrics Text in Dark Stage Karaoke Mode */}
+              {isKaraokeMode && (
+                <div className="absolute inset-0 bg-gradient-to-t from-teal-500/35 via-cyan-500/20 to-transparent blur-3xl rounded-3xl animate-spotlight pointer-events-none z-0" />
+              )}
+
+              {/* Prompter Content Wrapper with relative z-10 over spotlight glow */}
+              <div className="relative z-10 space-y-4">
+
               {/* Header / Mode Bar */}
               <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800">
                 <div className="flex items-center gap-2">
@@ -1402,6 +1526,17 @@ export function VocaloidPortal() {
                     </p>
                   </div>
                 </div>
+
+                <div className="flex items-center gap-2">
+                  {/* Manual Lyrics / SRT Upload Button */}
+                  <button
+                    onClick={() => { sfx.playClick(); setShowManualLyricsModal(true); }}
+                    className="px-3 py-1.5 bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-sm"
+                    title="Paste or upload SRT/TXT lyrics that match your video"
+                  >
+                    <BookOpen className="w-3.5 h-3.5 text-teal-400" />
+                    <span>✍️ Paste / Upload SRT</span>
+                  </button>
 
                 {/* View Mode Switcher and Hide Toggle */}
                 <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-[11px] font-mono">
@@ -1469,6 +1604,7 @@ export function VocaloidPortal() {
                   </button>
                 </div>
               </div>
+            </div>
 
             {/* Karaoke Mode Focus Notification Indicator */}
             {isKaraokeMode && (
@@ -2035,15 +2171,15 @@ export function VocaloidPortal() {
                 )}
               </div>
             )}
-          </div>
+              </div>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Curated Vocaloid Hall of Fame Playlist Grid */}
-      <div className={`bg-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4 transition-opacity duration-300 ${
-        isKaraokeMode ? "opacity-30 hover:opacity-100" : "opacity-100"
-      }`}>
+      {/* Curated Vocaloid Hall of Fame Playlist Grid (Hidden in Dark Stage Karaoke Mode) */}
+      {!isKaraokeMode && (
+        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4 animate-fadeIn">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
@@ -2121,6 +2257,83 @@ export function VocaloidPortal() {
           })}
         </div>
       </div>
+      )}
+
+      {/* Manual Lyrics & SRT / TXT Upload Modal */}
+      {showManualLyricsModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-slate-900 border-2 border-teal-500/50 rounded-3xl p-6 sm:p-8 max-w-xl w-full shadow-2xl space-y-5 relative">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2.5 rounded-2xl bg-teal-500/10 border border-teal-500/30 text-teal-400">
+                  <BookOpen className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-white uppercase tracking-tight">Manual Lyrics & SRT / TXT Importer</h3>
+                  <p className="text-xs text-slate-400 font-mono">Upload an SRT/TXT file or paste raw lyrics to match your video</p>
+                </div>
+              </div>
+              <button
+                onClick={() => { sfx.playClick(); setShowManualLyricsModal(false); }}
+                className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-mono text-slate-300 uppercase tracking-wider mb-1.5">
+                  Song Title (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={manualSongTitleInput}
+                  onChange={(e) => setManualSongTitleInput(e.target.value)}
+                  placeholder="e.g. Hatsune Miku - Custom Track"
+                  className="w-full bg-slate-950 border border-slate-800 focus:border-teal-400 rounded-xl px-4 py-2.5 text-sm text-white font-mono outline-none transition-colors"
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-mono text-slate-300 uppercase tracking-wider">
+                    Upload SRT or TXT File
+                  </label>
+                  <label className="cursor-pointer text-xs font-mono text-teal-400 hover:text-teal-300 bg-teal-500/10 px-3 py-1 rounded-lg border border-teal-500/30 transition-all">
+                    Browse File...
+                    <input type="file" accept=".srt,.txt" onChange={handleFileUpload} className="hidden" />
+                  </label>
+                </div>
+                <textarea
+                  rows={8}
+                  value={manualPasteText}
+                  onChange={(e) => setManualPasteText(e.target.value)}
+                  placeholder="Paste lyrics here or paste SRT subtitle content with timestamps (e.g. 00:01:20,123 --> 00:01:25,456)..."
+                  className="w-full bg-slate-950 border border-slate-800 focus:border-teal-400 rounded-2xl p-4 text-xs font-mono text-slate-200 outline-none resize-none transition-colors leading-relaxed"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  onClick={() => { sfx.playClick(); setShowManualLyricsModal(false); }}
+                  className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono font-bold transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleApplyManualLyrics}
+                  disabled={!manualPasteText.trim()}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-teal-400 via-cyan-400 to-pink-500 hover:from-teal-300 hover:to-pink-400 text-slate-950 text-xs font-mono font-bold shadow-lg shadow-teal-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>Apply & Sync to Video</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

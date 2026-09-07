@@ -32,12 +32,22 @@ import {
   BookOpen,
   Info,
   Sliders,
+  SlidersHorizontal,
   Type,
   PartyPopper,
   Zap,
   Activity,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  Bot,
+  Wand2,
+  Timer,
+  Gauge,
+  RefreshCw,
+  Cpu,
+  Settings2,
+  CheckCircle2,
+  AlertCircle
 } from "lucide-react";
 import { sfx } from "../utils/sfx";
 
@@ -67,12 +77,27 @@ interface VocaloidLyricsData {
   songTitle: string;
   producer: string;
   vocalist: string;
+  bpm?: number;
+  recommendedSpeedSec?: number;
   romajiLyrics: string;
   japaneseLyrics: string;
   englishLyrics: string;
   lines: KaraokeLine[];
   trivia?: string;
   sources?: Array<{ title: string; uri: string }>;
+}
+
+interface AIDetectionResult {
+  detectedSongTitle: string;
+  producer: string;
+  vocalist: string;
+  vocalistColor?: string;
+  genre: string;
+  bpm: number;
+  recommendedSpeedSec: number;
+  confidence: number;
+  mood: string;
+  summary: string;
 }
 
 const DEFAULT_VIDEO_ID = "h4hy2Gn-FVE";
@@ -209,7 +234,29 @@ export function VocaloidPortal() {
   const [lyricsError, setLyricsError] = useState<string | null>(null);
   const [activeLineIndex, setActiveLineIndex] = useState<number>(0);
   const [isKaraokeAutoPlay, setIsKaraokeAutoPlay] = useState<boolean>(true);
-  const [karaokeSpeedSec, setKaraokeSpeedSec] = useState<number>(6);
+  
+  // Speed Adjustment & Tempo Sync Controls
+  const [karaokeSpeedSec, setKaraokeSpeedSec] = useState<number>(5.5);
+  const [syncOffsetSec, setSyncOffsetSec] = useState<number>(0.0);
+  const [showSpeedPanel, setShowSpeedPanel] = useState<boolean>(false);
+  const [beatPulse, setBeatPulse] = useState<boolean>(false);
+  
+  // AI Video Detection & Auto-Match State
+  const [isDetectingAI, setIsDetectingAI] = useState<boolean>(false);
+  const [aiDetection, setAiDetection] = useState<AIDetectionResult | null>(null);
+  const [showAIDetectionCard, setShowAIDetectionCard] = useState<boolean>(false);
+  const [autoDetectOnSwitch, setAutoDetectOnSwitch] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("isekai_vocaloid_autodetect") !== "false";
+    } catch {
+      return true;
+    }
+  });
+
+  // Tap Tempo state
+  const tapTimesRef = useRef<number[]>([]);
+
+  // UI View Modes
   const [lyricsViewMode, setLyricsViewMode] = useState<"prompter" | "dual" | "romaji" | "japanese" | "english" | "fulltext">("prompter");
   const [fontSize, setFontSize] = useState<"sm" | "base" | "lg" | "xl">("base");
   const [manualSearchQuery, setManualSearchQuery] = useState<string>("");
@@ -256,10 +303,10 @@ export function VocaloidPortal() {
     (t) => t.videoId === currentVideoId
   ) || {
     id: "custom",
-    title: "Custom Vocaloid Concert Stream",
-    artist: "Vocaloid Synthesizer Engine",
-    producer: "Custom URL Player",
-    vocalist: "Virtual Singer",
+    title: aiDetection?.detectedSongTitle || "Custom Vocaloid Concert Stream",
+    artist: aiDetection?.producer ? `${aiDetection.producer} feat. ${aiDetection.vocalist}` : "Vocaloid Synthesizer Engine",
+    producer: aiDetection?.producer || "Custom URL Player",
+    vocalist: aiDetection?.vocalist || "Virtual Singer",
     videoId: currentVideoId,
     thumb: `https://img.youtube.com/vi/${currentVideoId}/hqdefault.jpg`,
     tag: "✨ Custom Track",
@@ -267,8 +314,42 @@ export function VocaloidPortal() {
     year: "Live"
   };
 
+  // Run AI Video Detection & Metadata Extraction
+  const runAIVideoDetection = async (videoIdToDetect: string = currentVideoId, queryOverride?: string) => {
+    setIsDetectingAI(true);
+    try {
+      const res = await fetch("/api/vocaloid/ai-detect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          videoId: videoIdToDetect,
+          userQuery: queryOverride || undefined
+        })
+      });
+
+      const data = await res.json();
+      if (data.success && data.detection) {
+        setAiDetection(data.detection);
+        setShowAIDetectionCard(true);
+
+        // Auto-apply recommended speed if detected
+        if (data.detection.recommendedSpeedSec) {
+          setKaraokeSpeedSec(Number(data.detection.recommendedSpeedSec));
+        }
+
+        // Fetch matched lyrics using the newly detected title & producer
+        fetchLyrics(data.detection.detectedSongTitle, videoIdToDetect);
+        sfx.playBadgeUnlock();
+      }
+    } catch (err) {
+      console.error("AI Detection error:", err);
+    } finally {
+      setIsDetectingAI(false);
+    }
+  };
+
   // Fetch lyrics with Google Search grounding
-  const fetchLyrics = async (customQuery?: string) => {
+  const fetchLyrics = async (customQuery?: string, videoIdToFetch: string = currentVideoId) => {
     setIsLoadingLyrics(true);
     setLyricsError(null);
     try {
@@ -276,8 +357,8 @@ export function VocaloidPortal() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          videoId: currentVideoId,
-          title: currentTrackInfo.title,
+          videoId: videoIdToFetch,
+          title: customQuery || currentTrackInfo.title,
           artist: currentTrackInfo.artist,
           producer: currentTrackInfo.producer,
           query: customQuery || manualSearchQuery || undefined
@@ -288,6 +369,11 @@ export function VocaloidPortal() {
       if (data.success && data.lyrics) {
         setLyricsData(data.lyrics);
         setActiveLineIndex(0);
+
+        // Auto-calibrate speed if provided by lyrics response and not manually overridden
+        if (data.lyrics.recommendedSpeedSec && !aiDetection) {
+          setKaraokeSpeedSec(Number(data.lyrics.recommendedSpeedSec));
+        }
       } else {
         setLyricsError(data.error || "Could not retrieve lyrics for this video.");
       }
@@ -299,23 +385,31 @@ export function VocaloidPortal() {
     }
   };
 
-  // Trigger lyrics fetch whenever video changes
+  // Trigger lyrics fetch and optional AI detection whenever video changes
   useEffect(() => {
-    fetchLyrics();
+    if (autoDetectOnSwitch) {
+      runAIVideoDetection(currentVideoId);
+    } else {
+      fetchLyrics(undefined, currentVideoId);
+    }
   }, [currentVideoId]);
 
-  // Karaoke Auto-Advance Timer
+  // Karaoke Auto-Advance Timer with Speed Calibration
   useEffect(() => {
     if (!isKaraokeAutoPlay || !lyricsData?.lines?.length) return;
 
+    const intervalMs = Math.max(800, karaokeSpeedSec * 1000);
     const interval = setInterval(() => {
+      setBeatPulse(true);
+      setTimeout(() => setBeatPulse(false), 200);
+
       setActiveLineIndex((prev) => {
         if (prev >= lyricsData.lines.length - 1) {
           return 0; // Loop back to start of song
         }
         return prev + 1;
       });
-    }, karaokeSpeedSec * 1000);
+    }, intervalMs);
 
     return () => clearInterval(interval);
   }, [isKaraokeAutoPlay, karaokeSpeedSec, lyricsData?.lines?.length]);
@@ -333,6 +427,7 @@ export function VocaloidPortal() {
   const handleSelectTrack = (track: VocaloidTrack) => {
     sfx.playClick();
     setCurrentVideoId(track.videoId);
+    setAiDetection(null);
     try {
       localStorage.setItem("isekai_vocaloid_video_id", track.videoId);
     } catch {}
@@ -345,6 +440,7 @@ export function VocaloidPortal() {
     sfx.playBadgeUnlock();
     const resolvedId = extractVideoId(customInput);
     setCurrentVideoId(resolvedId);
+    setAiDetection(null);
     try {
       localStorage.setItem("isekai_vocaloid_video_id", resolvedId);
     } catch {}
@@ -355,7 +451,7 @@ export function VocaloidPortal() {
     e.preventDefault();
     if (!manualSearchQuery.trim()) return;
     sfx.playClick();
-    fetchLyrics(manualSearchQuery.trim());
+    runAIVideoDetection(currentVideoId, manualSearchQuery.trim());
   };
 
   const handleToggleFullscreen = () => {
@@ -387,7 +483,7 @@ export function VocaloidPortal() {
     sfx.playClick();
     if (!lyricsData) return;
 
-    const fullText = `=== ${lyricsData.songTitle} ===\nVocalist: ${lyricsData.vocalist} | Producer: ${lyricsData.producer}\n\n[ROMAJI]\n${lyricsData.romajiLyrics}\n\n[JAPANESE]\n${lyricsData.japaneseLyrics}\n\n[ENGLISH]\n${lyricsData.englishLyrics}`;
+    const fullText = `=== ${lyricsData.songTitle} ===\nVocalist: ${lyricsData.vocalist} | Producer: ${lyricsData.producer}\nTempo Pace: ${karaokeSpeedSec}s / verse\n\n[ROMAJI]\n${lyricsData.romajiLyrics}\n\n[JAPANESE]\n${lyricsData.japaneseLyrics}\n\n[ENGLISH]\n${lyricsData.englishLyrics}`;
 
     if (navigator.clipboard) {
       navigator.clipboard.writeText(fullText);
@@ -402,9 +498,33 @@ export function VocaloidPortal() {
     setTimeout(() => setCheerEffect(false), 2200);
   };
 
+  // Tap tempo handler
+  const handleTapTempo = () => {
+    sfx.playClick();
+    const now = Date.now();
+    const taps = tapTimesRef.current.filter((t) => now - t < 3000);
+    taps.push(now);
+    tapTimesRef.current = taps;
+
+    if (taps.length >= 2) {
+      const intervals = [];
+      for (let i = 1; i < taps.length; i++) {
+        intervals.push(taps[i] - taps[i - 1]);
+      }
+      const avgIntervalMs = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+      // Convert beat interval to verse scroll pace (approx 4-8 beats per verse)
+      const measuredVerseSec = Math.max(1.5, Math.min(12.0, (avgIntervalMs * 4) / 1000));
+      const rounded = Math.round(measuredVerseSec * 10) / 10;
+      setKaraokeSpeedSec(rounded);
+    }
+  };
+
   const currentLine = lyricsData?.lines?.[activeLineIndex];
   const totalLines = lyricsData?.lines?.length || 1;
   const progressPercent = Math.round(((activeLineIndex + 1) / totalLines) * 100);
+
+  // Approximate BPM estimation for the current verse pace
+  const calculatedApproxBpm = Math.round((60 / karaokeSpeedSec) * 4);
 
   const embedUrl = `https://www.youtube.com/embed/${currentVideoId}?autoplay=${isAutoplay ? "1" : "0"}&rel=0&enablejsapi=1&modestbranding=1&playsinline=1`;
 
@@ -427,7 +547,7 @@ export function VocaloidPortal() {
           <div className="space-y-3 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-teal-500/10 border border-teal-400/40 rounded-full text-teal-300 text-xs font-mono font-bold uppercase tracking-wider shadow-sm">
               <Disc3 className="w-3.5 h-3.5 text-teal-400 animate-spin" />
-              <span>01 // Vocaloid Live Soundstage & Karaoke Prompter</span>
+              <span>01 // Vocaloid Live Soundstage & AI Karaoke Prompter</span>
             </div>
 
             <h1 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-white flex items-center gap-3">
@@ -438,7 +558,7 @@ export function VocaloidPortal() {
             </h1>
 
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Sing along with synchronized live karaoke lyrics powered by real-time Google Search grounding. Experience Hatsune Miku, Kagamine Rin/Len, Megurine Luka, and legendary Vocaloid producer classics with Romaji, Kanji, and English translations!
+              Sing along with synchronized live karaoke lyrics powered by real-time Google Search grounding. Features AI video tempo detection, continuous speed adjustment slider, Romaji, Kanji, and English translations!
             </p>
 
             {/* Quick Actions Bar */}
@@ -459,6 +579,24 @@ export function VocaloidPortal() {
               >
                 <Flame className="w-3.5 h-3.5 text-pink-400" />
                 <span>Featured Showcase (h4hy2Gn-FVE)</span>
+              </button>
+
+              {/* AI Detect Button */}
+              <button
+                onClick={() => {
+                  sfx.playClick();
+                  runAIVideoDetection(currentVideoId);
+                }}
+                disabled={isDetectingAI}
+                className="px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 text-slate-950 shadow-md shadow-teal-500/30 transition-all flex items-center gap-1.5 active:scale-95 disabled:opacity-50"
+                title="Use Gemini AI to analyze the video and match synchronized lyrics + tempo"
+              >
+                {isDetectingAI ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Bot className="w-3.5 h-3.5 fill-slate-950" />
+                )}
+                <span>{isDetectingAI ? "AI Scanning Video..." : "AI Detect Video & Match"}</span>
               </button>
 
               <button
@@ -515,7 +653,7 @@ export function VocaloidPortal() {
           <div className="bg-slate-950/85 border border-teal-500/35 rounded-2xl p-4 md:w-84 shrink-0 shadow-xl space-y-3 relative overflow-hidden backdrop-blur-md">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-teal-400 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-teal-400 animate-ping" />
+                <span className={`w-2 h-2 rounded-full ${beatPulse ? "scale-150 bg-pink-400" : "bg-teal-400"} transition-all`} />
                 Now Playing Live
               </span>
               <span className="text-[10px] font-mono text-slate-400 px-2 py-0.5 rounded bg-slate-900 border border-slate-800">
@@ -525,10 +663,14 @@ export function VocaloidPortal() {
 
             <div>
               <h3 className="text-sm font-bold text-white line-clamp-1 group-hover:text-teal-300 transition-colors">
-                {lyricsData?.songTitle || currentTrackInfo.title}
+                {aiDetection?.detectedSongTitle || lyricsData?.songTitle || currentTrackInfo.title}
               </h3>
               <p className="text-xs text-slate-400 line-clamp-1">
-                {lyricsData?.producer ? `${lyricsData.producer} • ${lyricsData.vocalist}` : currentTrackInfo.artist}
+                {aiDetection?.producer
+                  ? `${aiDetection.producer} • ${aiDetection.vocalist}`
+                  : lyricsData?.producer
+                  ? `${lyricsData.producer} • ${lyricsData.vocalist}`
+                  : currentTrackInfo.artist}
               </p>
             </div>
 
@@ -546,17 +688,82 @@ export function VocaloidPortal() {
               ))}
             </div>
 
-            {/* Google Search Grounding Verified Badge */}
+            {/* Google Search Grounding & Tempo Speed Badge */}
             <div className="pt-1 flex items-center justify-between border-t border-slate-800/80 text-[10px] font-mono text-slate-400">
               <span className="flex items-center gap-1 text-teal-300">
-                <Globe className="w-3 h-3 text-teal-400" />
-                Google Search Grounded
+                <Gauge className="w-3 h-3 text-teal-400" />
+                Tempo: {karaokeSpeedSec}s (~{calculatedApproxBpm} BPM)
               </span>
-              <span className="text-pink-300 font-bold">Karaoke Ready</span>
+              <span className="text-pink-300 font-bold flex items-center gap-1">
+                <Sparkles className="w-2.5 h-2.5" />
+                {aiDetection ? "AI Synced" : "Live Grounded"}
+              </span>
             </div>
           </div>
         </div>
       </div>
+
+      {/* AI Video Detection Summary Card (if analyzed) */}
+      {showAIDetectionCard && aiDetection && (
+        <div className="rounded-3xl bg-slate-900/90 border border-teal-400/50 p-5 shadow-2xl relative overflow-hidden backdrop-blur-xl animate-fadeIn">
+          <div className="absolute top-0 right-0 w-64 h-32 bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
+          
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="space-y-1.5 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-md bg-teal-500/20 border border-teal-400/40 text-teal-300 text-[10px] font-mono font-bold uppercase flex items-center gap-1">
+                  <Bot className="w-3 h-3 text-teal-400" />
+                  AI Video Match Results ({aiDetection.confidence}% Match)
+                </span>
+                <span className="text-[10px] font-mono text-pink-300 px-2 py-0.5 rounded bg-pink-950/60 border border-pink-500/40">
+                  {aiDetection.mood}
+                </span>
+                <span className="text-[10px] font-mono text-cyan-300 px-2 py-0.5 rounded bg-cyan-950/60 border border-cyan-500/40">
+                  {aiDetection.genre}
+                </span>
+              </div>
+
+              <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                <span>{aiDetection.detectedSongTitle}</span>
+                <span className="text-xs font-mono font-normal text-slate-400">
+                  by <strong className="text-teal-300">{aiDetection.producer}</strong> feat. <strong className="text-pink-300">{aiDetection.vocalist}</strong>
+                </span>
+              </h3>
+
+              <p className="text-xs text-slate-300 leading-relaxed max-w-3xl">
+                {aiDetection.summary}
+              </p>
+            </div>
+
+            {/* Quick Auto-Calibration Stats & Button */}
+            <div className="flex flex-wrap items-center gap-3 shrink-0 bg-slate-950/80 p-3 rounded-2xl border border-slate-800">
+              <div className="text-center px-2">
+                <div className="text-[10px] font-mono text-slate-400">Estimated BPM</div>
+                <div className="text-sm font-mono font-bold text-teal-300">{aiDetection.bpm} BPM</div>
+              </div>
+
+              <div className="h-8 w-px bg-slate-800" />
+
+              <div className="text-center px-2">
+                <div className="text-[10px] font-mono text-slate-400">Optimal Pace</div>
+                <div className="text-sm font-mono font-bold text-pink-300">{aiDetection.recommendedSpeedSec}s / verse</div>
+              </div>
+
+              <button
+                onClick={() => {
+                  sfx.playClick();
+                  setKaraokeSpeedSec(aiDetection.recommendedSpeedSec);
+                }}
+                className="px-3 py-1.5 bg-teal-500 hover:bg-teal-400 text-slate-950 font-mono font-bold text-xs rounded-xl transition-all shadow-sm flex items-center gap-1"
+                title="Apply AI detected tempo pace to the speed slider"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Apply AI Tempo</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Dual Stage: Video Player + Interactive Karaoke Prompter Deck */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -573,6 +780,16 @@ export function VocaloidPortal() {
           >
             {/* Floating In-Player Controls Overlay Header */}
             <div className="absolute top-3 right-3 z-30 flex items-center gap-2 bg-slate-950/80 backdrop-blur-md border border-teal-500/40 p-1.5 rounded-2xl shadow-xl">
+              <button
+                onClick={() => runAIVideoDetection(currentVideoId)}
+                disabled={isDetectingAI}
+                className="p-2 bg-slate-900 hover:bg-teal-600 text-teal-300 hover:text-slate-950 rounded-xl transition-all text-xs font-mono flex items-center gap-1.5"
+                title="AI Video Auto-Detection"
+              >
+                <Bot className={`w-3.5 h-3.5 ${isDetectingAI ? "animate-spin" : ""}`} />
+                <span className="hidden sm:inline">AI Match</span>
+              </button>
+
               <button
                 onClick={handleShare}
                 className="p-2 bg-slate-900 hover:bg-teal-600 text-slate-200 hover:text-white rounded-xl transition-all text-xs font-mono flex items-center gap-1.5"
@@ -627,14 +844,28 @@ export function VocaloidPortal() {
             />
           </div>
 
-          {/* Quick Song Search & URL Switcher */}
+          {/* Quick Song Search & URL Switcher with Auto-Detect Toggle */}
           <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 shadow-xl space-y-3">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <Search className="w-4 h-4 text-teal-400" />
                 <span className="text-xs font-bold text-slate-200">Load YouTube Video or Song</span>
               </div>
-              <span className="text-[11px] font-mono text-slate-400">Paste URL or ID</span>
+              
+              <label className="flex items-center gap-1.5 text-[11px] font-mono text-slate-300 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={autoDetectOnSwitch}
+                  onChange={(e) => {
+                    setAutoDetectOnSwitch(e.target.checked);
+                    try {
+                      localStorage.setItem("isekai_vocaloid_autodetect", String(e.target.checked));
+                    } catch {}
+                  }}
+                  className="rounded border-slate-700 text-teal-500 focus:ring-teal-400 w-3.5 h-3.5"
+                />
+                <span>AI Auto-Detect on Load</span>
+              </label>
             </div>
 
             <form onSubmit={handleApplyCustomUrl} className="flex items-center gap-2">
@@ -642,7 +873,7 @@ export function VocaloidPortal() {
                 type="text"
                 value={customInput}
                 onChange={(e) => setCustomInput(e.target.value)}
-                placeholder="Paste YouTube URL (e.g. https://youtu.be/h4hy2Gn-FVE)..."
+                placeholder="Paste YouTube URL (e.g. https://youtu.be/h4hy2Gn-FVE or song query)..."
                 className="flex-1 bg-slate-950 border border-slate-750 focus:border-teal-400 rounded-xl py-2 px-3 text-xs text-slate-200 placeholder-slate-500 focus:outline-none transition-all font-mono"
               />
               <button
@@ -671,7 +902,7 @@ export function VocaloidPortal() {
                     <Sparkles className="w-3.5 h-3.5 text-pink-400" />
                   </h2>
                   <p className="text-[10px] font-mono text-teal-300">
-                    {lyricsData?.songTitle ? `${lyricsData.songTitle}` : "Live Synchronized Sing-Along"}
+                    {lyricsData?.songTitle || aiDetection?.detectedSongTitle ? `${lyricsData?.songTitle || aiDetection?.detectedSongTitle}` : "Live Synchronized Sing-Along"}
                   </p>
                 </div>
               </div>
@@ -785,20 +1016,24 @@ export function VocaloidPortal() {
                 </span>
               </div>
 
-              {/* Tempo & Font Adjusters */}
+              {/* Tempo & Speed Controls Toggle */}
               <div className="flex items-center gap-2">
-                {/* Tempo Speed */}
-                <select
-                  value={karaokeSpeedSec}
-                  onChange={(e) => setKaraokeSpeedSec(Number(e.target.value))}
-                  className="bg-slate-900 border border-slate-750 text-[11px] text-slate-300 rounded-lg px-2 py-0.5 focus:outline-none focus:border-teal-400"
-                  title="Prompter Scrolling Pace"
+                {/* Speed Slider Toggle Button */}
+                <button
+                  onClick={() => {
+                    sfx.playClick();
+                    setShowSpeedPanel(!showSpeedPanel);
+                  }}
+                  className={`px-2.5 py-1 rounded-lg border text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${
+                    showSpeedPanel
+                      ? "bg-teal-500 text-slate-950 border-teal-400 shadow-sm"
+                      : "bg-slate-900 border-slate-750 text-teal-300 hover:bg-slate-800"
+                  }`}
+                  title="Open Speed Adjustment Slider & Tempo Calibration"
                 >
-                  <option value={4}>Pace: Fast (4s)</option>
-                  <option value={6}>Pace: Normal (6s)</option>
-                  <option value={8}>Pace: Slow (8s)</option>
-                  <option value={10}>Pace: Relaxed (10s)</option>
-                </select>
+                  <SlidersHorizontal className="w-3 h-3" />
+                  <span>Speed: {karaokeSpeedSec}s</span>
+                </button>
 
                 {/* Font Size */}
                 <div className="flex items-center gap-1 bg-slate-900 px-1.5 py-0.5 rounded-lg border border-slate-750">
@@ -835,6 +1070,117 @@ export function VocaloidPortal() {
               </div>
             </div>
 
+            {/* Dedicated Speed Adjustment & Tempo Sync Slider Panel */}
+            {showSpeedPanel && (
+              <div className="p-4 bg-slate-950/90 rounded-2xl border border-teal-500/40 space-y-3.5 animate-fadeIn shadow-xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Gauge className="w-4 h-4 text-teal-400" />
+                    <span className="text-xs font-bold font-mono text-white">
+                      Lyrics Scroll Tempo & Sync Speed
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono font-bold text-teal-300 bg-teal-500/10 px-2 py-0.5 rounded border border-teal-500/30">
+                      {karaokeSpeedSec} sec / verse (~{calculatedApproxBpm} BPM)
+                    </span>
+                  </div>
+                </div>
+
+                {/* Continuous Speed Adjustment Slider */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-[10px] font-mono text-slate-400">
+                    <span>🚀 Fast / Rock (1.5s)</span>
+                    <span>🎵 Standard (5.5s)</span>
+                    <span>🌸 Ballad / Slow (12.0s)</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="1.0"
+                    max="15.0"
+                    step="0.1"
+                    value={karaokeSpeedSec}
+                    onChange={(e) => setKaraokeSpeedSec(parseFloat(e.target.value))}
+                    className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-teal-400 focus:outline-none"
+                  />
+                </div>
+
+                {/* Quick Tempo Presets & Fine Tuning Tools */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                  {/* Preset Pills */}
+                  <div className="flex flex-wrap items-center gap-1 text-[11px] font-mono">
+                    <span className="text-[10px] text-slate-500 mr-1">Presets:</span>
+                    <button
+                      onClick={() => { sfx.playClick(); setKaraokeSpeedSec(2.5); }}
+                      className={`px-2 py-0.5 rounded-lg border transition-all ${
+                        karaokeSpeedSec === 2.5
+                          ? "bg-teal-500 text-slate-950 font-bold border-teal-400"
+                          : "bg-slate-900 border-slate-800 text-slate-300 hover:text-white"
+                      }`}
+                    >
+                      Presto (2.5s)
+                    </button>
+                    <button
+                      onClick={() => { sfx.playClick(); setKaraokeSpeedSec(4.0); }}
+                      className={`px-2 py-0.5 rounded-lg border transition-all ${
+                        karaokeSpeedSec === 4.0
+                          ? "bg-teal-500 text-slate-950 font-bold border-teal-400"
+                          : "bg-slate-900 border-slate-800 text-slate-300 hover:text-white"
+                      }`}
+                    >
+                      Allegro (4.0s)
+                    </button>
+                    <button
+                      onClick={() => { sfx.playClick(); setKaraokeSpeedSec(5.5); }}
+                      className={`px-2 py-0.5 rounded-lg border transition-all ${
+                        karaokeSpeedSec === 5.5
+                          ? "bg-teal-500 text-slate-950 font-bold border-teal-400"
+                          : "bg-slate-900 border-slate-800 text-slate-300 hover:text-white"
+                      }`}
+                    >
+                      Moderato (5.5s)
+                    </button>
+                    <button
+                      onClick={() => { sfx.playClick(); setKaraokeSpeedSec(8.0); }}
+                      className={`px-2 py-0.5 rounded-lg border transition-all ${
+                        karaokeSpeedSec === 8.0
+                          ? "bg-teal-500 text-slate-950 font-bold border-teal-400"
+                          : "bg-slate-900 border-slate-800 text-slate-300 hover:text-white"
+                      }`}
+                    >
+                      Andante (8.0s)
+                    </button>
+                  </div>
+
+                  {/* Tap Tempo & Step Calibrators */}
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => setKaraokeSpeedSec((prev) => Math.max(1.0, Math.round((prev - 0.2) * 10) / 10))}
+                      className="px-2 py-0.5 bg-slate-900 hover:bg-slate-800 border border-slate-750 text-slate-300 rounded-lg text-xs font-mono"
+                      title="Speed up (decrease seconds per line)"
+                    >
+                      -0.2s
+                    </button>
+                    <button
+                      onClick={() => setKaraokeSpeedSec((prev) => Math.min(15.0, Math.round((prev + 0.2) * 10) / 10))}
+                      className="px-2 py-0.5 bg-slate-900 hover:bg-slate-800 border border-slate-750 text-slate-300 rounded-lg text-xs font-mono"
+                      title="Slow down (increase seconds per line)"
+                    >
+                      +0.2s
+                    </button>
+                    <button
+                      onClick={handleTapTempo}
+                      className="px-2.5 py-0.5 bg-pink-950/60 hover:bg-pink-900/80 border border-pink-500/40 text-pink-300 rounded-lg text-xs font-mono font-bold active:scale-95 transition-all flex items-center gap-1"
+                      title="Tap 3-4 times on the beat of the song to calculate speed"
+                    >
+                      <Zap className="w-3 h-3 text-pink-400" />
+                      <span>Tap Tempo</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Custom Google Search Bar for Lyrics if expanded */}
             {showSearchBox && (
               <form onSubmit={handleManualSearchLyrics} className="flex items-center gap-2 p-2 bg-slate-950 rounded-2xl border border-teal-500/40 animate-fadeIn">
@@ -847,11 +1193,11 @@ export function VocaloidPortal() {
                 />
                 <button
                   type="submit"
-                  disabled={isLoadingLyrics}
-                  className="px-3 py-1.5 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs rounded-xl flex items-center gap-1 shadow-sm font-mono"
+                  disabled={isLoadingLyrics || isDetectingAI}
+                  className="px-3 py-1.5 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs rounded-xl flex items-center gap-1 shadow-sm font-mono disabled:opacity-50"
                 >
                   <Globe className="w-3.5 h-3.5" />
-                  <span>Google Search</span>
+                  <span>AI Search</span>
                 </button>
               </form>
             )}
@@ -865,32 +1211,42 @@ export function VocaloidPortal() {
             </div>
 
             {/* Loading State */}
-            {isLoadingLyrics && (
+            {(isLoadingLyrics || isDetectingAI) && (
               <div className="py-16 text-center space-y-3">
                 <div className="inline-flex p-3 rounded-full bg-teal-500/10 border border-teal-400/40 text-teal-400 animate-spin">
                   <Disc3 className="w-8 h-8" />
                 </div>
                 <p className="text-xs font-mono text-teal-300 animate-pulse">
-                  Searching Google for official Vocaloid lyrics & karaoke cues...
+                  {isDetectingAI
+                    ? "AI scanning video audio & matching Vocaloid producer tempo..."
+                    : "Searching Google for official Vocaloid lyrics & karaoke cues..."}
                 </p>
               </div>
             )}
 
             {/* Error Message */}
-            {!isLoadingLyrics && lyricsError && (
+            {!isLoadingLyrics && !isDetectingAI && lyricsError && (
               <div className="p-4 bg-red-950/40 border border-red-500/40 rounded-2xl text-xs text-red-200 space-y-2">
                 <p>{lyricsError}</p>
-                <button
-                  onClick={() => fetchLyrics()}
-                  className="px-3 py-1 bg-red-800 hover:bg-red-700 text-white rounded-lg text-xs font-mono"
-                >
-                  Retry Search
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => fetchLyrics()}
+                    className="px-3 py-1 bg-red-800 hover:bg-red-700 text-white rounded-lg text-xs font-mono"
+                  >
+                    Retry Search
+                  </button>
+                  <button
+                    onClick={() => runAIVideoDetection(currentVideoId)}
+                    className="px-3 py-1 bg-teal-600 hover:bg-teal-500 text-slate-950 font-bold rounded-lg text-xs font-mono"
+                  >
+                    Run AI Auto-Detection
+                  </button>
+                </div>
               </div>
             )}
 
             {/* 1. Stage Karaoke Prompter View Mode (Large Highlighted Prompter) */}
-            {!isLoadingLyrics && lyricsData && lyricsViewMode === "prompter" && (
+            {!isLoadingLyrics && !isDetectingAI && lyricsData && lyricsViewMode === "prompter" && (
               <div className="space-y-4">
                 {/* Active Singing Card */}
                 {currentLine && (
@@ -901,7 +1257,8 @@ export function VocaloidPortal() {
                           {currentLine.section}
                         </span>
                       )}
-                      <span className="text-[10px] font-mono text-teal-400 font-bold">
+                      <span className="text-[10px] font-mono text-teal-400 font-bold flex items-center gap-1">
+                        <span className={`w-2 h-2 rounded-full ${beatPulse ? "bg-pink-400 scale-125" : "bg-teal-400"}`} />
                         Sing Now 🎤
                       </span>
                     </div>
@@ -983,7 +1340,7 @@ export function VocaloidPortal() {
             )}
 
             {/* 2. Dual / Multi-line Karaoke View */}
-            {!isLoadingLyrics && lyricsData && (lyricsViewMode === "dual" || lyricsViewMode === "romaji" || lyricsViewMode === "japanese" || lyricsViewMode === "english") && (
+            {!isLoadingLyrics && !isDetectingAI && lyricsData && (lyricsViewMode === "dual" || lyricsViewMode === "romaji" || lyricsViewMode === "japanese" || lyricsViewMode === "english") && (
               <div
                 ref={lineContainerRef}
                 className="space-y-3 max-h-96 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-teal-500/30 scrollbar-track-slate-950"
@@ -1040,7 +1397,7 @@ export function VocaloidPortal() {
             )}
 
             {/* 3. Full Text Archive & Copy Mode */}
-            {!isLoadingLyrics && lyricsData && lyricsViewMode === "fulltext" && (
+            {!isLoadingLyrics && !isDetectingAI && lyricsData && lyricsViewMode === "fulltext" && (
               <div className="space-y-4 max-h-96 overflow-y-auto pr-1">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-mono font-bold text-teal-300">Complete Song Transcripts</span>
@@ -1129,7 +1486,7 @@ export function VocaloidPortal() {
               <span>Vocaloid Hall of Fame & Live Stage Classics</span>
             </h3>
             <p className="text-xs text-slate-400">
-              Click any song to instantly load video and synchronized karaoke lyrics.
+              Click any song to instantly load video and auto-match synchronized karaoke lyrics.
             </p>
           </div>
           <span className="text-xs font-mono text-teal-400 bg-teal-500/10 px-2.5 py-1 rounded-full border border-teal-500/30">

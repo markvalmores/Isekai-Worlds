@@ -5,6 +5,7 @@ export type PageView =
   | "wallpapers"
   | "gifs"
   | "cosplay"
+  | "vocaloid"
   | "media"
   | "leaderboard"
   | "profile"

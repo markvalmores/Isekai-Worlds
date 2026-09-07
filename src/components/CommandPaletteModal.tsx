@@ -29,7 +29,8 @@ import {
   Check,
   Zap,
   Globe,
-  Monitor
+  Monitor,
+  Disc3
 } from "lucide-react";
 import { PageView, AppSettings } from "../types";
 import { sfx } from "../utils/sfx";
@@ -185,6 +186,15 @@ export function CommandPaletteModal({
       icon: <Sparkles className="w-4 h-4 text-amber-400" />,
       keywords: ["cosplay", "costume", "dress", "photo", "vault"],
       action: () => { setCurrentPage("cosplay"); onClose(); }
+    },
+    {
+      id: "nav-vocaloid",
+      category: "Navigation",
+      label: "Go to Vocaloid Multiverse & Concerts",
+      description: "Hatsune Miku, Vocaloid synthesisers & live stage MV streams",
+      icon: <Disc3 className="w-4 h-4 text-teal-400" />,
+      keywords: ["vocaloid", "miku", "hatsune miku", "music", "song", "concert", "rin", "len", "luka", "kaito", "meiko"],
+      action: () => { setCurrentPage("vocaloid"); onClose(); }
     },
     {
       id: "nav-media",

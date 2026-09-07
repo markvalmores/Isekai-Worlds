@@ -25,6 +25,7 @@ import { PlayGamesDashboard } from "./components/PlayGamesDashboard";
 import { RomsDashboard } from "./components/RomsDashboard";
 import { CardGamesDashboard } from "./components/CardGamesDashboard";
 import { SakuraCentralEmbed } from "./components/SakuraCentralEmbed";
+import { VocaloidPortal } from "./components/VocaloidPortal";
 import { AchievementsDashboard } from "./components/AchievementsDashboard";
 import { AniCommunity } from "./components/AniCommunity";
 import { DailyLoginModal } from "./components/DailyLoginModal";
@@ -279,6 +280,7 @@ export default function App() {
       wallpapers: "4K Anime Wallpapers",
       gifs: "Anime GIFs & Reactions",
       cosplay: "Cosplay & Costume Vault",
+      vocaloid: "Vocaloid Multiverse",
       media: "Live Anime Streams",
       leaderboard: "Global Leaderboards",
       profile: "Profile Dashboard",
@@ -709,6 +711,10 @@ export default function App() {
           <SakuraCentralEmbed />
         )}
 
+        {currentPage === "vocaloid" && (
+          <VocaloidPortal />
+        )}
+
         {currentPage === "media" && (
           <MediaHub
             userProfile={profile}
@@ -864,6 +870,7 @@ export default function App() {
           { id: "wallpapers", label: "Wallpapers" },
           { id: "gifs", label: "GIFs" },
           { id: "cosplay", label: "Cosplay" },
+          { id: "vocaloid", label: "Vocaloid" },
           { id: "media", label: "Streams" },
           { id: "watch", label: "Watch Anime" },
           { id: "games", label: "Arcade Games" },

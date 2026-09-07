@@ -34,6 +34,7 @@ export const DICTIONARY: Record<LanguageCode, Record<string, string>> = {
     gifs: "Anime GIFs",
     media: "Live Anime Stream",
     watch: "Watch Anime",
+    vocaloid: "Vocaloid",
     radio: "Radio Gaga",
     amv: "Anime MVs",
     movies: "Movies",

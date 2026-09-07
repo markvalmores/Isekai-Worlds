@@ -34,7 +34,8 @@ import {
   ChevronRight,
   Radio as RemoteIcon,
   Award,
-  MessageSquare
+  MessageSquare,
+  Disc3
 } from "lucide-react";
 
 interface HeaderProps {
@@ -99,6 +100,7 @@ export const Header: React.FC<HeaderProps> = ({
     { id: "wallpapers", labelKey: "wallpapers", icon: <ImageIcon className="w-4 h-4" /> },
     { id: "gifs", labelKey: "gifs", icon: <Film className="w-4 h-4" /> },
     { id: "cosplay", labelKey: "cosplay", icon: <Camera className="w-4 h-4 text-pink-400" /> },
+    { id: "vocaloid", labelKey: "vocaloid", icon: <Disc3 className="w-4 h-4 text-teal-400 group-hover:animate-spin" /> },
     { id: "media", labelKey: "media", icon: <Tv2 className="w-4 h-4" /> },
     { id: "watch", labelKey: "watch", icon: <Tv className="w-4 h-4" /> },
     { id: "radio", labelKey: "radio", icon: <Radio className="w-4 h-4" /> },

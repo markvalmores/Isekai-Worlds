@@ -47,9 +47,13 @@ import {
   Cpu,
   Settings2,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  X,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import { sfx } from "../utils/sfx";
+import { VocaloidD3Visualizer } from "./VocaloidD3Visualizer";
 
 interface VocaloidTrack {
   id: string;
@@ -269,10 +273,73 @@ export function VocaloidPortal() {
     }
   });
 
+  // Toggle state to show/hide the entire Karaoke Lyrics Prompter Deck
+  const [showLyricsDeck, setShowLyricsDeck] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("isekai_vocaloid_show_lyrics") !== "false";
+    } catch {
+      return true;
+    }
+  });
+
+  // Toggle state for In-Video Floating Karaoke Subtitles HUD
+  const [showVideoLyricsOverlay, setShowVideoLyricsOverlay] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("isekai_vocaloid_video_overlay") !== "false";
+    } catch {
+      return true;
+    }
+  });
+
+  // Toggle state for D3.js Audio Visualizer
+  const [showVisualizer, setShowVisualizer] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("isekai_vocaloid_show_viz") !== "false";
+    } catch {
+      return true;
+    }
+  });
+
   // Live YouTube Sync & Tracing State
   const [isSyncingLive, setIsSyncingLive] = useState<boolean>(false);
   const [syncLiveStep, setSyncLiveStep] = useState<string>("");
   const [syncToastMessage, setSyncToastMessage] = useState<string | null>(null);
+
+  // Toggle D3.js Audio Visualizer (show/hide)
+  const toggleVisualizer = () => {
+    sfx.playClick();
+    const next = !showVisualizer;
+    setShowVisualizer(next);
+    try {
+      localStorage.setItem("isekai_vocaloid_show_viz", String(next));
+    } catch {}
+    if (next) {
+      sfx.playBadgeUnlock();
+    }
+  };
+
+  // Toggle Karaoke Lyrics Deck (show/hide)
+  const toggleLyricsDeck = () => {
+    sfx.playClick();
+    const next = !showLyricsDeck;
+    setShowLyricsDeck(next);
+    try {
+      localStorage.setItem("isekai_vocaloid_show_lyrics", String(next));
+    } catch {}
+    if (next) {
+      sfx.playBadgeUnlock();
+    }
+  };
+
+  // Toggle In-Video Floating Subtitles
+  const toggleVideoLyricsOverlay = () => {
+    sfx.playClick();
+    const next = !showVideoLyricsOverlay;
+    setShowVideoLyricsOverlay(next);
+    try {
+      localStorage.setItem("isekai_vocaloid_video_overlay", String(next));
+    } catch {}
+  };
 
   // Toggle Karaoke Mode with SFX and persistence
   const toggleKaraokeMode = () => {
@@ -284,6 +351,7 @@ export function VocaloidPortal() {
     } catch {}
     if (next) {
       sfx.playBadgeUnlock();
+      setShowLyricsDeck(true);
     }
   };
 
@@ -741,22 +809,51 @@ export function VocaloidPortal() {
 
             {/* Quick Actions Bar */}
             <div className="flex flex-wrap items-center gap-2 pt-2">
-              {/* Karaoke Mode Toggle Switch */}
+              {/* Karaoke Lyrics ON / OFF Toggle Switch */}
+              <button
+                onClick={toggleLyricsDeck}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-2 border shadow-lg active:scale-95 ${
+                  showLyricsDeck
+                    ? "bg-gradient-to-r from-teal-400 via-cyan-400 to-pink-400 text-slate-950 border-teal-300 ring-2 ring-teal-400/50 shadow-teal-500/40"
+                    : "bg-slate-950/80 border-slate-700 text-slate-400 hover:text-white hover:border-teal-400"
+                }`}
+                title="Toggle Karaoke Lyrics Deck (Show or Hide Lyrics Prompter & Subtitles)"
+              >
+                <div className={`w-2 h-2 rounded-full ${showLyricsDeck ? "bg-slate-950 animate-ping" : "bg-slate-600"}`} />
+                <Music className={`w-3.5 h-3.5 ${showLyricsDeck ? "text-slate-950" : "text-teal-400"}`} />
+                <span>{showLyricsDeck ? "Karaoke Lyrics: ON" : "Karaoke Lyrics: OFF"}</span>
+              </button>
+
+              {/* Karaoke High Contrast Focus Mode Toggle Switch */}
               <button
                 onClick={toggleKaraokeMode}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-2 border shadow-lg active:scale-95 ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-2 border shadow-md active:scale-95 ${
                   isKaraokeMode
-                    ? "bg-gradient-to-r from-teal-400 via-cyan-400 to-pink-400 text-slate-950 border-teal-300 ring-2 ring-teal-400/50 shadow-teal-500/40"
+                    ? "bg-teal-500 text-slate-950 border-teal-300 ring-2 ring-teal-400/50"
                     : "bg-slate-950/80 border-slate-700 text-slate-300 hover:text-white hover:border-teal-400"
                 }`}
-                title="Toggle Karaoke Mode (High contrast, large font display & dimmed background for focus) [Press 'K']"
+                title="Toggle Karaoke High Contrast Mode [Press 'K']"
               >
-                <div className={`w-2 h-2 rounded-full ${isKaraokeMode ? "bg-slate-950 animate-ping" : "bg-slate-600"}`} />
                 <Mic className={`w-3.5 h-3.5 ${isKaraokeMode ? "text-slate-950" : "text-teal-400"}`} />
-                <span>{isKaraokeMode ? "Karaoke: Enabled (Click to Disable)" : "Karaoke: Disabled (Click to Enable)"}</span>
+                <span>{isKaraokeMode ? "High-Contrast Stage: ON" : "High-Contrast Stage: OFF"}</span>
                 <span className="text-[10px] px-1 py-0.2 rounded bg-slate-900/40 border border-slate-700/50 text-slate-400 font-normal">
                   [K]
                 </span>
+              </button>
+
+              {/* D3 Audio Visualizer ON / OFF Toggle Switch */}
+              <button
+                onClick={toggleVisualizer}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-2 border shadow-lg active:scale-95 ${
+                  showVisualizer
+                    ? "bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 text-slate-950 border-emerald-300 ring-2 ring-emerald-400/50 shadow-emerald-500/30"
+                    : "bg-slate-950/80 border-slate-700 text-slate-400 hover:text-white hover:border-emerald-400"
+                }`}
+                title="Toggle D3.js Audio Visualizer (FFT Spectrum, Radial Halo, Waveforms & Mic Analysis)"
+              >
+                <div className={`w-2 h-2 rounded-full ${showVisualizer ? "bg-slate-950 animate-ping" : "bg-slate-600"}`} />
+                <Activity className={`w-3.5 h-3.5 ${showVisualizer ? "text-slate-950" : "text-emerald-400"}`} />
+                <span>{showVisualizer ? "D3 Visualizer: ON" : "D3 Visualizer: OFF"}</span>
               </button>
 
               {/* Dedicated Live YouTube Sync & AI Match Button */}
@@ -1012,7 +1109,49 @@ export function VocaloidPortal() {
           >
             {/* Floating In-Player Controls Overlay Header */}
             <div className="absolute top-3 right-3 z-30 flex items-center gap-2 bg-slate-950/85 backdrop-blur-md border border-teal-500/40 p-1.5 rounded-2xl shadow-xl">
-              {/* Karaoke Mode Quick Switch on Player */}
+              {/* Karaoke Lyrics ON/OFF Toggle on Player */}
+              <button
+                onClick={toggleLyricsDeck}
+                className={`p-2 rounded-xl transition-all text-xs font-mono flex items-center gap-1.5 font-bold ${
+                  showLyricsDeck
+                    ? "bg-gradient-to-r from-teal-400 to-cyan-400 text-slate-950 shadow-md shadow-teal-400/30"
+                    : "bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white"
+                }`}
+                title="Toggle Karaoke Lyrics Deck ON/OFF"
+              >
+                <Music className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{showLyricsDeck ? "Lyrics: ON" : "Lyrics: OFF"}</span>
+              </button>
+
+              {/* In-Video Subtitle HUD Toggle */}
+              <button
+                onClick={toggleVideoLyricsOverlay}
+                className={`p-2 rounded-xl transition-all text-xs font-mono flex items-center gap-1.5 font-bold ${
+                  showVideoLyricsOverlay
+                    ? "bg-pink-500 text-white shadow-md shadow-pink-500/30"
+                    : "bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white"
+                }`}
+                title="Toggle Floating In-Video Karaoke Subtitles HUD"
+              >
+                <Mic className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{showVideoLyricsOverlay ? "HUD: ON" : "HUD: OFF"}</span>
+              </button>
+
+              {/* D3 Audio Visualizer Toggle on Player */}
+              <button
+                onClick={toggleVisualizer}
+                className={`p-2 rounded-xl transition-all text-xs font-mono flex items-center gap-1.5 font-bold ${
+                  showVisualizer
+                    ? "bg-gradient-to-r from-emerald-400 to-teal-400 text-slate-950 shadow-md shadow-emerald-400/30"
+                    : "bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white"
+                }`}
+                title="Toggle D3.js Audio Visualizer Deck"
+              >
+                <Activity className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{showVisualizer ? "Visualizer: ON" : "Visualizer"}</span>
+              </button>
+
+              {/* Karaoke High Contrast Stage Quick Switch on Player */}
               <button
                 onClick={toggleKaraokeMode}
                 className={`p-2 rounded-xl transition-all text-xs font-mono flex items-center gap-1.5 font-bold ${
@@ -1020,10 +1159,10 @@ export function VocaloidPortal() {
                     ? "bg-teal-400 text-slate-950 shadow-md shadow-teal-400/30 ring-1 ring-teal-300"
                     : "bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white"
                 }`}
-                title="Toggle Karaoke Mode (Disabled by default) [Press 'K']"
+                title="Toggle High-Contrast Focus Mode [Press 'K']"
               >
-                <Mic className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{isKaraokeMode ? "Karaoke: ON" : "Enable Karaoke"}</span>
+                <Sparkles className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{isKaraokeMode ? "Focus: ON" : "Focus"}</span>
               </button>
 
               <button
@@ -1083,6 +1222,45 @@ export function VocaloidPortal() {
               </button>
             </div>
 
+            {/* In-Video Floating Karaoke Subtitle / Lyrics Overlay HUD */}
+            {showVideoLyricsOverlay && showLyricsDeck && currentLine && (
+              <div className="absolute bottom-4 left-4 right-4 z-30 pointer-events-none flex justify-center animate-fadeIn">
+                <div className="max-w-2xl w-full bg-slate-950/90 backdrop-blur-xl border-2 border-teal-400/80 p-3 sm:p-4 rounded-2xl shadow-[0_0_35px_rgba(20,184,166,0.5)] text-center pointer-events-auto transition-all space-y-1">
+                  <div className="flex items-center justify-between text-[10px] font-mono text-teal-300 pb-1 border-b border-slate-800/80">
+                    <span className="flex items-center gap-1.5 font-bold">
+                      <span className={`w-2 h-2 rounded-full ${beatPulse ? "bg-pink-400 scale-125" : "bg-teal-400 animate-ping"}`} />
+                      KARAOKE LIVE HUD
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-slate-400">Line {activeLineIndex + 1}/{totalLines}</span>
+                      <button
+                        onClick={toggleVideoLyricsOverlay}
+                        className="text-slate-400 hover:text-white p-0.5 rounded hover:bg-slate-800 transition-colors"
+                        title="Hide In-Video Subtitle HUD"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Japanese Kanji/Kana */}
+                  <p className="text-base sm:text-2xl font-black text-white leading-tight drop-shadow-[0_2px_10px_rgba(255,255,255,0.8)]">
+                    {currentLine.ja}
+                  </p>
+
+                  {/* Romaji Pronunciation */}
+                  <p className="text-xs sm:text-base font-mono font-bold text-teal-300 drop-shadow-[0_0_8px_rgba(45,212,191,0.8)]">
+                    {currentLine.romaji}
+                  </p>
+
+                  {/* English Translation */}
+                  <p className="text-[11px] sm:text-xs text-slate-300 italic">
+                    "{currentLine.en}"
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* YouTube Iframe Player */}
             <iframe
               ref={iframeRef}
@@ -1093,6 +1271,22 @@ export function VocaloidPortal() {
               allowFullScreen
             />
           </div>
+
+          {/* D3.js Live Audio Visualizer Deck */}
+          {showVisualizer && (
+            <div className="animate-fadeIn">
+              <VocaloidD3Visualizer
+                isPlaying={isKaraokeAutoPlay}
+                currentTime={activeLineIndex * karaokeSpeedSec}
+                bpm={lyricsData?.bpm || aiDetection?.bpm || calculatedApproxBpm || 135}
+                songTitle={lyricsData?.songTitle || aiDetection?.detectedSongTitle || currentTrackInfo.title}
+                vocalist={lyricsData?.vocalist || aiDetection?.vocalist || currentTrackInfo.vocalist}
+                volume={85}
+                currentLyricLine={currentLine?.romaji || currentLine?.ja || ""}
+                isKaraokeMode={isKaraokeMode}
+              />
+            </div>
+          )}
 
           {/* Quick Song Search & URL Switcher with Live Sync Button */}
           <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 shadow-xl space-y-3">
@@ -1151,90 +1345,130 @@ export function VocaloidPortal() {
         </div>
 
         {/* Right Column: Real-Time Karaoke Prompter Studio (5 cols or 12 cols in theater mode) */}
-        <div className={`space-y-4 ${isTheaterMode ? "lg:col-span-12" : "lg:col-span-5"}`}>
-          <div className={`bg-slate-900/95 rounded-3xl p-5 shadow-2xl space-y-4 relative overflow-hidden backdrop-blur-xl transition-all duration-300 ${
-            isKaraokeMode
-              ? "border-2 border-teal-400 shadow-[0_0_40px_rgba(20,184,166,0.3)] bg-slate-950"
-              : "border border-teal-500/40"
-          }`}>
-            {/* Header / Mode Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${
-                  isKaraokeMode ? "bg-teal-400 text-slate-950" : "bg-teal-500/10 border border-teal-400/30 text-teal-300"
-                }`}>
-                  <Mic2 className="w-4 h-4" />
-                </div>
-                <div>
-                  <h2 className="text-sm font-black text-white uppercase tracking-tight flex items-center gap-1.5">
-                    <span>{isKaraokeMode ? "Karaoke Focus Prompter" : "Karaoke Lyrics Stage"}</span>
-                    <Sparkles className="w-3.5 h-3.5 text-pink-400" />
-                  </h2>
-                  <p className="text-[10px] font-mono text-teal-300">
-                    {lyricsData?.songTitle || aiDetection?.detectedSongTitle ? `${lyricsData?.songTitle || aiDetection?.detectedSongTitle}` : "Live Synchronized Sing-Along"}
-                  </p>
-                </div>
+        <div className={`space-y-4 ${isTheaterMode || !showLyricsDeck ? "lg:col-span-12" : "lg:col-span-5"}`}>
+          {!showLyricsDeck ? (
+            <div className="bg-slate-900/90 border border-dashed border-teal-500/40 rounded-3xl p-6 text-center shadow-xl backdrop-blur-xl animate-fadeIn space-y-4">
+              <div className="inline-flex p-3 rounded-2xl bg-teal-500/10 border border-teal-400/30 text-teal-400">
+                <Music className="w-6 h-6 animate-pulse" />
               </div>
-
-              {/* View Mode Switcher */}
-              <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-[11px] font-mono">
+              <div className="space-y-1">
+                <h3 className="text-base font-black text-white uppercase tracking-tight">Karaoke Lyrics Prompter is Hidden</h3>
+                <p className="text-xs text-slate-300 font-mono max-w-md mx-auto">
+                  Click below to restore the live synchronized lyrics prompter with Romaji, Kanji, and English translations.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
                 <button
-                  onClick={() => { sfx.playClick(); setLyricsViewMode("prompter"); }}
-                  className={`px-2.5 py-1 rounded-lg transition-all ${
-                    lyricsViewMode === "prompter"
-                      ? "bg-teal-500 text-slate-950 font-bold shadow-sm"
-                      : "text-slate-400 hover:text-white"
-                  }`}
-                  title="Stage Prompter: Focus on Current Singing Line"
+                  onClick={toggleLyricsDeck}
+                  className="px-5 py-2.5 bg-gradient-to-r from-teal-400 via-cyan-400 to-pink-500 hover:from-teal-300 hover:to-pink-400 text-slate-950 font-mono font-bold text-xs rounded-xl shadow-lg shadow-teal-500/30 transition-all flex items-center gap-2 active:scale-95"
                 >
-                  Stage
+                  <Music className="w-4 h-4 text-slate-950" />
+                  <span>🎤 Turn ON Karaoke Lyrics</span>
                 </button>
                 <button
-                  onClick={() => { sfx.playClick(); setLyricsViewMode("dual"); }}
-                  className={`px-2.5 py-1 rounded-lg transition-all ${
-                    lyricsViewMode === "dual"
-                      ? "bg-teal-500 text-slate-950 font-bold shadow-sm"
-                      : "text-slate-400 hover:text-white"
+                  onClick={toggleVideoLyricsOverlay}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-mono font-bold border transition-all flex items-center gap-1.5 ${
+                    showVideoLyricsOverlay
+                      ? "bg-pink-500 text-white border-pink-400"
+                      : "bg-slate-950 border-slate-700 text-slate-300 hover:text-white"
                   }`}
-                  title="Dual Kanji + Romaji + English Lines"
                 >
-                  Dual
-                </button>
-                <button
-                  onClick={() => { sfx.playClick(); setLyricsViewMode("romaji"); }}
-                  className={`px-2.5 py-1 rounded-lg transition-all ${
-                    lyricsViewMode === "romaji"
-                      ? "bg-teal-500 text-slate-950 font-bold shadow-sm"
-                      : "text-slate-400 hover:text-white"
-                  }`}
-                  title="Romaji Pronunciation Guide"
-                >
-                  Romaji
-                </button>
-                <button
-                  onClick={() => { sfx.playClick(); setLyricsViewMode("japanese"); }}
-                  className={`px-2.5 py-1 rounded-lg transition-all ${
-                    lyricsViewMode === "japanese"
-                      ? "bg-teal-500 text-slate-950 font-bold shadow-sm"
-                      : "text-slate-400 hover:text-white"
-                  }`}
-                  title="Japanese Kanji & Kana"
-                >
-                  日本語
-                </button>
-                <button
-                  onClick={() => { sfx.playClick(); setLyricsViewMode("fulltext"); }}
-                  className={`px-2.5 py-1 rounded-lg transition-all ${
-                    lyricsViewMode === "fulltext"
-                      ? "bg-teal-500 text-slate-950 font-bold shadow-sm"
-                      : "text-slate-400 hover:text-white"
-                  }`}
-                  title="Full Text & Copy Options"
-                >
-                  Full
+                  <Mic className="w-3.5 h-3.5" />
+                  <span>In-Video Subtitles HUD: {showVideoLyricsOverlay ? "ON" : "OFF"}</span>
                 </button>
               </div>
             </div>
+          ) : (
+            <div className={`bg-slate-900/95 rounded-3xl p-5 shadow-2xl space-y-4 relative overflow-hidden backdrop-blur-xl transition-all duration-300 ${
+              isKaraokeMode
+                ? "border-2 border-teal-400 shadow-[0_0_40px_rgba(20,184,166,0.3)] bg-slate-950"
+                : "border border-teal-500/40"
+            }`}>
+              {/* Header / Mode Bar */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800">
+                <div className="flex items-center gap-2">
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${
+                    isKaraokeMode ? "bg-teal-400 text-slate-950" : "bg-teal-500/10 border border-teal-400/30 text-teal-300"
+                  }`}>
+                    <Mic2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-black text-white uppercase tracking-tight flex items-center gap-1.5">
+                      <span>{isKaraokeMode ? "Karaoke Focus Prompter" : "Karaoke Lyrics Stage"}</span>
+                      <Sparkles className="w-3.5 h-3.5 text-pink-400" />
+                    </h2>
+                    <p className="text-[10px] font-mono text-teal-300">
+                      {lyricsData?.songTitle || aiDetection?.detectedSongTitle ? `${lyricsData?.songTitle || aiDetection?.detectedSongTitle}` : "Live Synchronized Sing-Along"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* View Mode Switcher and Hide Toggle */}
+                <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-[11px] font-mono">
+                  <button
+                    onClick={() => { sfx.playClick(); setLyricsViewMode("prompter"); }}
+                    className={`px-2.5 py-1 rounded-lg transition-all ${
+                      lyricsViewMode === "prompter"
+                        ? "bg-teal-500 text-slate-950 font-bold shadow-sm"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                    title="Stage Prompter: Focus on Current Singing Line"
+                  >
+                    Stage
+                  </button>
+                  <button
+                    onClick={() => { sfx.playClick(); setLyricsViewMode("dual"); }}
+                    className={`px-2.5 py-1 rounded-lg transition-all ${
+                      lyricsViewMode === "dual"
+                        ? "bg-teal-500 text-slate-950 font-bold shadow-sm"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                    title="Dual Kanji + Romaji + English Lines"
+                  >
+                    Dual
+                  </button>
+                  <button
+                    onClick={() => { sfx.playClick(); setLyricsViewMode("romaji"); }}
+                    className={`px-2.5 py-1 rounded-lg transition-all ${
+                      lyricsViewMode === "romaji"
+                        ? "bg-teal-500 text-slate-950 font-bold shadow-sm"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                    title="Romaji Pronunciation Guide"
+                  >
+                    Romaji
+                  </button>
+                  <button
+                    onClick={() => { sfx.playClick(); setLyricsViewMode("japanese"); }}
+                    className={`px-2.5 py-1 rounded-lg transition-all ${
+                      lyricsViewMode === "japanese"
+                        ? "bg-teal-500 text-slate-950 font-bold shadow-sm"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                    title="Japanese Kanji & Kana"
+                  >
+                    日本語
+                  </button>
+                  <button
+                    onClick={() => { sfx.playClick(); setLyricsViewMode("fulltext"); }}
+                    className={`px-2.5 py-1 rounded-lg transition-all ${
+                      lyricsViewMode === "fulltext"
+                        ? "bg-teal-500 text-slate-950 font-bold shadow-sm"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                    title="Full Text & Copy Options"
+                  >
+                    Full
+                  </button>
+                  <button
+                    onClick={toggleLyricsDeck}
+                    className="p-1 rounded-lg transition-all text-slate-400 hover:text-rose-400 hover:bg-slate-900 border-l border-slate-800 ml-0.5"
+                    title="Hide Lyrics Deck"
+                  >
+                    <EyeOff className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
 
             {/* Karaoke Mode Focus Notification Indicator */}
             {isKaraokeMode && (
@@ -1802,6 +2036,7 @@ export function VocaloidPortal() {
               </div>
             )}
           </div>
+          )}
         </div>
       </div>
 

@@ -695,7 +695,7 @@ export function UTubePlatform({ userProfile, onAddCoins, isGoldMode = false }: U
                     muted={false}
                     className="absolute inset-0 w-full h-full object-cover"
                     onError={handleVideoError}
-                    referrerPolicy="no-referrer"
+                    {...({ referrerPolicy: "no-referrer" } as any)}
                   />
                 )}
               </div>

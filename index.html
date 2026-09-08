@@ -7,9 +7,110 @@
     <meta property="og:title" content="Isekai Worlds" />
     <meta property="og:description" content="The ultimate Isekai anime multiverse platform featuring live anime feeds, HD wallpapers & GIFs, customizable profile dashboard, global active session leaderboards, AI multi-language translation, Smart TV / Console remote controller navigation, VR portal mode, and simulated hardware GPU/CPU RTX path tracing visualizers." />
     <title>Isekai Worlds</title>
+    <script>
+      (function() {
+        // 1. Bulletproof Storage Polyfill in raw vanilla JS before any module parses
+        function makeSafeStore() {
+          var store = {};
+          return {
+            getItem: function(k) { return Object.prototype.hasOwnProperty.call(store, k) ? store[k] : null; },
+            setItem: function(k, v) { store[k] = String(v); },
+            removeItem: function(k) { delete store[k]; },
+            clear: function() { store = {}; },
+            key: function(i) { return Object.keys(store)[i] || null; },
+            get length() { return Object.keys(store).length; }
+          };
+        }
+
+        var lsWorking = false;
+        try {
+          var testK = '__isekai_preflight__' + Math.random();
+          window.localStorage.setItem(testK, '1');
+          window.localStorage.removeItem(testK);
+          lsWorking = true;
+        } catch(e) {}
+
+        if (!lsWorking) {
+          try {
+            var memLS = makeSafeStore();
+            Object.defineProperty(window, 'localStorage', { value: memLS, configurable: true, writable: true });
+            if (window.Window && window.Window.prototype) {
+              Object.defineProperty(window.Window.prototype, 'localStorage', { value: memLS, configurable: true, writable: true });
+            }
+          } catch(err) {}
+        }
+
+        var ssWorking = false;
+        try {
+          var testSK = '__isekai_preflight_s__' + Math.random();
+          window.sessionStorage.setItem(testSK, '1');
+          window.sessionStorage.removeItem(testSK);
+          ssWorking = true;
+        } catch(e) {}
+
+        if (!ssWorking) {
+          try {
+            var memSS = makeSafeStore();
+            Object.defineProperty(window, 'sessionStorage', { value: memSS, configurable: true, writable: true });
+            if (window.Window && window.Window.prototype) {
+              Object.defineProperty(window.Window.prototype, 'sessionStorage', { value: memSS, configurable: true, writable: true });
+            }
+          } catch(err) {}
+        }
+
+        // 2. Global Error Interceptor & Telemetry Dispatcher
+        window.addEventListener('error', function(ev) {
+          try {
+            fetch('/api/client-error', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                source: 'index_window_error',
+                message: ev.message,
+                filename: ev.filename,
+                lineno: ev.lineno,
+                colno: ev.colno,
+                stack: ev.error ? ev.error.stack : null
+              })
+            }).catch(function() {});
+          } catch(e) {}
+
+          var indicator = document.getElementById('engine-status-indicator');
+          if (indicator) {
+            indicator.innerText = 'AUTO-REPAIRING REALM...';
+            indicator.style.color = '#f43f5e';
+          }
+        });
+
+        // 3. Self-Healing Watchdog (if React takes >3.5s to mount due to slow network)
+        setTimeout(function() {
+          var statusEl = document.getElementById('engine-status-indicator');
+          var recoveryBtn = document.getElementById('engine-fast-launch');
+          if (statusEl && recoveryBtn) {
+            statusEl.innerText = 'STABILIZING CONNECTIONS...';
+            recoveryBtn.style.display = 'inline-block';
+          }
+        }, 3500);
+      })();
+    </script>
   </head>
-  <body>
-    <div id="root"></div>
+  <body style="background-color: #020617; color: #f8fafc; margin: 0; padding: 0; min-height: 100vh; overflow-x: hidden;">
+    <div id="root">
+      <div style="min-height: 100vh; background-color: #020617; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; text-align: center; padding: 20px;">
+        <div style="width: 56px; height: 56px; border-radius: 18px; background: linear-gradient(135deg, #9333ea, #ec4899); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(147, 51, 234, 0.4); margin-bottom: 20px;">
+          <span style="font-size: 28px;">⚡</span>
+        </div>
+        <div style="font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.025em; margin-bottom: 8px;">
+          ISEKAI WORLDS
+        </div>
+        <div id="engine-status-indicator" style="font-size: 13px; font-family: monospace; color: #a855f7; font-weight: 600; letter-spacing: 0.05em; margin-bottom: 16px;">
+          CONNECTING TO MULTIVERSE...
+        </div>
+        <button id="engine-fast-launch" onclick="window.location.reload()" style="display: none; padding: 10px 22px; border-radius: 12px; background: linear-gradient(135deg, #9333ea, #ec4899); color: #ffffff; font-weight: bold; font-family: monospace; font-size: 12px; border: none; cursor: pointer; box-shadow: 0 4px 20px rgba(147, 51, 234, 0.4);">
+          FAST RE-ENTER REALM
+        </button>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

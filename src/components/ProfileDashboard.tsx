@@ -209,6 +209,16 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({
     return `${hrs}h ${mins}m`;
   };
 
+  const formatTimeSafe = (timeStr?: string) => {
+    if (!timeStr) return "";
+    try {
+      const d = new Date(timeStr);
+      return isNaN(d.getTime()) ? "" : d.toLocaleTimeString();
+    } catch {
+      return "";
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto space-y-8">
       {/* Live Universal Multi-Profile Synchronizer Banner */}
@@ -230,7 +240,7 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({
               </div>
               <p className="text-slate-400 text-xs mt-0.5">
                 Every profile is continuously synchronized across Firestore, Cloud Server & all devices.
-                {lastSyncedTime && ` Last synchronized: ${new Date(lastSyncedTime).toLocaleTimeString()}`}
+                {formatTimeSafe(lastSyncedTime) && ` Last synchronized: ${formatTimeSafe(lastSyncedTime)}`}
               </p>
             </div>
           </div>

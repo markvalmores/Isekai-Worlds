@@ -97,6 +97,10 @@ export class UniversalSyncManager {
   // Real-time Firestore sync listener
   private initRealtimeFirestoreListener() {
     try {
+      if (!db) {
+        console.warn("[Firestore Sync] db instance not ready yet");
+        return;
+      }
       const syncDocRef = doc(db, "global_sync", DEFAULT_SYNC_DOC);
       this.unsubSnapshot = onSnapshot(
         syncDocRef,
@@ -122,12 +126,22 @@ export class UniversalSyncManager {
   // Heartbeat sync every 15s to keep continuous sync forever everywhere
   private initPeriodicHeartbeat() {
     setInterval(() => {
-      this.syncNow();
+      try {
+        this.syncNow();
+      } catch (e) {
+        console.warn("[Sync Heartbeat] Periodic sync notice:", e);
+      }
     }, 15000);
 
-    window.addEventListener("online", () => {
-      this.syncNow();
-    });
+    if (typeof window !== "undefined") {
+      window.addEventListener("online", () => {
+        try {
+          this.syncNow();
+        } catch (e) {
+          console.warn("[Sync Heartbeat] Online sync notice:", e);
+        }
+      });
+    }
   }
 
   // Sync everything everywhere (Firestore + Server + LocalStorage)

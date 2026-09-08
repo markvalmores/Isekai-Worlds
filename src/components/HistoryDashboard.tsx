@@ -34,15 +34,25 @@ export const HistoryDashboard: React.FC = () => {
       </div>
 
       <div className="space-y-2">
-        {history.map((entry, idx) => (
-          <div key={idx} className="p-3 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-between text-xs text-slate-300">
-            <div>
-              <p className="font-bold text-white">{entry.title}</p>
-              <p className="text-[10px] text-slate-500">{new Date(entry.timestamp).toLocaleString()}</p>
+        {(history || []).map((entry, idx) => {
+          let dateStr = "";
+          try {
+            dateStr = entry.timestamp ? new Date(entry.timestamp).toLocaleString() : "";
+          } catch {}
+          return (
+            <div key={idx} className="p-3 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-between text-xs text-slate-300">
+              <div>
+                <p className="font-bold text-white">{entry.title || "Untitled Activity"}</p>
+                {dateStr && <p className="text-[10px] text-slate-500">{dateStr}</p>}
+              </div>
+              {entry.url && (
+                <a href={entry.url} target="_blank" rel="noreferrer" className="text-rose-400 font-bold hover:underline">
+                  View
+                </a>
+              )}
             </div>
-            <a href={entry.url} target="_blank" className="text-rose-400 font-bold hover:underline">View</a>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

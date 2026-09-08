@@ -100,7 +100,7 @@ export const GlobalVoiceNavigator: React.FC<GlobalVoiceNavigatorProps> = ({
     }
   };
 
-  const startVoiceSearch = () => {
+  const startVoiceSearch = async () => {
     const SpeechRecognitionAPI = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognitionAPI) {
       setFeedback("Speech recognition is not supported in this browser.");
@@ -110,15 +110,24 @@ export const GlobalVoiceNavigator: React.FC<GlobalVoiceNavigatorProps> = ({
     }
 
     try {
+      setFeedback("Requesting microphone access...");
+      setIsOpen(true);
+      sfx.playClick();
+
+      // Explicitly prompt for microphone access & capture mic device
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // Clean up stream tracks immediately or let recognition take over
+        stream.getTracks().forEach(track => track.stop());
+      }
+
       const recognition = new SpeechRecognitionAPI();
       recognition.lang = "en-US";
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
 
       setIsListening(true);
-      setIsOpen(true);
       setFeedback("Listening for voice command... (e.g., 'Go to Dictionary', 'Watch Anime', 'Wallpapers')");
-      sfx.playClick();
 
       recognition.onresult = (event: any) => {
         const spoken = event.results[0][0].transcript;
@@ -132,11 +141,11 @@ export const GlobalVoiceNavigator: React.FC<GlobalVoiceNavigatorProps> = ({
         console.warn("Voice command error:", event.error);
         setIsListening(false);
         if (event.error === "not-allowed" || event.error === "permission-denied") {
-          setFeedback("Microphone permission denied. Please allow microphone access or click a quick suggestion below.");
+          setFeedback("Microphone permission denied. Please allow microphone access in your browser settings or click a quick suggestion below.");
         } else {
-          setFeedback(`Voice recognition notice: ${event.error}. You can also type commands below.`);
+          setFeedback(`Voice recognition notice: ${event.error}. You can also type or click commands below.`);
         }
-        setTimeout(() => setFeedback(null), 5000);
+        setTimeout(() => setFeedback(null), 6000);
       };
 
       recognition.onend = () => {
@@ -144,10 +153,15 @@ export const GlobalVoiceNavigator: React.FC<GlobalVoiceNavigatorProps> = ({
       };
 
       recognition.start();
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
       setIsListening(false);
-      setFeedback("Could not start microphone.");
+      if (e.name === "NotAllowedError" || e.name === "PermissionDeniedError") {
+        setFeedback("Microphone permission denied by user. Please allow microphone access.");
+      } else {
+        setFeedback(`Could not access microphone: ${e.message || "Unknown error"}. You can also use quick suggestions below.`);
+      }
+      setTimeout(() => setFeedback(null), 6000);
     }
   };
 

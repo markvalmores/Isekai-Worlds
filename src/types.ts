@@ -21,7 +21,8 @@ export type PageView =
   | "vercel"
   | "cinemax"
   | "dictionary"
-  | "history";
+  | "history"
+  | "vtubers";
 
 export type LanguageCode =
   | "en"

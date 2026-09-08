@@ -44,6 +44,7 @@ import { DonationCreditsModal } from "./components/DonationCreditsModal";
 import { SocialAuthModal } from "./components/SocialAuthModal";
 import { VercelAppsDashboard } from "./components/VercelAppsDashboard";
 import { CineMax } from "./components/CineMax";
+import { VtubersTab } from "./components/VtubersTab";
 import { HistoryDashboard } from "./components/HistoryDashboard";
 import { ChildSafetyModal } from "./components/ChildSafetyModal";
 import { Cookie, Check, Sparkles, Tv } from "lucide-react";
@@ -299,7 +300,8 @@ export default function App() {
       vercel: "Vercel APPs & Games",
       cinemax: "Movies",
       dictionary: "Google 243 Languages Dictionary",
-      history: "History Dashboard"
+      history: "History Dashboard",
+      vtubers: "VTubers Hub"
     };
 
     setTargetPageName(names[page] || "Isekai Realm");
@@ -817,6 +819,9 @@ export default function App() {
 
         {currentPage === "cinemax" && (
           <CineMax />
+        )}
+        {currentPage === "vtubers" && (
+          <VtubersTab />
         )}
         {currentPage === "history" && (
           <HistoryDashboard />

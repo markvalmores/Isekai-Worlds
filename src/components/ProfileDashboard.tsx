@@ -62,6 +62,34 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({
   const [isForceSyncing, setIsForceSyncing] = useState(false);
   const [syncFeedback, setSyncFeedback] = useState<string | null>(null);
 
+  // Login Streak State
+  const [loginStreak, setLoginStreak] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem("isekai_login_streak");
+      return saved ? parseInt(saved, 10) : 3;
+    } catch {
+      return 3;
+    }
+  });
+
+  const [streakClaimed, setStreakClaimed] = useState<boolean>(() => {
+    try {
+      const todayStr = new Date().toISOString().split("T")[0];
+      return localStorage.getItem(`isekai_streak_claimed_${todayStr}`) === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  const handleClaimStreak = () => {
+    sfx.playBadgeUnlock();
+    setStreakClaimed(true);
+    const todayStr = new Date().toISOString().split("T")[0];
+    try {
+      localStorage.setItem(`isekai_streak_claimed_${todayStr}`, "true");
+    } catch {}
+  };
+
   // Sync formData when profile changes
   useEffect(() => {
     if (!editing) {
@@ -278,6 +306,41 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({
             <span>{syncFeedback}</span>
           </div>
         )}
+      </div>
+
+      {/* Login Streak Tracker & Rewards Card */}
+      <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-amber-950/40 via-slate-900/95 to-orange-950/40 border border-amber-500/40 shadow-xl backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div className="flex items-center gap-4 text-center sm:text-left">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-lg shadow-orange-600/30 shrink-0 text-2xl animate-bounce" style={{ animationDuration: '3s' }}>
+            🔥
+          </div>
+          <div>
+            <div className="flex items-center justify-center sm:justify-start gap-2">
+              <h3 className="text-lg font-black text-white font-mono">Daily Login Streak</h3>
+              <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-mono font-bold flex items-center gap-1">
+                <span>{loginStreak} Days Consecutive</span>
+              </span>
+            </div>
+            <p className="text-xs text-slate-300 font-mono mt-1">
+              Keep your streak burning! Earn <strong className="text-amber-400">+{loginStreak * 50} Isekai Coins</strong> bonus rewards for daily consecutive visits.
+            </p>
+          </div>
+        </div>
+
+        <div className="shrink-0">
+          <button
+            onClick={handleClaimStreak}
+            disabled={streakClaimed}
+            className={`px-6 py-3 rounded-2xl font-mono font-bold text-xs uppercase transition-all shadow-lg flex items-center gap-2 ${
+              streakClaimed
+                ? "bg-slate-800 border border-slate-700 text-slate-400 cursor-not-allowed"
+                : "bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white shadow-orange-600/30 hover:scale-105 active:scale-95 cursor-pointer"
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-amber-200" />
+            <span>{streakClaimed ? "Streak Bonus Claimed Today! ✓" : `Claim +${loginStreak * 50} Streak Coins`}</span>
+          </button>
+        </div>
       </div>
 
       {/* Discord Style Profile Card */}

@@ -2,6 +2,7 @@ import React from "react";
 import { PageView, LanguageCode, UserProfile, AppSettings } from "../types";
 import { SUPPORTED_LANGUAGES, getTranslation } from "../utils/i18n";
 import { sfx } from "../utils/sfx";
+import { LofiPlayer } from "./LofiPlayer";
 import {
   Sparkles,
   Globe,
@@ -232,6 +233,9 @@ export const Header: React.FC<HeaderProps> = ({
               <span>Daily Rewards</span>
             </button>
           )}
+
+          {/* Lo-Fi Anime Music Player */}
+          <LofiPlayer />
 
           {/* Smart TV Remote Button */}
           {openTvRemote && (

@@ -18,26 +18,44 @@ export const GooglePlusTab: React.FC = () => {
     window.open(`https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`, "_blank");
   };
 
-  const handleGeminiSubmit = (e: React.FormEvent) => {
+  const handleGeminiSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!geminiPrompt.trim()) return;
+    if (!geminiPrompt.trim() || isGenerating) return;
     sfx.playClick();
     const userText = geminiPrompt.trim();
-    setChatLog(prev => [...prev, { role: "user", text: userText }]);
+    const updatedHistory = [...chatLog, { role: "user" as const, text: userText }];
+    setChatLog(updatedHistory);
     setGeminiPrompt("");
     setIsGenerating(true);
 
-    setTimeout(() => {
-      let reply = `I processed your request regarding "${userText}". As an AI assistant integrated in Google+, I am here to help you explore, search, and create!`;
-      if (userText.toLowerCase().includes("hello") || userText.toLowerCase().includes("hi")) {
-        reply = "Hello there! Welcome to Google+ & Gemini AI hub.";
-      } else if (userText.toLowerCase().includes("vtuber")) {
-        reply = "VTubers are amazing! You can check out live streams on the VTubers tab right here in the app.";
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
+
+    try {
+      const res = await fetch("/api/gemini/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: userText,
+          history: updatedHistory.slice(-6)
+        }),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      const data = await res.json();
+      if (data && data.reply) {
+        setChatLog(prev => [...prev, { role: "gemini", text: data.reply }]);
+      } else {
+        setChatLog(prev => [...prev, { role: "gemini", text: "I received your prompt, but encountered an unexpected response format." }]);
       }
-      setChatLog(prev => [...prev, { role: "gemini", text: reply }]);
+    } catch (err: any) {
+      console.error("Gemini request error:", err);
+      const errMsg = err.name === "AbortError" ? "Request timed out after 25 seconds." : (err.message || "Unknown error");
+      setChatLog(prev => [...prev, { role: "gemini", text: `Gemini response notice: ${errMsg}` }]);
+    } finally {
       setIsGenerating(false);
       sfx.playClick();
-    }, 1000);
+    }
   };
 
   return (

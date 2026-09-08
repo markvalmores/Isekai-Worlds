@@ -402,6 +402,53 @@ Do NOT wrap the output in markdown code blocks. Return only pure JSON string.`;
   }
 });
 
+// 2d. Google+ Gemini Chat API endpoint using Gemini model
+app.post("/api/gemini/chat", async (req, res) => {
+  try {
+    const { prompt, history } = req.body;
+    if (!prompt) {
+      return res.status(400).json({ error: "Prompt is required" });
+    }
+
+    const ai = getGenAI();
+    if (!ai) {
+      return res.json({
+        reply: `Hello! I received your message: "${prompt}". (Note: GEMINI_API_KEY environment variable is not configured on this server container yet, but your interface is fully ready!).`
+      });
+    }
+
+    const systemInstruction = `You are Gemini, Google's advanced multimodal AI assistant integrated within the Google+ and Isekai Worlds platform. You are helpful, intelligent, creative, friendly, and capable of discussing VTubers, anime, coding, science, art, and answering general questions with depth and accuracy.`;
+
+    let contents = prompt;
+    if (Array.isArray(history) && history.length > 0) {
+      const formattedHistory = history.map((h: any) => `${h.role === 'user' ? 'User' : 'Gemini'}: ${h.text}`).join("\n");
+      contents = `${formattedHistory}\nUser: ${prompt}\nGemini:`;
+    }
+
+    // Wrap in timeout promise to prevent hanging
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Gemini API request timed out after 20 seconds")), 20000)
+    );
+
+    const apiPromise = ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents,
+      config: {
+        systemInstruction
+      }
+    });
+
+    const response: any = await Promise.race([apiPromise, timeoutPromise]);
+    const reply = response.text || "I'm sorry, I couldn't generate a response right now. Please try again.";
+    return res.json({ reply });
+  } catch (error: any) {
+    console.error("Gemini chat error:", error);
+    return res.json({
+      reply: `Gemini AI Assistant response fallback: I processed your query ("${req.body.prompt || ''}"). Note: ${error.message || "API error encountered"}.`
+    });
+  }
+});
+
 // 2c. Real-time Vocaloid Karaoke Lyrics & AI Video Detection with 429 Quota-Resilient Fallbacks
 const vocaloidLyricsCache = new Map<string, any>();
 const vocaloidDetectionCache = new Map<string, any>();

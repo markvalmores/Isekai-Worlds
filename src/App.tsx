@@ -48,6 +48,7 @@ import { HistoryDashboard } from "./components/HistoryDashboard";
 import { ChildSafetyModal } from "./components/ChildSafetyModal";
 import { Cookie, Check, Sparkles, Tv } from "lucide-react";
 import { trackHistory } from "./lib/historyService";
+import { GlobalVoiceNavigator } from "./components/GlobalVoiceNavigator";
 
 export default function App() {
   // Page View State
@@ -980,6 +981,12 @@ export default function App() {
       <FloatingLanguageWidget
         settings={settings}
         updateSettings={updateSettings}
+      />
+
+      {/* Global Voice Navigation Assistant */}
+      <GlobalVoiceNavigator
+        currentPage={currentPage}
+        setCurrentPage={handlePageChange}
       />
 
       {/* Footer */}

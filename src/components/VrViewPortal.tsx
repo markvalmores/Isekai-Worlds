@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { sfx } from "../utils/sfx";
 import { fetchRealTimeAnimeList, RealTimeAnimeItem } from "../utils/animeApi";
+import { VrHomeTourModal } from "./VrHomeTourModal";
 import {
   Eye,
   Sparkles,
@@ -15,7 +16,8 @@ import {
   Box,
   Disc,
   Layers,
-  Crosshair
+  Crosshair,
+  Home
 } from "lucide-react";
 
 type HapticIntensity = "soft" | "medium" | "heavy" | "ultra";
@@ -161,6 +163,8 @@ export const VrViewPortal: React.FC = () => {
     }
   ];
 
+  const [isVirtualTourOpen, setIsVirtualTourOpen] = useState(false);
+
   const handleRotateLeft = (e?: React.MouseEvent<HTMLElement>) => {
     const pattern = hapticIntensity === "soft" ? [30] : hapticIntensity === "heavy" ? [60, 30, 60] : [45, 20, 45];
     triggerHaptic(pattern, "Spatial Rotation Left ←", "click", e);
@@ -176,7 +180,7 @@ export const VrViewPortal: React.FC = () => {
   return (
     <div className={`space-y-8 transition-transform duration-100 ${isVibrating ? "translate-x-0.5 translate-y-0.5 scale-[0.998]" : ""}`}>
       {/* Header Banner */}
-      <div className="p-8 rounded-3xl bg-slate-900/80 border border-indigo-500/20 relative overflow-hidden">
+      <div className="p-8 rounded-3xl bg-slate-900/80 border border-indigo-500/20 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="relative z-10 max-w-2xl space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/30 text-xs font-mono text-violet-300">
             <Eye className="w-4 h-4" />
@@ -197,6 +201,21 @@ export const VrViewPortal: React.FC = () => {
             Experience Isekai Worlds in 360° virtual reality with simulated tactile haptic force feedback. Interact with VR menu nodes, spatial cards, and arcane artifacts to trigger controller vibrations & shockwaves.
           </p>
         </div>
+
+        {/* Launch 3D Virtual Home Tour Button */}
+        <button
+          onClick={(e) => {
+            triggerHaptic([60, 40, 100], "Launching 3D Virtual Home Tour", "warp", e);
+            setIsVirtualTourOpen(true);
+          }}
+          className="group relative px-6 py-4 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 text-white font-mono text-xs font-bold shadow-[0_0_35px_rgba(168,85,247,0.5)] border border-purple-400/50 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 shrink-0"
+        >
+          <Home className="w-5 h-5 text-cyan-300 animate-pulse" />
+          <div className="text-left">
+            <span className="block text-sm font-black">Launch 3D Virtual Home Tour</span>
+            <span className="text-[10px] text-purple-200">Keyboard & VR Controller Navigation</span>
+          </div>
+        </button>
       </div>
 
       {/* VR Haptic Controller & Engine Control Dashboard */}
@@ -422,6 +441,11 @@ export const VrViewPortal: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* 3D Virtual Home Tour Modal */}
+      {isVirtualTourOpen && (
+        <VrHomeTourModal onClose={() => setIsVirtualTourOpen(false)} />
+      )}
     </div>
   );
 };

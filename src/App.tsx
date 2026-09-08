@@ -45,6 +45,7 @@ import { SocialAuthModal } from "./components/SocialAuthModal";
 import { VercelAppsDashboard } from "./components/VercelAppsDashboard";
 import { CineMax } from "./components/CineMax";
 import { VtubersTab } from "./components/VtubersTab";
+import { GooglePlusTab } from "./components/GooglePlusTab";
 import { HistoryDashboard } from "./components/HistoryDashboard";
 import { ChildSafetyModal } from "./components/ChildSafetyModal";
 import { Cookie, Check, Sparkles, Tv } from "lucide-react";
@@ -301,7 +302,8 @@ export default function App() {
       cinemax: "Movies",
       dictionary: "Google 243 Languages Dictionary",
       history: "History Dashboard",
-      vtubers: "VTubers Hub"
+      vtubers: "VTubers Hub",
+      googleplus: "Google+ & Gemini Portal"
     };
 
     setTargetPageName(names[page] || "Isekai Realm");
@@ -822,6 +824,9 @@ export default function App() {
         )}
         {currentPage === "vtubers" && (
           <VtubersTab />
+        )}
+        {currentPage === "googleplus" && (
+          <GooglePlusTab />
         )}
         {currentPage === "history" && (
           <HistoryDashboard />

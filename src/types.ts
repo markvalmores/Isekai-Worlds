@@ -22,7 +22,8 @@ export type PageView =
   | "cinemax"
   | "dictionary"
   | "history"
-  | "vtubers";
+  | "vtubers"
+  | "googleplus";
 
 export type LanguageCode =
   | "en"

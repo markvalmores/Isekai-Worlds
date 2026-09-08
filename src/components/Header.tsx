@@ -119,6 +119,7 @@ export const Header: React.FC<HeaderProps> = ({
     { id: "vr", labelKey: "vr", icon: <Eye className="w-4 h-4" /> },
     { id: "hardware", labelKey: "hardware", icon: <Cpu className="w-4 h-4" /> },
     { id: "vtubers", labelKey: "vtubers", icon: <Radio className="w-4 h-4 text-pink-400 animate-pulse" /> },
+    { id: "googleplus", labelKey: "googleplus", icon: <Globe className="w-4 h-4 text-blue-400 animate-pulse" /> },
   ];
 
   const handleNavClick = (page: PageView) => {

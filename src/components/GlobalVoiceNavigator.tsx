@@ -129,10 +129,14 @@ export const GlobalVoiceNavigator: React.FC<GlobalVoiceNavigatorProps> = ({
       };
 
       recognition.onerror = (event: any) => {
-        console.error("Voice command error", event.error);
+        console.warn("Voice command error:", event.error);
         setIsListening(false);
-        setFeedback(`Voice error: ${event.error}`);
-        setTimeout(() => setFeedback(null), 3000);
+        if (event.error === "not-allowed" || event.error === "permission-denied") {
+          setFeedback("Microphone permission denied. Please allow microphone access or click a quick suggestion below.");
+        } else {
+          setFeedback(`Voice recognition notice: ${event.error}. You can also type commands below.`);
+        }
+        setTimeout(() => setFeedback(null), 5000);
       };
 
       recognition.onend = () => {

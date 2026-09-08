@@ -17,7 +17,8 @@ export const VtubersTab: React.FC = () => {
     { name: "HIMEHINA", embedUrl: "https://www.youtube.com/embed/rPARkChnFA0", linkUrl: "https://www.youtube.com/watch?v=rPARkChnFA0", query: "himehina", icon: "🌸" },
     { name: "VShojo", embedUrl: "https://www.youtube.com/embed/8UqsrwIZVRw", linkUrl: "https://www.youtube.com/watch?v=8UqsrwIZVRw", query: "vshojo", icon: "💜" },
     { name: "Hololive ReGLOSS", embedUrl: "https://www.youtube.com/embed/_I7rCnEDJfo", linkUrl: "https://www.youtube.com/watch?v=_I7rCnEDJfo", query: "hololive regloss", icon: "🎨" },
-    { name: "Hololive FLOW GLOW", embedUrl: "https://www.youtube.com/embed/0ko7LKM3yoU", linkUrl: "https://www.youtube.com/watch?v=0ko7LKM3yoU", query: "hololive flow glow", icon: "🔥" }
+    { name: "Hololive FLOW GLOW", embedUrl: "https://www.youtube.com/embed/0ko7LKM3yoU", linkUrl: "https://www.youtube.com/watch?v=0ko7LKM3yoU", query: "hololive flow glow", icon: "🔥" },
+    { name: "VTuber NEWS", embedUrl: "https://www.youtube.com/embed/Y1gTa-8-5eg", linkUrl: "https://www.youtube.com/watch?v=Y1gTa-8-5eg", query: "vtuber news", icon: "📰" }
   ];
 
   const handleFullscreenToggle = () => {

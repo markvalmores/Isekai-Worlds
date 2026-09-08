@@ -8,6 +8,19 @@ export const VtubersTab: React.FC = () => {
   const [activeEmbedUrl, setActiveEmbedUrl] = useState<string>("https://www.youtube.com/embed/Af7pRKJYFE0");
   const [customSearchQuery, setCustomSearchQuery] = useState<string>("VTuber");
 
+  // Polling state
+  const [pollOptions, setPollOptions] = useState([
+    { id: "stream-1", name: "VTuber Live Stream", votes: 42 },
+    { id: "stream-2", name: "Hololive English", votes: 68 },
+    { id: "stream-3", name: "Nijisanji En", votes: 35 },
+    { id: "stream-4", name: "Vgen Stream", votes: 50 },
+    { id: "stream-5", name: "VShojo", votes: 29 }
+  ]);
+  const [hasVoted, setHasVoted] = useState(false);
+  const [userVotedId, setUserVotedId] = useState<string | null>(null);
+  const [newSuggestion, setNewSuggestion] = useState("");
+  const [suggestionSubmitted, setSuggestionSubmitted] = useState(false);
+
   const popularVtuberStreams = [
     { name: "VTuber Live Stream", embedUrl: "https://www.youtube.com/embed/Af7pRKJYFE0", linkUrl: "https://www.youtube.com/watch?v=Af7pRKJYFE0", query: "VTuber live", icon: "🔴" },
     { name: "Hololive English", embedUrl: "https://www.youtube.com/embed/54oaXuyyfMc", linkUrl: "https://www.youtube.com/watch?v=54oaXuyyfMc", query: "hololive english", icon: "✨" },
@@ -16,10 +29,37 @@ export const VtubersTab: React.FC = () => {
     { name: "Holostars English", embedUrl: "https://www.youtube.com/embed/UdXvaf0Ld80", linkUrl: "https://www.youtube.com/watch?v=UdXvaf0Ld80", query: "holostars english", icon: "💫" },
     { name: "HIMEHINA", embedUrl: "https://www.youtube.com/embed/rPARkChnFA0", linkUrl: "https://www.youtube.com/watch?v=rPARkChnFA0", query: "himehina", icon: "🌸" },
     { name: "VShojo", embedUrl: "https://www.youtube.com/embed/8UqsrwIZVRw", linkUrl: "https://www.youtube.com/watch?v=8UqsrwIZVRw", query: "vshojo", icon: "💜" },
+    { name: "Vgen", embedUrl: "https://www.youtube.com/embed/22BjqX3khS0", linkUrl: "https://www.youtube.com/watch?v=22BjqX3khS0", query: "vgen", icon: "💎" },
     { name: "Hololive ReGLOSS", embedUrl: "https://www.youtube.com/embed/_I7rCnEDJfo", linkUrl: "https://www.youtube.com/watch?v=_I7rCnEDJfo", query: "hololive regloss", icon: "🎨" },
     { name: "Hololive FLOW GLOW", embedUrl: "https://www.youtube.com/embed/0ko7LKM3yoU", linkUrl: "https://www.youtube.com/watch?v=0ko7LKM3yoU", query: "hololive flow glow", icon: "🔥" },
     { name: "VTuber NEWS", embedUrl: "https://www.youtube.com/embed/Y1gTa-8-5eg", linkUrl: "https://www.youtube.com/watch?v=Y1gTa-8-5eg", query: "vtuber news", icon: "📰" }
   ];
+
+  const handleVote = (id: string) => {
+    sfx.playClick();
+    if (!hasVoted) {
+      setPollOptions(pollOptions.map(opt => opt.id === id ? { ...opt, votes: opt.votes + 1 } : opt));
+      setHasVoted(true);
+      setUserVotedId(id);
+    }
+  };
+
+  const handleSuggestionSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSuggestion.trim()) return;
+    sfx.playClick();
+    const newId = `custom-${Date.now()}`;
+    setPollOptions([...pollOptions, { id: newId, name: newSuggestion.trim(), votes: 1 }]);
+    setNewSuggestion("");
+    setSuggestionSubmitted(true);
+    if (!hasVoted) {
+      setHasVoted(true);
+      setUserVotedId(newId);
+    }
+    setTimeout(() => setSuggestionSubmitted(false), 4000);
+  };
+
+  const totalVotes = pollOptions.reduce((acc, curr) => acc + curr.votes, 0);
 
   const handleFullscreenToggle = () => {
     sfx.playClick();
@@ -128,7 +168,7 @@ export const VtubersTab: React.FC = () => {
           </div>
 
           {/* Iframe Embed */}
-          <div className="relative flex-1 w-full bg-slate-950">
+          <div className="relative flex-1 w-full bg-slate-950 min-h-[500px]">
             <iframe
               id="vtuber-iframe"
               src={activeEmbedUrl}
@@ -137,6 +177,119 @@ export const VtubersTab: React.FC = () => {
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
             />
+          </div>
+        </div>
+
+        {/* Interactive Polling & Suggestions Section */}
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Polling Card */}
+          <div className="lg:col-span-2 bg-slate-900 border border-pink-500/30 rounded-3xl p-6 shadow-xl flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-pink-400" />
+                  <h3 className="text-lg font-black text-white">Community VTuber Stream Poll</h3>
+                </div>
+                <span className="text-xs font-mono px-3 py-1 rounded-full bg-pink-500/10 border border-pink-500/30 text-pink-300">
+                  {totalVotes} Total Votes
+                </span>
+              </div>
+              <p className="text-xs text-slate-400 mb-6">
+                Vote for your favorite VTuber stream or agency channel below! Results update instantly in real-time.
+              </p>
+
+              <div className="space-y-3">
+                {pollOptions.map((opt) => {
+                  const percentage = totalVotes > 0 ? Math.round((opt.votes / totalVotes) * 100) : 0;
+                  const isUserPick = userVotedId === opt.id;
+                  return (
+                    <div
+                      key={opt.id}
+                      onClick={() => handleVote(opt.id)}
+                      className={`relative overflow-hidden p-4 rounded-2xl border transition-all cursor-pointer group ${
+                        isUserPick
+                          ? "bg-pink-950/40 border-pink-500 shadow-lg shadow-pink-500/20"
+                          : "bg-slate-950/60 border-slate-800 hover:border-pink-500/40 hover:bg-slate-950"
+                      }`}
+                    >
+                      {/* Percentage Progress Bar Background */}
+                      <div
+                        className="absolute inset-y-0 left-0 bg-pink-600/20 transition-all duration-500 pointer-events-none"
+                        style={{ width: `${percentage}%` }}
+                      />
+                      <div className="relative z-10 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-5 h-5 rounded-full border flex items-center justify-center text-xs font-bold ${
+                            isUserPick ? "bg-pink-600 border-pink-400 text-white" : "border-slate-700 text-slate-500"
+                          }`}>
+                            {isUserPick ? "✓" : ""}
+                          </div>
+                          <span className="text-sm font-bold text-slate-200 group-hover:text-white transition-colors">
+                            {opt.name}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 text-xs font-mono font-bold">
+                          <span className="text-pink-400">{percentage}%</span>
+                          <span className="text-slate-400">({opt.votes} votes)</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {hasVoted && (
+              <div className="mt-4 p-3 rounded-xl bg-pink-950/30 border border-pink-500/30 text-center text-xs text-pink-300 font-mono">
+                🎉 Thank you for voting! Your voice has been recorded in the VTuber community ledger.
+              </div>
+            )}
+          </div>
+
+          {/* Suggestion Box Card */}
+          <div className="bg-slate-900 border border-pink-500/30 rounded-3xl p-6 shadow-xl flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <Heart className="w-5 h-5 text-pink-400" />
+                <h3 className="text-lg font-black text-white">Suggest a VTuber Stream</h3>
+              </div>
+              <p className="text-xs text-slate-400 mb-6">
+                Have a favorite stream or clipper you want to add to the poll and watch together? Submit it here!
+              </p>
+
+              <form onSubmit={handleSuggestionSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-mono font-bold text-slate-300 mb-2">
+                    VTuber Name or Stream Title
+                  </label>
+                  <input
+                    type="text"
+                    value={newSuggestion}
+                    onChange={(e) => setNewSuggestion(e.target.value)}
+                    placeholder="e.g. Pekora, Gawr Gura, etc."
+                    className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-mono focus:outline-none focus:border-pink-500 transition-colors"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3 rounded-xl bg-pink-600 hover:bg-pink-500 text-white text-xs font-mono font-bold transition-all shadow-lg shadow-pink-600/30 flex items-center justify-center gap-2"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>Submit Suggestion to Poll</span>
+                </button>
+              </form>
+
+              {suggestionSubmitted && (
+                <div className="mt-4 p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-center text-xs text-emerald-300 font-mono">
+                  ✨ Successfully added to poll options!
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-slate-800 text-[11px] text-slate-500 font-mono text-center">
+              Isekai Realm • VTuber Community Hub
+            </div>
           </div>
         </div>
       </div>

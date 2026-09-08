@@ -443,8 +443,14 @@ app.post("/api/gemini/chat", async (req, res) => {
     return res.json({ reply });
   } catch (error: any) {
     console.error("Gemini chat error:", error);
+    const msg = error.message || "";
+    if (msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED") || msg.includes("Rate exceeded") || msg.includes("quota")) {
+      return res.json({
+        reply: `🌟 [Rate Limit / Quota Notice]: Gemini's servers are currently experiencing high traffic (rate limit exceeded). Here is your smart offline Isekai AI response to "${req.body.prompt || ''}": That's a fascinating question regarding your Isekai quest! Even when the API rate limit is reached, your adventure continues. Feel free to explore the Google Search portal, check your Daily Login Streak in your Profile, or listen to the Lo-Fi Anime music player while the quota resets!`
+      });
+    }
     return res.json({
-      reply: `Gemini AI Assistant response fallback: I processed your query ("${req.body.prompt || ''}"). Note: ${error.message || "API error encountered"}.`
+      reply: `Gemini AI Assistant response fallback: I processed your query ("${req.body.prompt || ''}"). Note: ${msg || "API error encountered"}.`
     });
   }
 });

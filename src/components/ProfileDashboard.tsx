@@ -81,6 +81,49 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({
     }
   });
 
+  // Level Up Milestone Modal State
+  const [levelUpModalData, setLevelUpModalData] = useState<{
+    isOpen: boolean;
+    milestoneName: string;
+    rewardCoins: number;
+    badgeName: string;
+    icon: string;
+  }>({
+    isOpen: false,
+    milestoneName: "",
+    rewardCoins: 0,
+    badgeName: "",
+    icon: "👑"
+  });
+
+  // Check active session milestones
+  useEffect(() => {
+    const milestones = [
+      { seconds: 60, name: "1 Minute Initiate", coins: 100, badge: "⚡ Speed Runner", icon: "⚡" },
+      { seconds: 3600, name: "1 Hour Adventurer", coins: 500, badge: "🛡️ 1-Hour Vanguard", icon: "🛡️" },
+      { seconds: 18000, name: "5 Hours Champion", coins: 1500, badge: "⚔️ 5-Hour Veteran", icon: "⚔️" },
+      { seconds: 36000, name: "10 Hours Legend", coins: 3000, badge: "🌌 10-Hour Master", icon: "🌌" }
+    ];
+
+    for (const m of milestones) {
+      if (activeSeconds >= m.seconds) {
+        const key = `isekai_milestone_claimed_${m.seconds}`;
+        if (!localStorage.getItem(key)) {
+          localStorage.setItem(key, "true");
+          sfx.playBadgeUnlock();
+          setLevelUpModalData({
+            isOpen: true,
+            milestoneName: m.name,
+            rewardCoins: m.coins,
+            badgeName: m.badge,
+            icon: m.icon
+          });
+          break;
+        }
+      }
+    }
+  }, [activeSeconds]);
+
   const handleClaimStreak = () => {
     sfx.playBadgeUnlock();
     setStreakClaimed(true);
@@ -343,6 +386,74 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({
         </div>
       </div>
 
+      {/* Rank Progression Tracker Card */}
+      {(() => {
+        const ranks = [
+          { name: "Novice Adventurer", minSecs: 0, maxSecs: 300, icon: "🌱" },
+          { name: "Adept Explorer", minSecs: 300, maxSecs: 900, icon: "⚔️" },
+          { name: "Master Summoner", minSecs: 900, maxSecs: 1800, icon: "🔮" },
+          { name: "Grand Isekai Hero", minSecs: 1800, maxSecs: 3600, icon: "👑" },
+          { name: "Legend of the Realm", minSecs: 3600, maxSecs: 7200, icon: "⚡" },
+          { name: "Mythic Godlike Entity", minSecs: 7200, maxSecs: 14400, icon: "🌌" }
+        ];
+
+        let currentRankIdx = 0;
+        for (let i = 0; i < ranks.length; i++) {
+          if (activeSeconds >= ranks[i].minSecs) {
+            currentRankIdx = i;
+          }
+        }
+        const currentRank = ranks[currentRankIdx];
+        const nextRank = ranks[currentRankIdx + 1] || ranks[ranks.length - 1];
+
+        const minSecs = currentRank.minSecs;
+        const maxSecs = nextRank.minSecs > currentRank.minSecs ? nextRank.minSecs : currentRank.maxSecs;
+        const progressSecs = Math.min(activeSeconds - minSecs, maxSecs - minSecs);
+        const totalTierSecs = Math.max(1, maxSecs - minSecs);
+        const progressPercent = Math.min(100, Math.max(0, Math.round((progressSecs / totalTierSecs) * 100)));
+
+        return (
+          <div className="p-6 rounded-3xl bg-gradient-to-r from-purple-950/50 via-slate-900/95 to-indigo-950/50 border border-purple-500/40 shadow-xl backdrop-blur-xl space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-purple-600/20 border border-purple-400/40 flex items-center justify-center text-2xl shadow-md shrink-0">
+                  {currentRank.icon}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-black text-white font-mono">Rank Progression Tracker</h3>
+                    <span className="px-2.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-400/40 text-purple-300 text-xs font-mono font-bold">
+                      {currentRank.name}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-300 font-mono mt-0.5">
+                    Active Session Time: <strong className="text-cyan-400">{formatHoursMins(activeSeconds)}</strong> • Next Tier: <strong className="text-purple-300">{nextRank.name}</strong>
+                  </p>
+                </div>
+              </div>
+
+              <div className="text-right font-mono">
+                <span className="text-xl font-black text-purple-400">{progressPercent}%</span>
+                <span className="text-xs text-slate-400 block">Progress to Next Rank</span>
+              </div>
+            </div>
+
+            {/* Visual Progress Bar */}
+            <div className="relative w-full h-4 bg-slate-950 rounded-full overflow-hidden border border-purple-500/30 shadow-inner">
+              <div
+                className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 transition-all duration-700 shadow-[0_0_15px_rgba(168,85,247,0.5)] rounded-full"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+
+            <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
+              <span>Current Tier: {formatHoursMins(minSecs)}</span>
+              <span>Target Tier: {formatHoursMins(maxSecs)}</span>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Discord Style Profile Card */}
       <div className="rounded-3xl bg-slate-900 border border-indigo-500/30 overflow-hidden shadow-2xl relative">
         {/* Banner Image */}
@@ -600,6 +711,49 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({
         <div className="p-4 rounded-2xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 font-mono text-xs text-center flex items-center justify-center gap-2">
           <Check className="w-4 h-4 text-emerald-400" />
           <span>Profile saved and hardcode synchronized to all profiles across cloud & Firestore!</span>
+        </div>
+      )}
+
+      {/* Level Up Milestone Modal */}
+      {levelUpModalData.isOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
+          <div className="relative max-w-md w-full bg-slate-900 border-2 border-amber-500/80 rounded-3xl p-8 shadow-[0_0_80px_rgba(245,158,11,0.4)] flex flex-col items-center text-center space-y-6">
+            <div className="absolute -top-12 w-24 h-24 rounded-3xl bg-gradient-to-tr from-amber-500 to-orange-600 border-4 border-slate-900 flex items-center justify-center text-5xl shadow-2xl animate-bounce" style={{ animationDuration: '2s' }}>
+              {levelUpModalData.icon}
+            </div>
+
+            <div className="pt-8 space-y-2">
+              <span className="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-300 text-xs font-mono font-bold uppercase tracking-widest">
+                🎉 MILESTONE REACHED!
+              </span>
+              <h2 className="text-2xl font-black text-white font-mono">{levelUpModalData.milestoneName}</h2>
+              <p className="text-xs text-slate-300 font-mono">
+                Your active session time has unlocked a legendary reward!
+              </p>
+            </div>
+
+            <div className="w-full p-4 rounded-2xl bg-slate-950 border border-amber-500/30 flex items-center justify-around">
+              <div className="text-center">
+                <span className="text-[10px] font-mono text-slate-400 block uppercase">Coin Reward</span>
+                <span className="text-lg font-black text-amber-400">+{levelUpModalData.rewardCoins} 🪙</span>
+              </div>
+              <div className="w-px h-8 bg-slate-800" />
+              <div className="text-center">
+                <span className="text-[10px] font-mono text-slate-400 block uppercase">Exclusive Badge</span>
+                <span className="text-sm font-bold text-purple-300">{levelUpModalData.badgeName}</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                sfx.playClick();
+                setLevelUpModalData(prev => ({ ...prev, isOpen: false }));
+              }}
+              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-mono font-bold text-xs uppercase tracking-wider shadow-lg shadow-orange-600/40 hover:scale-[1.02] transition-transform cursor-pointer"
+            >
+              Claim Rewards & Continue Exploring 🚀
+            </button>
+          </div>
         </div>
       )}
     </div>

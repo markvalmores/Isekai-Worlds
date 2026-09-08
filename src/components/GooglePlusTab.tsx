@@ -42,7 +42,20 @@ export const GooglePlusTab: React.FC = () => {
         signal: controller.signal
       });
       clearTimeout(timeoutId);
-      const data = await res.json();
+
+      const rawText = await res.text();
+      let data: any = null;
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        // If response is raw HTML or text instead of JSON
+        if (rawText && rawText.length < 500 && !rawText.toLowerCase().includes("<!doctype")) {
+          data = { reply: rawText };
+        } else {
+          data = { reply: `Gemini server returned non-JSON response: ${rawText.slice(0, 100)}...` };
+        }
+      }
+
       if (data && data.reply) {
         setChatLog(prev => [...prev, { role: "gemini", text: data.reply }]);
       } else {

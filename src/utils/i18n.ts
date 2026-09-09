@@ -123,7 +123,7 @@ export const DICTIONARY: Record<LanguageCode, Record<string, string>> = {
     viewLeaderboard: "VER RANKING TOP",
   },
   tag: {
-    welcomeTitle: "MALIGAYANG DATINGS SA ISEKAI WORLDS",
+    welcomeTitle: "MALIGAYANG PAGDATING SA ISEKAI WORLDS",
     subtitle: "Ang Pinakamahusay na Anime Multiverse Platform para sa Wallpapers, Live Feeds at Global Leaderboards",
     home: "Portal Hub",
     wallpapers: "4K Wallpapers",

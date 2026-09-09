@@ -166,26 +166,41 @@ export function PlayGamesDashboard({ onAddCoins, isGoldMode = false }: PlayGames
   };
 
   // Game tracking loop - grants +15 coins every 45s of active page session
+  const gamingSecondsRef = useRef(0);
+  const onAddCoinsRef = useRef(onAddCoins);
+  const multiplierRef = useRef(activeMultiplier);
+
+  useEffect(() => {
+    onAddCoinsRef.current = onAddCoins;
+  }, [onAddCoins]);
+
+  useEffect(() => {
+    multiplierRef.current = activeMultiplier;
+  }, [activeMultiplier]);
+
   useEffect(() => {
     let interval: any = null;
     if (activeTab === "play" && selectedGame) {
       interval = setInterval(() => {
-        setGamingSeconds((prev) => {
-          const next = prev + 1;
-          if (next % 45 === 0) {
-            const reward = 15 * activeMultiplier;
-            if (onAddCoins) onAddCoins(reward);
-            setCoinsClaimed((curr) => curr + reward);
-            sfx.playBadgeUnlock();
+        gamingSecondsRef.current += 1;
+        const currentSec = gamingSecondsRef.current;
+        setGamingSeconds(currentSec);
+
+        if (currentSec % 45 === 0) {
+          const reward = 15 * multiplierRef.current;
+          if (onAddCoinsRef.current) {
+            onAddCoinsRef.current(reward);
           }
-          return next;
-        });
+          setCoinsClaimed((curr) => curr + reward);
+          sfx.playBadgeUnlock();
+        }
       }, 1000);
     } else {
+      gamingSecondsRef.current = 0;
       setGamingSeconds(0);
     }
     return () => clearInterval(interval);
-  }, [activeTab, selectedGame, activeMultiplier]);
+  }, [activeTab, selectedGame]);
 
   // Persist comments
   const handleAddComment = (e: React.FormEvent) => {

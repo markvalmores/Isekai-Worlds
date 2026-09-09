@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   HardDrive,
   ExternalLink,
@@ -71,22 +71,30 @@ export function RomsDashboard({ onAddCoins, isGoldMode = false }: RomsDashboardP
   // Track playtime in ROMs section
   const [romsSeconds, setRomsSeconds] = useState<number>(0);
   const [coinsClaimed, setCoinsClaimed] = useState<number>(0);
+  const romsSecondsRef = useRef(0);
+  const onAddCoinsRef = useRef(onAddCoins);
+
+  useEffect(() => {
+    onAddCoinsRef.current = onAddCoins;
+  }, [onAddCoins]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setRomsSeconds((prev) => {
-        const next = prev + 1;
-        if (next % 45 === 0) {
-          const reward = 15;
-          if (onAddCoins) onAddCoins(reward);
-          setCoinsClaimed((curr) => curr + reward);
-          sfx.playBadgeUnlock();
+      romsSecondsRef.current += 1;
+      const currentSec = romsSecondsRef.current;
+      setRomsSeconds(currentSec);
+
+      if (currentSec % 45 === 0) {
+        const reward = 15;
+        if (onAddCoinsRef.current) {
+          onAddCoinsRef.current(reward);
         }
-        return next;
-      });
+        setCoinsClaimed((curr) => curr + reward);
+        sfx.playBadgeUnlock();
+      }
     }, 1000);
     return () => clearInterval(interval);
-  }, [onAddCoins]);
+  }, []);
 
   const handleRefresh = () => {
     sfx.playClick();

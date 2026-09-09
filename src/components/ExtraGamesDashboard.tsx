@@ -44,8 +44,8 @@ export interface ExtraGameItem {
 // Strictly only the Happy Meal Game as requested
 const HAPPY_MEAL_GAME: ExtraGameItem = {
   id: "spiderman-happymeal",
-  title: "Spide-Man Brand New Day McDonald's Happy Meal Game",
-  nameAlias: "Spider-Man Brand New Day McDonald's Happy Meal Game",
+  title: "Spider-Man: Brand New Day McDonald's Happy Meal Game",
+  nameAlias: "Spider-Man: Brand New Day McDonald's Happy Meal Game",
   category: "Happy Meal Games",
   url: "https://spm30776.happymealdigital.com/?locale=en-PH",
   coverUrl: "https://images.unsplash.com/photo-1635863138275-d9b33299680b?w=800&auto=format&fit=crop&q=80",
@@ -131,28 +131,38 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
   }, []);
 
   // Passive Coin Reward Tracker Loop (20 coins every 45s of active game session)
+  const secondsRef = useRef(0);
+  const onAddCoinsRef = useRef(onAddCoins);
+
+  useEffect(() => {
+    onAddCoinsRef.current = onAddCoins;
+  }, [onAddCoins]);
+
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     if (isPlayerActive) {
       interval = setInterval(() => {
-        setGamingSeconds((prev) => {
-          const next = prev + 1;
-          if (next % 45 === 0) {
-            const reward = 20;
-            if (onAddCoins) onAddCoins(reward);
-            setCoinsClaimed((curr) => curr + reward);
-            sfx.playBadgeUnlock();
+        secondsRef.current += 1;
+        const currentSec = secondsRef.current;
+        setGamingSeconds(currentSec);
+
+        if (currentSec % 45 === 0) {
+          const reward = 20;
+          if (onAddCoinsRef.current) {
+            onAddCoinsRef.current(reward);
           }
-          return next;
-        });
+          setCoinsClaimed((curr) => curr + reward);
+          sfx.playBadgeUnlock();
+        }
       }, 1000);
     } else {
+      secondsRef.current = 0;
       setGamingSeconds(0);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isPlayerActive, onAddCoins]);
+  }, [isPlayerActive]);
 
   // Back Button handler
   const handleBack = () => {

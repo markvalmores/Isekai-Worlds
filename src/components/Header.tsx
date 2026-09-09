@@ -38,7 +38,8 @@ import {
   MessageSquare,
   Disc3,
   Mic,
-  BookA
+  BookA,
+  Flame
 } from "lucide-react";
 
 interface HeaderProps {
@@ -112,6 +113,7 @@ export const Header: React.FC<HeaderProps> = ({
     { id: "amv", labelKey: "amv", icon: <Sparkles className="w-4 h-4 text-rose-500" /> },
     { id: "cinemax", labelKey: "movies", icon: <Clapperboard className="w-4 h-4" /> },
     { id: "games", labelKey: "games", icon: <Gamepad2 className="w-4 h-4 text-emerald-400" /> },
+    { id: "extragames", labelKey: "extraGames", icon: <Flame className="w-4 h-4 text-rose-400 animate-pulse" /> },
     { id: "roms", labelKey: "roms", icon: <HardDrive className="w-4 h-4 text-purple-400" /> },
     { id: "cards", labelKey: "cards", icon: <Layers className="w-4 h-4 text-amber-400 animate-pulse" /> },
     { id: "vercel", labelKey: "vercel", icon: <Globe className="w-4 h-4 text-cyan-400 animate-pulse" /> },

@@ -30,7 +30,8 @@ import {
   Zap,
   Globe,
   Monitor,
-  Disc3
+  Disc3,
+  Flame
 } from "lucide-react";
 import { PageView, AppSettings } from "../types";
 import { sfx } from "../utils/sfx";
@@ -240,6 +241,15 @@ export function CommandPaletteModal({
       icon: <Gamepad2 className="w-4 h-4 text-indigo-400" />,
       keywords: ["game", "arcade", "play", "retro", "minigame"],
       action: () => { setCurrentPage("games"); onClose(); }
+    },
+    {
+      id: "nav-extragames",
+      category: "Navigation",
+      label: "Go to Extra Games & Happy Meal Portal",
+      description: "Spider-Man: Brand New Day & Happy Meal digital games",
+      icon: <Flame className="w-4 h-4 text-red-400" />,
+      keywords: ["extra", "extragames", "happymeal", "happy meal", "spiderman", "spider-man", "mcdonalds", "marvel"],
+      action: () => { setCurrentPage("extragames"); onClose(); }
     },
     {
       id: "nav-roms",

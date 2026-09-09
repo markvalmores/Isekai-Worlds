@@ -22,6 +22,7 @@ import { WatchAnimePortal } from "./components/WatchAnimePortal";
 import { RadioGaga } from "./components/RadioGaga";
 import { RadioGagaAMV } from "./components/AmvDashboard";
 import { PlayGamesDashboard } from "./components/PlayGamesDashboard";
+import { ExtraGamesDashboard } from "./components/ExtraGamesDashboard";
 import { RomsDashboard } from "./components/RomsDashboard";
 import { CardGamesDashboard } from "./components/CardGamesDashboard";
 import { SakuraCentralEmbed } from "./components/SakuraCentralEmbed";
@@ -296,6 +297,7 @@ export default function App() {
       radio: "Radio Gaga Broadcast",
       amv: "Anime Music Videos",
       games: "Arcade Games Portal",
+      extragames: "Extra Games & Happy Meal Portal",
       roms: "Retro ROMs Vault",
       cards: "Anime Card Games Arena",
       vercel: "Vercel APPs & Games",
@@ -791,6 +793,13 @@ export default function App() {
 
         {currentPage === "games" && (
           <PlayGamesDashboard
+            onAddCoins={handleAddCoins}
+            isGoldMode={isGold}
+          />
+        )}
+
+        {currentPage === "extragames" && (
+          <ExtraGamesDashboard
             onAddCoins={handleAddCoins}
             isGoldMode={isGold}
           />

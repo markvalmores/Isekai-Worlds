@@ -23,7 +23,8 @@ export type PageView =
   | "dictionary"
   | "history"
   | "vtubers"
-  | "googleplus";
+  | "googleplus"
+  | "extragames";
 
 export type LanguageCode =
   | "en"

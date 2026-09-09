@@ -90,10 +90,19 @@ export const Footer: React.FC<FooterProps> = ({
             </li>
             <li>
               <button
-                onClick={() => { sfx.playClick(); setCurrentPage("wallpapers"); }}
+                onClick={() => { sfx.playClick(); setCurrentPage("extragames"); }}
+                className="hover:text-red-400 text-red-300/90 font-semibold transition-colors flex items-center gap-1"
+              >
+                <Sparkles className="w-3 h-3 text-red-400" />
+                <span>Extra Games & Happy Meal</span>
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => { sfx.playClick(); setCurrentPage("games"); }}
                 className="hover:text-cyan-400 transition-colors"
               >
-                4K Anime Wallpapers
+                Play Games Portal
               </button>
             </li>
             <li>

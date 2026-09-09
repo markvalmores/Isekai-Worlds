@@ -5,9 +5,28 @@ import App from './App.tsx';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import './index.css';
 
+// Helper to detect benign platform/environment noise that should not trigger alerts
+function isBenignError(msgOrReason: string | undefined | null): boolean {
+  if (!msgOrReason) return false;
+  const str = String(msgOrReason).toLowerCase();
+  return (
+    str.includes('websocket') ||
+    str.includes('closed without opened') ||
+    str.includes('failed to connect to websocket') ||
+    str.includes('resizeobserver loop') ||
+    str.includes('script error') ||
+    str.includes('aborted') ||
+    str.includes('canceling') ||
+    str.includes('canceled')
+  );
+}
+
 // Global error handlers to prevent unhandled runtime errors from freezing the UI
 if (typeof window !== 'undefined') {
   window.addEventListener('error', (event) => {
+    if (isBenignError(event.message)) {
+      return;
+    }
     console.warn('[Global Safety Interceptor] Runtime error safely handled:', event.message);
     try {
       fetch('/api/client-error', {
@@ -26,6 +45,14 @@ if (typeof window !== 'undefined') {
   });
 
   window.addEventListener('unhandledrejection', (event) => {
+    const reasonStr = event.reason
+      ? (event.reason.message || event.reason.stack || String(event.reason))
+      : 'unknown';
+
+    if (isBenignError(reasonStr)) {
+      return;
+    }
+
     console.warn('[Global Safety Interceptor] Unhandled promise rejection safely handled:', event.reason);
     try {
       fetch('/api/client-error', {
@@ -33,7 +60,7 @@ if (typeof window !== 'undefined') {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           source: 'main_unhandled_rejection',
-          reason: event.reason ? (event.reason.message || event.reason.stack || String(event.reason)) : 'unknown',
+          reason: reasonStr,
         }),
       }).catch(() => {});
     } catch {}

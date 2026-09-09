@@ -1,21 +1,21 @@
 {
   "allProfiles": [
     {
-      "badge": "Divine Chosen",
-      "bio": "Collecting rare anime cards and exploring retro gaming archives.",
-      "bannerGradient": "from-emerald-600 via-teal-600 to-indigo-600",
       "favAnime": "Overlord / No Game No Life",
-      "username": "LunarSovereign_610",
-      "avatarUrl": "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&auto=format&fit=crop&q=80",
-      "title": "Starbound Wanderer",
+      "title": "Lo-Fi Enthusiast",
+      "avatarUrl": "https://www.animeexplained.com/wp-content/uploads/2023/12/Shadow-from-The-Eminence-in-Shadow.jpg",
+      "badge": "📻 Beat Master",
+      "joinedDate": "2026",
+      "id": "persona-1788778209275-93ucl",
       "country": "GLOBAL",
-      "bannerUrl": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1200&auto=format&fit=crop&q=80",
-      "customStatus": "Exploring Isekai Worlds as LunarSovereign_610...",
-      "id": "u-1788521945484-3h41r",
+      "bannerGradient": "from-emerald-600 via-teal-600 to-indigo-600",
+      "customStatus": "I Am.... ATOMIC. ",
       "accentColor": "#a855f7",
-      "joinedDate": "2026"
+      "bannerUrl": "https://nekos.best/api/v2/hug/548daa04-3dff-4524-bb28-c229e5542e9f.gif",
+      "bio": "i am shadow i hunt in the shadows!. ",
+      "username": "Shadow"
     }
   ],
-  "activeProfileId": "u-1788521945484-3h41r",
-  "lastUpdated": "2026-09-04T11:43:08.794Z"
+  "activeProfileId": "persona-1788778209275-93ucl",
+  "lastUpdated": "2026-09-09T09:23:42.112Z"
 }

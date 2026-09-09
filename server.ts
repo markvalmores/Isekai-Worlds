@@ -12,7 +12,17 @@ app.use(express.json({ limit: "10mb" }));
 
 // Client Error Telemetry Endpoint
 app.post("/api/client-error", (req, res) => {
-  console.log("[CLIENT ERROR CAPTURED]:", JSON.stringify(req.body));
+  const bodyStr = JSON.stringify(req.body || {}).toLowerCase();
+  const isBenign =
+    bodyStr.includes("websocket") ||
+    bodyStr.includes("closed without opened") ||
+    bodyStr.includes("failed to connect to websocket") ||
+    bodyStr.includes("resizeobserver loop") ||
+    bodyStr.includes("script error");
+
+  if (!isBenign) {
+    console.log("[CLIENT ERROR CAPTURED]:", JSON.stringify(req.body));
+  }
   res.json({ received: true });
 });
 

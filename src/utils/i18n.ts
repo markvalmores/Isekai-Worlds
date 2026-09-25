@@ -45,6 +45,8 @@ export const DICTIONARY: Record<LanguageCode, Record<string, string>> = {
     cards: "Card Games",
     extragames: "Extra Games",
     extraGames: "Extra Games",
+    zerozone: "Zero Zone Mark Apps",
+    zeroZoneMarkApps: "Zero Zone Mark Apps",
     vercel: "Vercel APPs",
     leaderboard: "Global Active Top 100",
     profile: "Profile Dashboard",

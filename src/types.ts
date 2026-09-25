@@ -24,7 +24,8 @@ export type PageView =
   | "history"
   | "vtubers"
   | "googleplus"
-  | "extragames";
+  | "extragames"
+  | "zerozone";
 
 export type LanguageCode =
   | "en"

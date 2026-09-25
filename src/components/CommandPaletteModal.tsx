@@ -31,7 +31,8 @@ import {
   Globe,
   Monitor,
   Disc3,
-  Flame
+  Flame,
+  Smartphone
 } from "lucide-react";
 import { PageView, AppSettings } from "../types";
 import { sfx } from "../utils/sfx";
@@ -268,6 +269,15 @@ export function CommandPaletteModal({
       icon: <Sparkles className="w-4 h-4 text-rose-400" />,
       keywords: ["cards", "card", "arena", "gacha", "battle", "binder"],
       action: () => { setCurrentPage("cards"); onClose(); }
+    },
+    {
+      id: "nav-zerozone",
+      category: "Navigation",
+      label: "Go to Zero Zone Mark Apps",
+      description: "Official Android apps & games from Zero Zone on Google Play",
+      icon: <Smartphone className="w-4 h-4 text-emerald-400" />,
+      keywords: ["zero zone", "zerozone", "mark", "apps", "games", "android", "play store", "apk"],
+      action: () => { setCurrentPage("zerozone"); onClose(); }
     },
     {
       id: "nav-leaderboard",

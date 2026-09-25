@@ -289,6 +289,84 @@ const VERCEL_APPS: VercelAppItem[] = [
     tags: ["TCG", "Cards", "Duel"],
     thumbnail: "https://api.microlink.io/?url=https%3A%2F%2Fanimemasterduelist.vercel.app%2F&screenshot=true&meta=false&embed=screenshot.url",
     featured: true
+  },
+  {
+    id: "anitetris",
+    title: "AniTetris",
+    url: "https://anitetris.vercel.app/",
+    category: "Games",
+    description: "Anime-inspired falling block arcade puzzle with intense clearing speed, combo multipliers, and retro visual themes.",
+    tags: ["Tetris", "Puzzle", "Anime", "Arcade"],
+    thumbnail: "https://api.microlink.io/?url=https%3A%2F%2Fanitetris.vercel.app%2F&screenshot=true&meta=false&embed=screenshot.url",
+    featured: true
+  },
+  {
+    id: "googlecraft",
+    title: "GoogleCraft",
+    url: "https://googlecraft.vercel.app/",
+    category: "Games",
+    description: "Infinite element crafting and discovery sandbox — merge elemental ingredients to unlock endless recipes and worlds.",
+    tags: ["Crafting", "Sandbox", "Discovery", "Puzzle"],
+    thumbnail: "https://api.microlink.io/?url=https%3A%2F%2Fgooglecraft.vercel.app%2F&screenshot=true&meta=false&embed=screenshot.url",
+    featured: true
+  },
+  {
+    id: "tensurachess",
+    title: "TenSura Chess",
+    url: "https://tensurachess.vercel.app/",
+    category: "Games",
+    description: "Reincarnated as a Slime themed fantasy chess game with special unit skills, tactical matches, and monster domain strategy.",
+    tags: ["TenSura", "Chess", "Strategy", "Fantasy"],
+    thumbnail: "https://api.microlink.io/?url=https%3A%2F%2Ftensurachess.vercel.app%2F&screenshot=true&meta=false&embed=screenshot.url",
+    featured: true
+  },
+  {
+    id: "interest-seven",
+    title: "Interest Seven",
+    url: "https://interest-seven.vercel.app/",
+    category: "Utilities",
+    description: "Interactive interest aggregator and visual portal curating top hobby feeds, trend charts, and multimedia showcases.",
+    tags: ["Interests", "Trends", "Media", "Utility"],
+    thumbnail: "https://api.microlink.io/?url=https%3A%2F%2Finterest-seven.vercel.app%2F&screenshot=true&meta=false&embed=screenshot.url"
+  },
+  {
+    id: "zzcapturedevice",
+    title: "ZZ Capture Device",
+    url: "https://zzcapturedevice.vercel.app/",
+    category: "Utilities",
+    description: "High-speed browser video capture suite, webcam stream controller, and multi-format screen recorder.",
+    tags: ["Capture", "Recorder", "Camera", "Utility"],
+    thumbnail: "https://api.microlink.io/?url=https%3A%2F%2Fzzcapturedevice.vercel.app%2F&screenshot=true&meta=false&embed=screenshot.url"
+  },
+  {
+    id: "nintendonews",
+    title: "Nintendo News",
+    url: "https://nintendonews.vercel.app/",
+    category: "Media & VTuber",
+    description: "Live Nintendo news bulletin, direct announcement feeds, release calendars, and gaming community highlights.",
+    tags: ["Nintendo", "News", "Gaming", "Media"],
+    thumbnail: "https://api.microlink.io/?url=https%3A%2F%2Fnintendonews.vercel.app%2F&screenshot=true&meta=false&embed=screenshot.url",
+    featured: true
+  },
+  {
+    id: "iamthegame",
+    title: "I Am The Game",
+    url: "https://iamthegame.vercel.app/",
+    category: "Games",
+    description: "Meta-action indie game experience with fast-paced reflex challenges, boss trials, and dynamic level gameplay.",
+    tags: ["Action", "Indie", "Reflex", "Arcade"],
+    thumbnail: "https://api.microlink.io/?url=https%3A%2F%2Fiamthegame.vercel.app%2F&screenshot=true&meta=false&embed=screenshot.url",
+    featured: true
+  },
+  {
+    id: "superboysekai",
+    title: "Superboy Sekai",
+    url: "https://superboysekai.vercel.app/",
+    category: "Games",
+    description: "Superhero meets Isekai multiverse adventure — unleash super-powered combat, parallel dimension flight, and legendary heroic quests.",
+    tags: ["Superboy", "Isekai", "Superhero", "Action", "RPG"],
+    thumbnail: "https://api.microlink.io/?url=https%3A%2F%2Fsuperboysekai.vercel.app%2F&screenshot=true&meta=false&embed=screenshot.url",
+    featured: true
   }
 ];
 

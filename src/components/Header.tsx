@@ -39,7 +39,8 @@ import {
   Disc3,
   Mic,
   BookA,
-  Flame
+  Flame,
+  Smartphone
 } from "lucide-react";
 
 interface HeaderProps {
@@ -117,6 +118,7 @@ export const Header: React.FC<HeaderProps> = ({
     { id: "roms", labelKey: "roms", icon: <HardDrive className="w-4 h-4 text-purple-400" /> },
     { id: "cards", labelKey: "cards", icon: <Layers className="w-4 h-4 text-amber-400 animate-pulse" /> },
     { id: "vercel", labelKey: "vercel", icon: <Globe className="w-4 h-4 text-cyan-400 animate-pulse" /> },
+    { id: "zerozone", labelKey: "zerozone", icon: <Smartphone className="w-4 h-4 text-emerald-400 animate-pulse" /> },
     { id: "leaderboard", labelKey: "leaderboard", icon: <Trophy className="w-4 h-4" /> },
     { id: "profile", labelKey: "profile", icon: <UserCheck className="w-4 h-4" /> },
     { id: "vr", labelKey: "vr", icon: <Eye className="w-4 h-4" /> },

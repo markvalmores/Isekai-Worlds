@@ -1,21 +1,21 @@
 {
   "allProfiles": [
     {
-      "favAnime": "Overlord / No Game No Life",
-      "title": "Lo-Fi Enthusiast",
+      "id": "persona-1788778209275-93ucl",
       "avatarUrl": "https://www.animeexplained.com/wp-content/uploads/2023/12/Shadow-from-The-Eminence-in-Shadow.jpg",
       "badge": "📻 Beat Master",
-      "joinedDate": "2026",
-      "id": "persona-1788778209275-93ucl",
+      "title": "Lo-Fi Enthusiast",
+      "favAnime": "Overlord / No Game No Life",
       "country": "GLOBAL",
+      "bio": "i am shadow i hunt in the shadows!. ",
+      "bannerUrl": "https://nekos.best/api/v2/hug/548daa04-3dff-4524-bb28-c229e5542e9f.gif",
+      "accentColor": "#a855f7",
+      "username": "Shadow",
       "bannerGradient": "from-emerald-600 via-teal-600 to-indigo-600",
       "customStatus": "I Am.... ATOMIC. ",
-      "accentColor": "#a855f7",
-      "bannerUrl": "https://nekos.best/api/v2/hug/548daa04-3dff-4524-bb28-c229e5542e9f.gif",
-      "bio": "i am shadow i hunt in the shadows!. ",
-      "username": "Shadow"
+      "joinedDate": "2026"
     }
   ],
   "activeProfileId": "persona-1788778209275-93ucl",
-  "lastUpdated": "2026-09-09T09:23:42.112Z"
+  "lastUpdated": "2026-09-25T00:56:15.202Z"
 }

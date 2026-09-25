@@ -44,6 +44,7 @@ import { DailyMissionsModal } from "./components/DailyMissionsModal";
 import { DonationCreditsModal } from "./components/DonationCreditsModal";
 import { SocialAuthModal } from "./components/SocialAuthModal";
 import { VercelAppsDashboard } from "./components/VercelAppsDashboard";
+import { ZeroZoneMarkApps } from "./components/ZeroZoneMarkApps";
 import { CineMax } from "./components/CineMax";
 import { VtubersTab } from "./components/VtubersTab";
 import { GooglePlusTab } from "./components/GooglePlusTab";
@@ -301,6 +302,7 @@ export default function App() {
       roms: "Retro ROMs Vault",
       cards: "Anime Card Games Arena",
       vercel: "Vercel APPs & Games",
+      zerozone: "Zero Zone Mark Apps",
       cinemax: "Movies",
       dictionary: "Google 243 Languages Dictionary",
       history: "History Dashboard",
@@ -825,6 +827,14 @@ export default function App() {
             userProfile={profile}
             onAddCoins={handleAddCoins}
             isGoldMode={isGold}
+          />
+        )}
+
+        {currentPage === "zerozone" && (
+          <ZeroZoneMarkApps
+            onAddCoins={handleAddCoins}
+            isGoldMode={isGold}
+            userProfile={profile}
           />
         )}
 

@@ -19,7 +19,8 @@ import {
   Flame,
   Globe,
   Radio,
-  Clock
+  Clock,
+  Smartphone
 } from "lucide-react";
 
 interface HomeHeroViewProps {
@@ -85,6 +86,14 @@ export const HomeHeroView: React.FC<HomeHeroViewProps> = ({
       icon: <Cpu className="w-6 h-6 text-cyan-400" />,
       badge: "GPU BOOST",
       bgGradient: "from-cyan-600/30 to-purple-600/30",
+    },
+    {
+      id: "zerozone" as PageView,
+      title: "Zero Zone Mark Apps",
+      desc: "Verified Google Play Store apps & games from the Zero Zone ecosystem",
+      icon: <Smartphone className="w-6 h-6 text-emerald-400" />,
+      badge: "PLAY STORE",
+      bgGradient: "from-emerald-600/30 to-teal-600/30",
     },
   ];
 

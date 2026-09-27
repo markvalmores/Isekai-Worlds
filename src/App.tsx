@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   PageView,
   LanguageCode,
@@ -340,9 +340,14 @@ export default function App() {
     }
   });
 
+  const isRemoteSyncingRef = useRef(false);
+
   // Universal Real-time Cloud & Firestore Subscription
   useEffect(() => {
     const unsub = universalSync.subscribe((payload) => {
+      if (payload.isRemoteUpdate) {
+        isRemoteSyncingRef.current = true;
+      }
       if (payload.allProfiles && payload.allProfiles.length > 0) {
         setAllProfiles(payload.allProfiles);
         if (payload.activeProfileId) {
@@ -430,6 +435,11 @@ export default function App() {
 
   // Continuous auto-sync trigger whenever profile, allProfiles, or settings change
   useEffect(() => {
+    if (isRemoteSyncingRef.current) {
+      isRemoteSyncingRef.current = false;
+      return;
+    }
+
     const timer = setTimeout(() => {
       universalSync.syncEverythingEverywhere({
         allProfiles,
@@ -441,7 +451,7 @@ export default function App() {
       }).then((res) => {
         if (res.lastSynced) setLastSyncedTime(res.lastSynced);
       }).catch(() => {});
-    }, 1500);
+    }, 3000);
     return () => clearTimeout(timer);
   }, [profile, allProfiles, settings]);
 

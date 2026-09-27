@@ -18,6 +18,7 @@ export interface SyncPayload {
   watchHistory?: any[];
   activeSeconds?: number;
   lastSynced: string;
+  isRemoteUpdate?: boolean;
 }
 
 const LOCAL_PROFILES_KEY = "isekai_all_profiles";
@@ -31,6 +32,8 @@ export class UniversalSyncManager {
   private isSyncing: boolean = false;
   private unsubSnapshot: (() => void) | null = null;
   private listeners: ((payload: SyncPayload) => void)[] = [];
+  private lastSavedHash: string = "";
+  private lastFirestoreWriteTime: number = 0;
 
   private constructor() {
     this.initRealtimeFirestoreListener();
@@ -59,6 +62,21 @@ export class UniversalSyncManager {
         console.error("Sync listener error:", e);
       }
     });
+  }
+
+  // Generate lightweight hash to check if state actually changed
+  private computeStateHash(payload: Partial<SyncPayload>): string {
+    try {
+      const profSummary = (payload.allProfiles || [])
+        .map((p) => `${p.id}:${p.username}:${p.badge}:${p.title}`)
+        .join("|");
+      const coins = payload.settings?.isekaiCoins || 0;
+      const theme = payload.settings?.darkMode ? "dark" : "light";
+      const gold = payload.settings?.isGoldMode ? "gold" : "std";
+      return `${payload.syncKey || ""}_${payload.activeProfileId || ""}_${profSummary}_${coins}_${theme}_${gold}`;
+    } catch {
+      return Date.now().toString();
+    }
   }
 
   // Get all local profiles
@@ -108,9 +126,11 @@ export class UniversalSyncManager {
           if (snapshot.exists()) {
             const data = snapshot.data() as SyncPayload;
             if (data && Array.isArray(data.allProfiles) && data.allProfiles.length > 0) {
-              console.log("[Firestore Sync] Real-time live update received from Firestore for all profiles!");
+              const remoteHash = this.computeStateHash(data);
+              this.lastSavedHash = remoteHash; // Record remote hash so local sync doesn't echo back
+              console.log("[Firestore Sync] Real-time live update received from Firestore");
               this.saveStoredProfiles(data.allProfiles, data.activeProfileId);
-              this.notify(data);
+              this.notify({ ...data, isRemoteUpdate: true });
             }
           }
         },
@@ -123,20 +143,23 @@ export class UniversalSyncManager {
     }
   }
 
-  // Heartbeat sync every 15s to keep continuous sync forever everywhere
+  // Heartbeat sync every 60s (only saves locally or syncs if needed)
   private initPeriodicHeartbeat() {
     setInterval(() => {
       try {
-        this.syncNow();
+        const local = this.getStoredProfiles();
+        if (local.allProfiles.length > 0) {
+          this.saveStoredProfiles(local.allProfiles, local.activeId);
+        }
       } catch (e) {
-        console.warn("[Sync Heartbeat] Periodic sync notice:", e);
+        console.warn("[Sync Heartbeat] Local auto-save notice:", e);
       }
-    }, 15000);
+    }, 60000);
 
     if (typeof window !== "undefined") {
       window.addEventListener("online", () => {
         try {
-          this.syncNow();
+          this.syncNow(true);
         } catch (e) {
           console.warn("[Sync Heartbeat] Online sync notice:", e);
         }
@@ -145,55 +168,19 @@ export class UniversalSyncManager {
   }
 
   // Sync everything everywhere (Firestore + Server + LocalStorage)
-  public async syncEverythingEverywhere(data: {
-    allProfiles: UserProfile[];
-    activeProfileId: string;
-    profile: UserProfile;
-    settings?: AppSettings;
-    activeSeconds?: number;
-    syncKey?: string;
-  }): Promise<{ success: boolean; message: string; lastSynced: string }> {
-    if (this.isSyncing) return { success: true, message: "Sync in progress", lastSynced: new Date().toISOString() };
-    this.isSyncing = true;
-
+  public async syncEverythingEverywhere(
+    data: {
+      allProfiles: UserProfile[];
+      activeProfileId: string;
+      profile: UserProfile;
+      settings?: AppSettings;
+      activeSeconds?: number;
+      syncKey?: string;
+    },
+    isForced: boolean = false
+  ): Promise<{ success: boolean; message: string; lastSynced: string }> {
     const now = new Date().toISOString();
     const cleanKey = (data.syncKey || localStorage.getItem(LOCAL_SYNC_KEY) || "isekai-default").trim().toLowerCase();
-
-    // 1. Gather all auxiliary storage items
-    let amvPlaylist = [];
-    try {
-      const p = localStorage.getItem("isekai_amv_playlist");
-      if (p) amvPlaylist = JSON.parse(p);
-    } catch {}
-
-    const amvPlaylistId = localStorage.getItem("isekai_amv_playlist_id") || "PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu";
-
-    let inventory = [];
-    try {
-      const inv = localStorage.getItem("isekai_card_inventory");
-      if (inv) inventory = JSON.parse(inv);
-    } catch {}
-
-    let gameComments = [];
-    try {
-      const gc = localStorage.getItem("isekai_game_comments");
-      if (gc) gameComments = JSON.parse(gc);
-    } catch {}
-
-    let savedWallpapers = [];
-    let savedGifs = [];
-    let savedCosplay = [];
-    let watchHistory = [];
-    try {
-      const sw = localStorage.getItem("isekai_saved_wallpapers");
-      if (sw) savedWallpapers = JSON.parse(sw);
-      const sg = localStorage.getItem("isekai_saved_gifs");
-      if (sg) savedGifs = JSON.parse(sg);
-      const sc = localStorage.getItem("isekai_saved_cosplay");
-      if (sc) savedCosplay = JSON.parse(sc);
-      const wh = localStorage.getItem("isekai_watch_history");
-      if (wh) watchHistory = JSON.parse(wh);
-    } catch {}
 
     // Ensure allProfiles includes active profile
     let fullProfilesList = [...data.allProfiles];
@@ -206,7 +193,7 @@ export class UniversalSyncManager {
       }
     }
 
-    // Save locally
+    // Always save locally first (instant)
     this.saveStoredProfiles(fullProfilesList, data.activeProfileId || data.profile?.id);
     localStorage.setItem(LOCAL_SYNC_KEY, cleanKey);
     localStorage.setItem(LOCAL_LAST_SYNCED_KEY, now);
@@ -217,58 +204,101 @@ export class UniversalSyncManager {
       activeProfileId: data.activeProfileId || data.profile?.id,
       profile: data.profile,
       settings: data.settings,
-      amvPlaylist,
-      amvPlaylistId,
-      inventory,
-      gameComments,
-      savedWallpapers,
-      savedGifs,
-      savedCosplay,
-      watchHistory,
       activeSeconds: data.activeSeconds,
       lastSynced: now
     };
 
-    // 2. Synchronize to Firestore
-    try {
-      // Save global master document
-      const syncDocRef = doc(db, "global_sync", DEFAULT_SYNC_DOC);
-      await setDoc(syncDocRef, payload, { merge: true });
+    // Calculate state hash
+    const currentHash = this.computeStateHash(payload);
 
-      // Save keyed document if different from default
-      if (cleanKey !== DEFAULT_SYNC_DOC) {
-        const keyedDocRef = doc(db, "global_sync", cleanKey);
-        await setDoc(keyedDocRef, payload, { merge: true });
-      }
-
-      // Save each profile to /profiles/{profileId}
-      for (const prof of fullProfilesList) {
-        if (prof.id) {
-          const pRef = doc(db, "profiles", prof.id);
-          await setDoc(pRef, prof, { merge: true });
-        }
-      }
-      console.log("[UniversalSync] Synced to Firestore database successfully!");
-    } catch (fsErr: any) {
-      console.warn("[UniversalSync] Firestore sync notice:", fsErr.message);
+    // Skip cloud write if state has not changed AND not forced
+    if (!isForced && currentHash === this.lastSavedHash) {
+      return {
+        success: true,
+        message: "No state changes to sync to cloud",
+        lastSynced: now
+      };
     }
 
-    // 3. Synchronize to Backend Server API
+    // Throttle Firestore network writes: minimum 10 seconds between writes unless forced
+    const timeSinceLastWrite = Date.now() - this.lastFirestoreWriteTime;
+    if (!isForced && timeSinceLastWrite < 10000) {
+      return {
+        success: true,
+        message: "Cloud write throttled (saved locally)",
+        lastSynced: now
+      };
+    }
+
+    if (this.isSyncing) {
+      return { success: true, message: "Sync in progress", lastSynced: now };
+    }
+
+    this.isSyncing = true;
+
     try {
-      await fetch("/api/sync/save", {
+      // 1. Gather auxiliary items for full sync
+      let amvPlaylist = [];
+      try {
+        const p = localStorage.getItem("isekai_amv_playlist");
+        if (p) amvPlaylist = JSON.parse(p);
+      } catch {}
+
+      const amvPlaylistId = localStorage.getItem("isekai_amv_playlist_id") || "PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu";
+
+      let inventory = [];
+      try {
+        const inv = localStorage.getItem("isekai_card_inventory");
+        if (inv) inventory = JSON.parse(inv);
+      } catch {}
+
+      const fullPayload: SyncPayload = {
+        ...payload,
+        amvPlaylist,
+        amvPlaylistId,
+        inventory
+      };
+
+      // 2. Synchronize to Firestore
+      if (db) {
+        const syncDocRef = doc(db, "global_sync", DEFAULT_SYNC_DOC);
+        await setDoc(syncDocRef, fullPayload, { merge: true });
+
+        if (cleanKey !== DEFAULT_SYNC_DOC) {
+          const keyedDocRef = doc(db, "global_sync", cleanKey);
+          await setDoc(keyedDocRef, fullPayload, { merge: true });
+        }
+
+        // Save active profile to /profiles/{profileId}
+        if (data.profile?.id) {
+          const pRef = doc(db, "profiles", data.profile.id);
+          await setDoc(pRef, data.profile, { merge: true });
+        }
+      }
+
+      this.lastSavedHash = currentHash;
+      this.lastFirestoreWriteTime = Date.now();
+      console.log("[UniversalSync] Synced to Firestore database successfully!");
+    } catch (fsErr: any) {
+      console.warn("[UniversalSync] Firestore sync notice:", fsErr?.message || fsErr);
+    } finally {
+      this.isSyncing = false;
+    }
+
+    // 3. Synchronize to Backend Server API (non-blocking)
+    try {
+      fetch("/api/sync/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
-      });
-      console.log("[UniversalSync] Synced to Backend Server successfully!");
+      }).catch(() => {});
     } catch (srvErr: any) {
       console.warn("[UniversalSync] Server sync notice:", srvErr.message);
     }
 
-    this.isSyncing = false;
     return {
       success: true,
-      message: `All ${fullProfilesList.length} profiles hardcode-synced everywhere!`,
+      message: `All ${fullProfilesList.length} profiles synced everywhere!`,
       lastSynced: now
     };
   }
@@ -279,13 +309,16 @@ export class UniversalSyncManager {
 
     // 1. Try Firestore first
     try {
-      const docRef = doc(db, "global_sync", cleanKey === "isekai-default" ? DEFAULT_SYNC_DOC : cleanKey);
-      const snapshot = await getDoc(docRef);
-      if (snapshot.exists()) {
-        const data = snapshot.data() as SyncPayload;
-        if (data && data.allProfiles && data.allProfiles.length > 0) {
-          this.saveStoredProfiles(data.allProfiles, data.activeProfileId);
-          return { success: true, data };
+      if (db) {
+        const docRef = doc(db, "global_sync", cleanKey === "isekai-default" ? DEFAULT_SYNC_DOC : cleanKey);
+        const snapshot = await getDoc(docRef);
+        if (snapshot.exists()) {
+          const data = snapshot.data() as SyncPayload;
+          if (data && data.allProfiles && data.allProfiles.length > 0) {
+            this.lastSavedHash = this.computeStateHash(data);
+            this.saveStoredProfiles(data.allProfiles, data.activeProfileId);
+            return { success: true, data };
+          }
         }
       }
     } catch (e) {
@@ -329,7 +362,7 @@ export class UniversalSyncManager {
   }
 
   // Trigger immediate sync
-  public syncNow() {
+  public syncNow(isForced: boolean = false) {
     const local = this.getStoredProfiles();
     if (local.allProfiles.length > 0) {
       const active = local.allProfiles.find((p) => p.id === local.activeId) || local.allProfiles[0];
@@ -338,12 +371,15 @@ export class UniversalSyncManager {
         const s = localStorage.getItem("isekai_app_settings");
         if (s) settings = JSON.parse(s);
       } catch {}
-      this.syncEverythingEverywhere({
-        allProfiles: local.allProfiles,
-        activeProfileId: local.activeId,
-        profile: active,
-        settings
-      });
+      this.syncEverythingEverywhere(
+        {
+          allProfiles: local.allProfiles,
+          activeProfileId: local.activeId,
+          profile: active,
+          settings
+        },
+        isForced
+      );
     }
   }
 }

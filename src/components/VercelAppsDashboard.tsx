@@ -281,13 +281,13 @@ const VERCEL_APPS: VercelAppItem[] = [
     thumbnail: "https://api.microlink.io/?url=https%3A%2F%2Fusagyuuunmovie1.vercel.app%2F&screenshot=true&meta=false&embed=screenshot.url"
   },
   {
-    id: "anime-master-duelist",
-    title: "ANIME MASTER DUELIST",
-    url: "https://animemasterduelist.vercel.app/",
+    id: "anipac",
+    title: "AniPac",
+    url: "https://anipac-two.vercel.app/",
     category: "Games",
-    description: "Ultimate trading card game duelist arena for supreme anime card battles.",
-    tags: ["TCG", "Cards", "Duel"],
-    thumbnail: "https://api.microlink.io/?url=https%3A%2F%2Fanimemasterduelist.vercel.app%2F&screenshot=true&meta=false&embed=screenshot.url",
+    description: "Retro anime Pac-Man arcade maze chase game with power pills, ghost hunting, and high-score chasers.",
+    tags: ["Pac-Man", "Arcade", "Retro", "Anime"],
+    thumbnail: "https://api.microlink.io/?url=https%3A%2F%2Fanipac-two.vercel.app%2F&screenshot=true&meta=false&embed=screenshot.url",
     featured: true
   },
   {

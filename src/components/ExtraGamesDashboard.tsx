@@ -47,7 +47,7 @@ const HAPPY_MEAL_GAME: ExtraGameItem = {
   title: "Spider-Man: Brand New Day McDonald's Happy Meal Game",
   nameAlias: "Spider-Man: Brand New Day McDonald's Happy Meal Game",
   category: "Happy Meal Games",
-  url: "https://spm30776.happymealdigital.com/?locale=en-PH",
+  url: "https://spm30776.happymealdigital.com/?locale=en-US",
   coverUrl: "https://images.unsplash.com/photo-1635863138275-d9b33299680b?w=800&auto=format&fit=crop&q=80",
   bannerUrl: "https://images.unsplash.com/photo-1604200213928-ba3cf4fc8436?w=1200&auto=format&fit=crop&q=80",
   description: "Official McDonald's Happy Meal digital game experience for Spider-Man: Brand New Day! Web-sling through city rooftops, dodge obstacles, collect spider power tokens, and complete superhero challenges directly in your browser with responsive touch and keyboard controls.",
@@ -163,6 +163,13 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
       if (interval) clearInterval(interval);
     };
   }, [isPlayerActive]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoadingIframe(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [iframeKey]);
 
   // Back Button handler
   const handleBack = () => {
@@ -490,9 +497,8 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
               title={game.title}
               onLoad={() => setIsLoadingIframe(false)}
               className="w-full h-full border-0 bg-slate-950"
-              allow="fullscreen; autoplay; encrypted-media; camera; microphone; payment; display-capture; clipboard-read; clipboard-write; web-share"
+              allow="fullscreen; autoplay; encrypted-media; camera; microphone; payment; display-capture; clipboard-read; clipboard-write; web-share; accelerometer; gyroscope"
               allowFullScreen
-              sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-modals allow-downloads allow-pointer-lock"
             />
           </div>
 
@@ -606,7 +612,7 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
       <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center gap-3">
         <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
         <p className="text-xs text-slate-300 leading-relaxed">
-          <strong>Happy Meal Digital Game Notice:</strong> The official McDonald&apos;s Happy Meal game is directly loaded from <code>https://spm30776.happymealdigital.com/?locale=en-PH</code>. You can play directly inside the fill-screen container or click Full Screen to expand to true fullscreen mode.
+          <strong>Happy Meal Digital Game Notice:</strong> The official McDonald&apos;s Happy Meal game is directly loaded from <code>https://spm30776.happymealdigital.com/?locale=en-US</code>. You can play directly inside the fill-screen container or click Full Screen to expand to true fullscreen mode.
         </p>
       </div>
     </div>

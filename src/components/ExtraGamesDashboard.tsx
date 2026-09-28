@@ -4,24 +4,21 @@ import {
   Play,
   Sparkles,
   ExternalLink,
-  RefreshCw,
-  Maximize2,
-  Minimize2,
-  ChevronLeft,
   Star,
   Heart,
-  Info,
   Activity,
   Flame,
   Share2,
   CheckCircle2,
-  Monitor,
   HelpCircle,
   Coins,
   ShieldCheck,
-  RotateCcw,
   Smartphone,
-  RotateCw
+  Copy,
+  Zap,
+  Globe,
+  Radio,
+  Volume2
 } from "lucide-react";
 import { sfx } from "../utils/sfx";
 
@@ -44,7 +41,7 @@ export interface ExtraGameItem {
   isHappyMeal: boolean;
 }
 
-// Strictly only the Happy Meal Game as requested
+// Strictly the official Happy Meal Game as requested
 const HAPPY_MEAL_GAME: ExtraGameItem = {
   id: "spiderman-happymeal",
   title: "Spider-Man: Brand New Day McDonald's Happy Meal Game",
@@ -73,23 +70,16 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
   onAddCoins,
   isGoldMode = false
 }) => {
-  // State
   const game = HAPPY_MEAL_GAME;
-  const [isPlayerActive, setIsPlayerActive] = useState<boolean>(true);
-  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-  const [isFillScreen, setIsFillScreen] = useState<boolean>(true); // Fill screen active by default
-  const [iframeKey, setIframeKey] = useState<number>(Date.now());
-  const [isLoadingIframe, setIsLoadingIframe] = useState<boolean>(true);
+
+  // State
   const [gamingSeconds, setGamingSeconds] = useState<number>(0);
   const [coinsClaimed, setCoinsClaimed] = useState<number>(0);
   const [showControlsGuide, setShowControlsGuide] = useState<boolean>(false);
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
   const [isMobileDevice, setIsMobileDevice] = useState<boolean>(false);
   const [isPortrait, setIsPortrait] = useState<boolean>(false);
-  const [iframeError, setIframeError] = useState<boolean>(false);
-
-  // Directly load official Happy Meal Game URL
-  const activeIframeSrc = game.url;
+  const [hasPlayedSession, setHasPlayedSession] = useState<boolean>(false);
 
   useEffect(() => {
     const handleDeviceCheck = () => {
@@ -127,94 +117,30 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
 
   const [hasLiked, setHasLiked] = useState<boolean>(false);
 
-  const gameContainerRef = useRef<HTMLDivElement>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-
-  // Native Fullscreen API Handler
-  const toggleNativeFullscreen = () => {
-    sfx.playClick();
-    if (!document.fullscreenElement) {
-      if (gameContainerRef.current?.requestFullscreen) {
-        gameContainerRef.current.requestFullscreen().catch(() => {});
-      }
-      setIsFullscreen(true);
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen().catch(() => {});
-      }
-      setIsFullscreen(false);
-    }
-  };
-
-  // Sync fullscreen change event from browser escape key
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, []);
-
-  // Passive Coin Reward Tracker Loop (20 coins every 45s of active game session)
+  // Passive Coin Reward Tracker Loop (20 coins every 45s of active page session)
   const secondsRef = useRef(0);
   const onAddCoinsRef = useRef(onAddCoins);
-
   useEffect(() => {
     onAddCoinsRef.current = onAddCoins;
   }, [onAddCoins]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    if (isPlayerActive) {
-      interval = setInterval(() => {
-        secondsRef.current += 1;
-        const currentSec = secondsRef.current;
-        setGamingSeconds(currentSec);
-
-        if (currentSec % 45 === 0) {
-          const reward = 20;
-          if (onAddCoinsRef.current) {
-            onAddCoinsRef.current(reward);
-          }
-          setCoinsClaimed((curr) => curr + reward);
-          sfx.playBadgeUnlock();
+    const interval = setInterval(() => {
+      secondsRef.current += 1;
+      const currentSec = secondsRef.current;
+      setGamingSeconds(currentSec);
+      if (currentSec % 45 === 0) {
+        const reward = 20;
+        if (onAddCoinsRef.current) {
+          onAddCoinsRef.current(reward);
         }
-      }, 1000);
-    } else {
-      secondsRef.current = 0;
-      setGamingSeconds(0);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isPlayerActive]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoadingIframe(false);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, [iframeKey]);
-
-  // Back Button handler
-  const handleBack = () => {
-    sfx.playClick();
-    if (isFullscreen) {
-      if (document.exitFullscreen) {
-        document.exitFullscreen().catch(() => {});
+        setCoinsClaimed((curr) => curr + reward);
+        sfx.playBadgeUnlock();
       }
-      setIsFullscreen(false);
-    }
-    setIsPlayerActive((prev) => !prev);
-  };
+    }, 1000);
 
-  // Refresh Game Iframe
-  const handleRefreshIframe = () => {
-    sfx.playClick();
-    setIsLoadingIframe(true);
-    setIframeError(false);
-    setIframeKey(Date.now());
-  };
+    return () => clearInterval(interval);
+  }, []);
 
   // Toggle Favorite
   const handleToggleFavorite = () => {
@@ -248,8 +174,20 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
     if (game.url) {
       navigator.clipboard.writeText(game.url);
       setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2000);
+      setTimeout(() => setCopiedLink(false), 2500);
     }
+  };
+
+  // Direct un-sandboxed game launch
+  const handleLaunchGame = () => {
+    sfx.playWarp();
+    setHasPlayedSession(true);
+    if (onAddCoins) {
+      onAddCoins(25);
+      setCoinsClaimed((curr) => curr + 25);
+    }
+    // Launch directly in un-sandboxed native browser tab
+    window.open(game.url, "_blank", "noopener,noreferrer");
   };
 
   const formatSessionTime = (seconds: number) => {
@@ -260,401 +198,190 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
 
   return (
     <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 py-6 space-y-6 animate-fadeIn">
-      {/* Top Banner & Header Hub */}
-      <div className={`p-6 sm:p-8 rounded-3xl border relative overflow-hidden transition-all shadow-2xl ${
-        isGoldMode
-          ? "bg-gradient-to-br from-amber-950/60 via-slate-950 to-amber-950/40 border-amber-500/40 shadow-[0_8px_32px_rgba(245,158,11,0.2)]"
-          : "bg-gradient-to-br from-red-950/50 via-slate-950 to-amber-950/40 border-red-500/30 shadow-[0_8px_32px_rgba(239,68,68,0.2)]"
-      }`}>
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-red-600/15 via-amber-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+      {/* ========================================================================= */}
+      {/* 🚀 TOP OF THE WEBSITE: PASTED UN-SANDBOXED OFFICIAL GAME LINK BAR */}
+      {/* ========================================================================= */}
+      <div className="p-4 sm:p-6 rounded-3xl bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 border border-red-400/60 shadow-2xl text-white space-y-4 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-2xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="space-y-3 max-w-2xl">
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="space-y-1.5 max-w-3xl">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="px-3 py-1 rounded-full bg-red-600/25 border border-red-500/50 text-red-400 font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
-                <Flame className="w-3.5 h-3.5 fill-red-500 text-red-500 animate-pulse" />
-                Happy Meal Games
+              <span className="px-3 py-1 rounded-full bg-black/40 text-amber-300 font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-sm border border-amber-300/30">
+                <Flame className="w-3.5 h-3.5 fill-amber-400 text-amber-400 animate-pulse" />
+                OFFICIAL EXTRA GAME (UN-SANDBOXED)
               </span>
-              <span className="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                Spider-Man: Brand New Day
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 font-mono text-[11px] font-bold border border-emerald-500/40 flex items-center gap-1">
+                <Smartphone className="w-3 h-3 text-emerald-400" />
+                100% Mobile Ready
               </span>
-              <span className="px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono text-xs font-bold flex items-center gap-1">
-                <Coins className="w-3 h-3" /> +20 Coins / 45s
+              <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white font-mono text-[11px] font-bold">
+                locale=en-PH
               </span>
             </div>
 
-            <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight uppercase">
-              {game.title}
+            <h1 className="text-xl sm:text-3xl font-black uppercase tracking-tight text-white drop-shadow">
+              Spider-Man: Brand New Day McDonald&apos;s Happy Meal Game
             </h1>
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Official McDonald&apos;s Happy Meal digital web experience. Embedded in full fill-screen responsive mode with instant touch and keyboard gameplay.
-            </p>
+
+            {/* BOLDLY PASTED LINK ON TOP AS REQUESTED */}
+            <div className="p-3 rounded-2xl bg-black/50 border border-white/25 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 backdrop-blur-md">
+              <div className="flex items-center gap-2 min-w-0">
+                <Globe className="w-4 h-4 text-amber-400 shrink-0" />
+                <span className="text-[11px] font-mono text-amber-300 font-bold uppercase shrink-0">
+                  Pasted Link:
+                </span>
+                <a
+                  href={game.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => sfx.playWarp()}
+                  className="font-mono text-xs sm:text-sm font-black text-white hover:text-amber-300 underline underline-offset-2 truncate"
+                  title="Open Official Happy Meal Digital Link"
+                >
+                  {game.url}
+                </a>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={handleCopyLink}
+                  className="px-3 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-all active:scale-95"
+                  title="Copy Link to Clipboard"
+                >
+                  {copiedLink ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-amber-300" />}
+                  <span>{copiedLink ? "COPIED!" : "COPY"}</span>
+                </button>
+              </div>
+            </div>
           </div>
 
-          {/* Quick Action Buttons */}
-          <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+          {/* Big Action Launch Buttons */}
+          <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5 shrink-0 justify-center">
             <button
-              onClick={() => {
-                sfx.playWarp();
-                setIsPlayerActive(true);
-                handleRefreshIframe();
-              }}
-              className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-red-600/30 active:scale-95 transition-all"
+              onClick={handleLaunchGame}
+              className="px-6 py-4 rounded-2xl bg-slate-950 hover:bg-slate-900 border-2 border-amber-400 text-amber-300 hover:text-white font-mono font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-2xl hover:scale-105 active:scale-95 transition-all group"
             >
-              <Play className="w-4 h-4 fill-current" />
-              <span>{isPlayerActive ? "RELOAD GAME" : "PLAY GAME"}</span>
-            </button>
-
-            <button
-              onClick={toggleNativeFullscreen}
-              className="px-4 py-2.5 sm:py-3 rounded-2xl bg-slate-900/90 border border-amber-500/40 hover:bg-slate-800 text-amber-300 hover:text-white font-mono font-bold text-xs uppercase flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95"
-              title="Enter Fullscreen"
-            >
-              <Maximize2 className="w-4 h-4 text-amber-400" />
-              <span>FULLSCREEN</span>
+              <Play className="w-5 h-5 fill-amber-400 group-hover:scale-110 transition-transform" />
+              <span>TAP TO PLAY NOW (DIRECT)</span>
             </button>
 
             <a
-              href={game.fallbackUrl || game.url}
+              href={game.url}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => sfx.playWarp()}
-              className="px-3.5 py-2.5 sm:py-3 rounded-2xl bg-slate-900/90 border border-slate-750 hover:bg-slate-800 text-slate-300 hover:text-white font-mono font-bold text-xs uppercase flex items-center justify-center gap-1.5 transition-all"
-              title="Open Official Happy Meal Digital in New Window"
+              className="px-4 py-2.5 rounded-xl bg-black/40 hover:bg-black/60 border border-white/25 text-white font-mono text-xs font-bold uppercase flex items-center justify-center gap-1.5 text-center transition-all"
             >
               <ExternalLink className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Direct Link</span>
+              <span>Open in New Browser Tab</span>
             </a>
           </div>
         </div>
       </div>
 
-      {/* EMBEDDED FILL SCREEN GAME CONTAINER & CONTROLS */}
-      {isPlayerActive ? (
-        <div className="space-y-4">
-          {/* Controls & Navigation Top Bar */}
-          <div className="p-4 sm:p-5 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl flex flex-wrap items-center justify-between gap-4 backdrop-blur-md">
-            {/* Left: Back Button & Title */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleBack}
-                className="px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:bg-red-950/40 hover:border-red-500/40 text-slate-200 hover:text-white font-mono text-xs font-bold uppercase flex items-center gap-2 transition-all shadow-md active:scale-95"
-                title="Toggle View / Back"
-              >
-                <ChevronLeft className="w-4 h-4 text-red-400" />
-                <span>BACK</span>
-              </button>
+      {/* ========================================================================= */}
+      {/* 🎮 MAIN SHOWCASE & CONTROLS GUIDE (NO RESTRICTIVE EMBEDDING) */}
+      {/* ========================================================================= */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left 2 Cols: Game Poster, Direct Play Hub, and Mobile Compatibility */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Main Superhero Card */}
+          <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-2xl relative overflow-hidden space-y-6">
+            <div className="relative rounded-2xl overflow-hidden aspect-[16/9] sm:aspect-[21/9] border border-slate-700/60 shadow-xl group">
+              <img
+                src={game.bannerUrl}
+                alt={game.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 filter brightness-95"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
 
-              <div className="h-6 w-px bg-slate-800 hidden sm:block" />
-
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded-md bg-red-600/20 text-red-400 font-mono font-bold text-[9px] uppercase border border-red-500/30">
-                    Happy Meal Games
-                  </span>
-                  <span className="text-[10px] font-mono text-amber-400 flex items-center gap-1 font-bold">
-                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                    {game.rating}
-                  </span>
-                </div>
-                <h2 className="text-sm sm:text-base font-black text-white uppercase truncate max-w-[280px] sm:max-w-md">
-                  {game.title}
-                </h2>
-              </div>
-            </div>
-
-            {/* Center: Live Session Playtime & Coins Indicator */}
-            <div className="hidden md:flex items-center gap-3 font-mono text-xs">
-              <div className="px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-300 flex items-center gap-2">
-                <Activity className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-                <span>PLAYTIME: <strong className="text-emerald-400">{formatSessionTime(gamingSeconds)}</strong></span>
-              </div>
-              <div className="px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 flex items-center gap-1.5 font-bold">
-                <Coins className="w-3.5 h-3.5 text-amber-400" />
-                <span>+{coinsClaimed} COINS</span>
-              </div>
-            </div>
-
-            {/* Right: Fill Screen, Fullscreen, Engine Selector, Reload, Guide, Direct Link */}
-            <div className="flex items-center gap-2 flex-wrap">
-              {/* Direct Official Link Button */}
-              <a
-                href={game.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => sfx.playWarp()}
-                className="px-3 py-2 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-300 font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-all shadow-sm"
-                title={`Official URL: ${game.url}`}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span className="hidden sm:inline">Official Game Link</span>
-                <span className="sm:hidden">Game</span>
-              </a>
-
-              {/* Fill Screen Mode Toggle */}
-              <button
-                onClick={() => {
-                  sfx.playClick();
-                  setIsFillScreen((prev) => !prev);
-                }}
-                className={`px-3 py-2 rounded-xl border font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-all shadow-sm ${
-                  isFillScreen
-                    ? "bg-red-600/20 border-red-500/50 text-red-300"
-                    : "bg-slate-950 border-slate-800 text-slate-400 hover:text-white"
-                }`}
-                title="Toggle Fill Screen Viewport Mode"
-              >
-                <Monitor className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Fill Screen: {isFillScreen ? "ON" : "OFF"}</span>
-              </button>
-
-              {/* Fullscreen Button */}
-              <button
-                onClick={toggleNativeFullscreen}
-                className="px-3 py-2 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-all shadow-md active:scale-95"
-                title="Toggle True Full Screen"
-              >
-                {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
-                <span>{isFullscreen ? "EXIT FULLSCREEN" : "FULL SCREEN"}</span>
-              </button>
-
-              {/* Reload / Refresh Game */}
-              <button
-                onClick={handleRefreshIframe}
-                className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:bg-slate-800 text-slate-300 hover:text-white transition-all"
-                title="Restart & Reload Game"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${isLoadingIframe ? "animate-spin text-amber-400" : ""}`} />
-              </button>
-
-              {/* Controls Guide Drawer */}
-              <button
-                onClick={() => {
-                  sfx.playClick();
-                  setShowControlsGuide((prev) => !prev);
-                }}
-                className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:bg-slate-800 text-slate-300 hover:text-white transition-all"
-                title="Game Controls & Touch Guide"
-              >
-                <HelpCircle className="w-3.5 h-3.5 text-cyan-400" />
-              </button>
-
-              {/* Open in New Tab Button */}
-              <a
-                href={game.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => sfx.playWarp()}
-                className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:bg-slate-800 text-slate-300 hover:text-white transition-all inline-flex items-center"
-                title="Open Game in New Tab"
-              >
-                <ExternalLink className="w-3.5 h-3.5 text-emerald-400" />
-              </a>
-            </div>
-          </div>
-
-          {/* Controls Guide Drawer */}
-          {showControlsGuide && (
-            <div className="p-4 rounded-2xl bg-slate-900/95 border border-cyan-500/30 text-xs text-slate-200 space-y-2 animate-fadeIn shadow-xl">
-              <div className="flex items-center justify-between font-mono font-bold text-cyan-400 uppercase text-xs border-b border-slate-800 pb-2">
-                <span className="flex items-center gap-1.5">
-                  <Gamepad2 className="w-4 h-4" /> Spider-Man Controls & Gameplay Guide
-                </span>
-                <button
-                  onClick={() => setShowControlsGuide(false)}
-                  className="text-slate-400 hover:text-white text-xs font-mono"
-                >
-                  ✕ Close
-                </button>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-slate-300">
-                <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-                  <strong className="text-white block mb-1">🎮 Desktop Keyboard</strong>
-                  <span>Use <strong>Arrow Keys / WASD</strong> to steer Spider-Man, <strong>Spacebar</strong> to shoot web-lines & swing, and <strong>Mouse Click</strong> to select items.</span>
-                </div>
-                <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-                  <strong className="text-white block mb-1">📱 Mobile & Touch</strong>
-                  <span>Tap and hold on the screen to sling webs across buildings and release to jump over obstacles.</span>
-                </div>
-                <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-                  <strong className="text-white block mb-1">⚡ Sound & Audio</strong>
-                  <span>Click or tap once inside the game frame to activate sound effects and superhero music.</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Mobile Landscape Recommendation Banner */}
-          {isMobileDevice && isPortrait && (
-            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-red-950/80 via-amber-950/60 to-slate-900 border border-amber-500/40 text-amber-200 text-xs flex items-center justify-between gap-3 shadow-lg">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-amber-500/20 text-amber-300 shrink-0">
-                  <Smartphone className="w-4 h-4 rotate-90 animate-pulse" />
-                </div>
-                <div>
-                  <strong className="text-white block font-mono text-[11px] uppercase tracking-wider">Rotate Phone to Landscape</strong>
-                  <span className="text-[11px] text-amber-300/90 leading-tight">Spider-Man requires horizontal landscape orientation for touch web-slinging.</span>
-                </div>
-              </div>
-              <button
-                onClick={toggleNativeFullscreen}
-                className="px-3 py-1.5 rounded-xl bg-amber-500 text-slate-950 font-mono font-bold text-[10px] uppercase shrink-0 shadow active:scale-95"
-              >
-                Fullscreen
-              </button>
-            </div>
-          )}
-
-          {/* EMBEDDED FILL SCREEN GAME IFRAME */}
-          <div
-            ref={gameContainerRef}
-            style={{
-              WebkitOverflowScrolling: "touch",
-              transform: "translateZ(0)"
-            }}
-            className={`relative rounded-2xl sm:rounded-3xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl transition-all duration-300 ${
-              isFullscreen
-                ? "fixed inset-0 z-50 rounded-none w-screen h-screen h-[100dvh]"
-                : isFillScreen
-                ? "w-full h-[65vh] sm:h-[78vh] min-h-[360px] sm:min-h-[580px] max-h-[920px]"
-                : "w-full aspect-[16/9] min-h-[300px] sm:min-h-[480px]"
-            }`}
-          >
-            {/* Top Fullscreen Floating Overlay HUD (When Fullscreen Active) */}
-            {isFullscreen && (
-              <div className="absolute top-4 left-4 z-40 bg-slate-950/90 border border-slate-800 rounded-2xl p-3 text-xs font-mono backdrop-blur-md shadow-2xl flex items-center gap-4">
-                <button
-                  onClick={toggleNativeFullscreen}
-                  className="px-3 py-1.5 rounded-xl bg-red-600 text-white font-bold text-xs uppercase flex items-center gap-1.5 shadow-md active:scale-95"
-                >
-                  <Minimize2 className="w-3.5 h-3.5" />
-                  <span>EXIT FULLSCREEN</span>
-                </button>
-                <span className="text-slate-300">{game.title}</span>
-                <span className="text-emerald-400 font-bold">{formatSessionTime(gamingSeconds)}</span>
-              </div>
-            )}
-
-            {/* Iframe Loading Placeholder */}
-            {isLoadingIframe && !iframeError && (
-              <div className="absolute inset-0 z-20 bg-slate-950/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center space-y-4">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-red-600 to-amber-500 flex items-center justify-center shadow-lg shadow-red-500/30 animate-pulse">
-                  <Gamepad2 className="w-8 h-8 text-white animate-bounce" />
-                </div>
+              <div className="absolute bottom-4 left-4 right-4 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <div className="space-y-1">
-                  <h3 className="text-lg font-black text-white uppercase tracking-wider font-mono">
-                    LOADING SPIDER-MAN HAPPY MEAL GAME...
+                  <span className="px-2.5 py-0.5 rounded-md bg-red-600 font-mono text-[10px] font-black uppercase text-white shadow">
+                    Marvel & McDonald&apos;s
+                  </span>
+                  <h3 className="text-lg sm:text-2xl font-black text-white uppercase drop-shadow">
+                    Spider-Man: Brand New Day
                   </h3>
-                  <p className="text-xs text-slate-400 max-w-sm">
-                    Connecting to {game.url} ...
+                  <p className="text-xs text-slate-300 max-w-md line-clamp-2">
+                    {game.description}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <a
-                    href={game.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono text-emerald-400 hover:text-white flex items-center gap-1.5"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" /> Direct Launch Tab
-                  </a>
-                </div>
-              </div>
-            )}
 
-            {/* Iframe Fallback/Error state */}
-            {iframeError && (
-              <div className="absolute inset-0 z-30 bg-slate-950/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center space-y-4">
-                <div className="w-16 h-16 rounded-2xl bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-400 shadow-lg">
-                  <Gamepad2 className="w-8 h-8" />
+                <button
+                  onClick={handleLaunchGame}
+                  className="px-5 py-3 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-mono font-black text-xs uppercase flex items-center justify-center gap-2 shadow-lg shadow-red-600/40 active:scale-95 transition-all shrink-0"
+                >
+                  <Play className="w-4 h-4 fill-current" />
+                  <span>START MISSION</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Mobile Optimization Guarantee Callout */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-emerald-950/40 via-slate-950 to-slate-900 border border-emerald-500/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 shrink-0">
+                  <Smartphone className="w-6 h-6 animate-pulse" />
                 </div>
-                <div className="space-y-1">
-                  <h3 className="text-lg font-black text-white uppercase tracking-wider font-mono">
-                    Direct Launch Required
-                  </h3>
-                  <p className="text-xs text-slate-300 max-w-md">
-                    McDonald&apos;s Happy Meal game can be played directly via the official link below:
+                <div className="space-y-1 text-xs">
+                  <h4 className="font-mono font-black text-emerald-300 uppercase tracking-wide">
+                    Why Direct Link (Not Sandboxed)?
+                  </h4>
+                  <p className="text-slate-300 leading-relaxed">
+                    Mobile phones (iOS Safari & Android Chrome) block WebGL GPU acceleration, audio playback, and orientation controls when games are embedded in sandboxed iframes. By pasting and opening the link directly, the game launches at full 60 FPS with zero black screens!
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <a
-                    href={game.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => sfx.playWarp()}
-                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-mono font-bold text-xs uppercase flex items-center gap-2 shadow-lg active:scale-95"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    <span>Launch Game ({game.url})</span>
-                  </a>
-                  <button
-                    onClick={handleRefreshIframe}
-                    className="px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 hover:text-white font-mono font-bold text-xs uppercase flex items-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" />
-                    <span>Retry Embed</span>
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* THE GAME IFRAME */}
-            <iframe
-              key={iframeKey}
-              ref={iframeRef}
-              src={activeIframeSrc}
-              title={game.title}
-              onLoad={() => {
-                setIsLoadingIframe(false);
-                setIframeError(false);
-              }}
-              onError={() => {
-                setIsLoadingIframe(false);
-                setIframeError(true);
-              }}
-              className="w-full h-full border-0 bg-slate-950"
-              style={{
-                width: "100%",
-                height: "100%",
-                border: 0,
-                transform: "translate3d(0, 0, 0)",
-                WebkitTransform: "translate3d(0, 0, 0)"
-              }}
-              allow="fullscreen; autoplay; encrypted-media; camera; microphone; payment; display-capture; clipboard-read; clipboard-write; web-share; accelerometer; gyroscope"
-              allowFullScreen
-            />
-          </div>
-
-          {/* Game Details & Social Action Bar */}
-          <div className="p-6 rounded-3xl bg-slate-900/70 border border-slate-800 shadow-xl space-y-4">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs font-mono text-red-400 font-bold uppercase tracking-wider">
-                    {game.developer}
-                  </span>
-                  <span className="text-slate-600">•</span>
-                  <span className="text-xs font-mono text-slate-400">Release: {game.releaseYear}</span>
-                  <span className="text-slate-600">•</span>
-                  <span className="text-xs font-mono text-emerald-400 font-semibold">Difficulty: {game.difficulty}</span>
-                </div>
-                <h3 className="text-lg font-black text-white uppercase">
-                  {game.title}
-                </h3>
-                <p className="text-xs text-slate-300 leading-relaxed max-w-3xl">
-                  {game.description}
-                </p>
               </div>
 
-              {/* Action Buttons: Favorite, Like, Share */}
+              <button
+                onClick={handleLaunchGame}
+                className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono font-black text-xs uppercase flex items-center gap-1.5 shrink-0 shadow active:scale-95 transition-all"
+              >
+                <Zap className="w-4 h-4 fill-current" />
+                <span>Launch Now</span>
+              </button>
+            </div>
+
+            {/* Pasted Link Box */}
+            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+              <div className="flex items-center justify-between text-xs font-mono">
+                <span className="text-slate-400 font-bold uppercase">Official URL Endpoint:</span>
+                <span className="text-amber-400 font-bold">Philippines Region (en-PH)</span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-900 border border-slate-750 font-mono text-xs sm:text-sm text-cyan-300 break-all select-all flex items-center justify-between gap-3">
+                <span>{game.url}</span>
+                <button
+                  onClick={handleCopyLink}
+                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white shrink-0"
+                  title="Copy URL"
+                >
+                  <Copy className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Game Stats & Social Actions */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2 border-t border-slate-800">
+              <div className="flex items-center gap-4 text-xs font-mono text-slate-400">
+                <div className="flex items-center gap-1.5 text-amber-400 font-bold">
+                  <Star className="w-4 h-4 fill-amber-400" />
+                  <span>5.0 / 5.0</span>
+                </div>
+                <span>•</span>
+                <span>Marvel / McDonald&apos;s</span>
+                <span>•</span>
+                <span className="text-emerald-400 font-bold">Difficulty: Superhero</span>
+              </div>
+
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleLikeGame}
-                  className={`px-4 py-2.5 rounded-xl border text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-sm ${
+                  className={`px-4 py-2 rounded-xl border text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-sm ${
                     hasLiked
                       ? "bg-rose-500/20 text-rose-300 border-rose-500/40"
-                      : "bg-slate-950 text-slate-300 border-slate-800 hover:text-rose-400 hover:border-rose-500/30"
+                      : "bg-slate-950 text-slate-300 border-slate-800 hover:text-rose-400"
                   }`}
                 >
                   <Heart className={`w-4 h-4 ${hasLiked ? "fill-rose-500 text-rose-500" : ""}`} />
@@ -663,7 +390,7 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
 
                 <button
                   onClick={handleToggleFavorite}
-                  className={`px-4 py-2.5 rounded-xl border text-xs font-mono font-bold flex items-center gap-1.5 transition-all ${
+                  className={`px-4 py-2 rounded-xl border text-xs font-mono font-bold flex items-center gap-1.5 transition-all ${
                     isFavorite
                       ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
                       : "bg-slate-950 text-slate-300 border-slate-800 hover:text-amber-400"
@@ -675,69 +402,105 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
 
                 <button
                   onClick={handleCopyLink}
-                  className="px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-mono font-bold flex items-center gap-1.5 transition-all"
-                  title="Copy Game URL"
+                  className="px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-mono font-bold flex items-center gap-1.5 transition-all"
                 >
                   {copiedLink ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4" />}
-                  <span>{copiedLink ? "COPIED!" : "SHARE"}</span>
+                  <span>{copiedLink ? "COPIED" : "SHARE"}</span>
                 </button>
               </div>
             </div>
-
-            {/* Tags list */}
-            <div className="flex flex-wrap gap-1.5 pt-2 border-t border-slate-800/60">
-              {game.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="text-[10px] font-mono text-slate-300 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800"
-                >
-                  #{tag}
-                </span>
-              ))}
-            </div>
           </div>
         </div>
-      ) : (
-        /* Standby Card when Back is toggled */
-        <div className="p-8 rounded-3xl bg-slate-900/80 border border-slate-800 shadow-2xl text-center space-y-6">
-          <div className="max-w-md mx-auto space-y-3">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-red-600 to-amber-500 flex items-center justify-center shadow-lg shadow-red-500/30 mx-auto">
-              <Gamepad2 className="w-8 h-8 text-white" />
+
+        {/* Right 1 Col: Mobile Instructions & Controls Drawer */}
+        <div className="space-y-6">
+          {/* Controls & Gameplay Guide */}
+          <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-4">
+            <div className="flex items-center gap-2 font-mono font-black text-sm text-cyan-400 uppercase border-b border-slate-800 pb-3">
+              <Gamepad2 className="w-4 h-4" />
+              <span>Gameplay & Touch Guide</span>
             </div>
-            <h2 className="text-xl font-black text-white uppercase">{game.title}</h2>
-            <p className="text-xs text-slate-300 leading-relaxed">{game.description}</p>
+
+            <div className="space-y-3 text-xs text-slate-300">
+              <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
+                <div className="flex items-center gap-2 text-white font-mono font-bold">
+                  <Smartphone className="w-4 h-4 text-emerald-400" />
+                  <span>Mobile Phone Touch Controls</span>
+                </div>
+                <p className="text-slate-400 leading-relaxed">
+                  Tap and hold on the screen to shoot web-lines and swing across rooftops. Release your finger to jump over obstacles and billboards.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
+                <div className="flex items-center gap-2 text-white font-mono font-bold">
+                  <Activity className="w-4 h-4 text-amber-400" />
+                  <span>Orientation Requirement</span>
+                </div>
+                <p className="text-slate-400 leading-relaxed">
+                  Rotate your phone to <strong>Landscape mode (Horizontal)</strong> for the optimal superhero field of view.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
+                <div className="flex items-center gap-2 text-white font-mono font-bold">
+                  <Volume2 className="w-4 h-4 text-purple-400" />
+                  <span>Sound & Superhero Audio</span>
+                </div>
+                <p className="text-slate-400 leading-relaxed">
+                  Tap anywhere on the game screen after opening to unmute sound effects and Marvel background music.
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div className="flex justify-center gap-3">
+          {/* Active Session & Rewards Tracker */}
+          <div className="p-6 rounded-3xl bg-gradient-to-br from-amber-950/30 via-slate-900 to-slate-950 border border-amber-500/30 shadow-xl space-y-4 font-mono">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-slate-400 font-bold uppercase flex items-center gap-1.5">
+                <Activity className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+                Page Session
+              </span>
+              <span className="text-emerald-400 font-bold">{formatSessionTime(gamingSeconds)}</span>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-amber-500/40 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-amber-300 font-bold text-xs">
+                <Coins className="w-4 h-4 text-amber-400" />
+                <span>COINS EARNED</span>
+              </div>
+              <span className="text-sm font-black text-amber-400">+{coinsClaimed} COINS</span>
+            </div>
+
             <button
-              onClick={() => {
-                sfx.playWarp();
-                setIsPlayerActive(true);
-              }}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-mono font-bold text-xs uppercase flex items-center gap-2 shadow-lg"
+              onClick={handleLaunchGame}
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-bold text-xs uppercase flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all"
             >
               <Play className="w-4 h-4 fill-current" />
-              <span>LAUNCH FILL SCREEN</span>
+              <span>Launch Spider-Man Game</span>
             </button>
-            <a
-              href={game.fallbackUrl || game.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-5 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white font-mono font-bold text-xs uppercase flex items-center gap-2"
-            >
-              <ExternalLink className="w-4 h-4" />
-              <span>Open in New Tab</span>
-            </a>
+          </div>
+
+          {/* Tags */}
+          <div className="flex flex-wrap gap-1.5">
+            {game.tags.map((tag) => (
+              <span
+                key={tag}
+                className="text-[10px] font-mono text-slate-300 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800"
+              >
+                #{tag}
+              </span>
+            ))}
           </div>
         </div>
-      )}
+      </div>
 
       {/* Official Notice */}
       <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center gap-3">
         <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
         <p className="text-xs text-slate-300 leading-relaxed">
-          <strong>Happy Meal Digital Game Notice:</strong> The official McDonald&apos;s Happy Meal game is directly loaded from{" "}
-          <code className="text-amber-400 font-mono">https://spm30776.happymealdigital.com/?locale=en-PH</code>. You can play directly inside the fill-screen container or click Full Screen to expand to true fullscreen mode.
+          <strong>Direct Official Link Notice:</strong> The official McDonald&apos;s Happy Meal game is directly loaded from{" "}
+          <code className="text-amber-400 font-mono font-bold">{game.url}</code>. No sandbox restrictions are applied, ensuring touch, gyroscope, audio, and hardware WebGL function natively on smartphones and tablets.
         </p>
       </div>
     </div>

@@ -19,7 +19,9 @@ import {
   HelpCircle,
   Coins,
   ShieldCheck,
-  RotateCcw
+  RotateCcw,
+  Smartphone,
+  RotateCw
 } from "lucide-react";
 import { sfx } from "../utils/sfx";
 
@@ -29,6 +31,7 @@ export interface ExtraGameItem {
   nameAlias: string;
   category: "Happy Meal Games";
   url: string;
+  fallbackUrl?: string;
   coverUrl: string;
   bannerUrl: string;
   description: string;
@@ -47,7 +50,8 @@ const HAPPY_MEAL_GAME: ExtraGameItem = {
   title: "Spider-Man: Brand New Day McDonald's Happy Meal Game",
   nameAlias: "Spider-Man: Brand New Day McDonald's Happy Meal Game",
   category: "Happy Meal Games",
-  url: "https://spm30776.happymealdigital.com/?locale=en-US",
+  url: "/api/happymeal-game/?locale=en-US",
+  fallbackUrl: "https://spm30776.happymealdigital.com/?locale=en-US",
   coverUrl: "https://images.unsplash.com/photo-1635863138275-d9b33299680b?w=800&auto=format&fit=crop&q=80",
   bannerUrl: "https://images.unsplash.com/photo-1604200213928-ba3cf4fc8436?w=1200&auto=format&fit=crop&q=80",
   description: "Official McDonald's Happy Meal digital game experience for Spider-Man: Brand New Day! Web-sling through city rooftops, dodge obstacles, collect spider power tokens, and complete superhero challenges directly in your browser with responsive touch and keyboard controls.",
@@ -80,6 +84,23 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
   const [coinsClaimed, setCoinsClaimed] = useState<number>(0);
   const [showControlsGuide, setShowControlsGuide] = useState<boolean>(false);
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
+  const [isMobileDevice, setIsMobileDevice] = useState<boolean>(false);
+  const [isPortrait, setIsPortrait] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleDeviceCheck = () => {
+      const isMob = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      setIsMobileDevice(isMob);
+      setIsPortrait(window.innerHeight > window.innerWidth);
+    };
+    handleDeviceCheck();
+    window.addEventListener("resize", handleDeviceCheck);
+    window.addEventListener("orientationchange", handleDeviceCheck);
+    return () => {
+      window.removeEventListener("resize", handleDeviceCheck);
+      window.removeEventListener("orientationchange", handleDeviceCheck);
+    };
+  }, []);
 
   // Favorites & Likes
   const [isFavorite, setIsFavorite] = useState<boolean>(() => {
@@ -267,28 +288,37 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
           </div>
 
           {/* Quick Action Buttons */}
-          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
             <button
               onClick={() => {
                 sfx.playWarp();
                 setIsPlayerActive(true);
                 handleRefreshIframe();
               }}
-              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-red-600/30 active:scale-95 transition-all"
+              className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-red-600/30 active:scale-95 transition-all"
             >
               <Play className="w-4 h-4 fill-current" />
               <span>{isPlayerActive ? "RELOAD GAME" : "PLAY GAME"}</span>
             </button>
 
+            <button
+              onClick={toggleNativeFullscreen}
+              className="px-4 py-2.5 sm:py-3 rounded-2xl bg-slate-900/90 border border-amber-500/40 hover:bg-slate-800 text-amber-300 hover:text-white font-mono font-bold text-xs uppercase flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95"
+              title="Enter Fullscreen"
+            >
+              <Maximize2 className="w-4 h-4 text-amber-400" />
+              <span>FULLSCREEN</span>
+            </button>
+
             <a
-              href={game.url}
+              href={game.fallbackUrl || game.url}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => sfx.playWarp()}
-              className="px-4 py-3 rounded-2xl bg-slate-900/90 border border-slate-750 hover:bg-slate-800 text-slate-300 hover:text-white font-mono font-bold text-xs uppercase flex items-center justify-center gap-2 transition-all"
+              className="px-3.5 py-2.5 sm:py-3 rounded-2xl bg-slate-900/90 border border-slate-750 hover:bg-slate-800 text-slate-300 hover:text-white font-mono font-bold text-xs uppercase flex items-center justify-center gap-1.5 transition-all"
               title="Open Official Happy Meal Digital in New Window"
             >
-              <ExternalLink className="w-4 h-4 text-emerald-400" />
+              <ExternalLink className="w-3.5 h-3.5 text-emerald-400" />
               <span>Direct Link</span>
             </a>
           </div>
@@ -436,15 +466,40 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
             </div>
           )}
 
+          {/* Mobile Landscape Recommendation Banner */}
+          {isMobileDevice && isPortrait && (
+            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-red-950/80 via-amber-950/60 to-slate-900 border border-amber-500/40 text-amber-200 text-xs flex items-center justify-between gap-3 shadow-lg">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-amber-500/20 text-amber-300 shrink-0">
+                  <Smartphone className="w-4 h-4 rotate-90 animate-pulse" />
+                </div>
+                <div>
+                  <strong className="text-white block font-mono text-[11px] uppercase tracking-wider">Rotate Phone to Landscape</strong>
+                  <span className="text-[11px] text-amber-300/90 leading-tight">Spider-Man requires horizontal landscape orientation for touch web-slinging.</span>
+                </div>
+              </div>
+              <button
+                onClick={toggleNativeFullscreen}
+                className="px-3 py-1.5 rounded-xl bg-amber-500 text-slate-950 font-mono font-bold text-[10px] uppercase shrink-0 shadow active:scale-95"
+              >
+                Fullscreen
+              </button>
+            </div>
+          )}
+
           {/* EMBEDDED FILL SCREEN GAME IFRAME */}
           <div
             ref={gameContainerRef}
-            className={`relative rounded-3xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl transition-all duration-300 ${
+            style={{
+              WebkitOverflowScrolling: "touch",
+              transform: "translateZ(0)"
+            }}
+            className={`relative rounded-2xl sm:rounded-3xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl transition-all duration-300 ${
               isFullscreen
-                ? "fixed inset-0 z-50 rounded-none w-screen h-screen"
+                ? "fixed inset-0 z-50 rounded-none w-screen h-screen h-[100dvh]"
                 : isFillScreen
-                ? "w-full h-[78vh] min-h-[580px] max-h-[920px]"
-                : "w-full aspect-[16/9] min-h-[480px]"
+                ? "w-full h-[65vh] sm:h-[78vh] min-h-[360px] sm:min-h-[580px] max-h-[920px]"
+                : "w-full aspect-[16/9] min-h-[300px] sm:min-h-[480px]"
             }`}
           >
             {/* Top Fullscreen Floating Overlay HUD (When Fullscreen Active) */}
@@ -478,7 +533,7 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
                 </div>
                 <div className="flex items-center gap-2">
                   <a
-                    href={game.url}
+                    href={game.fallbackUrl || game.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono text-emerald-400 hover:text-white flex items-center gap-1.5"
@@ -497,6 +552,13 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
               title={game.title}
               onLoad={() => setIsLoadingIframe(false)}
               className="w-full h-full border-0 bg-slate-950"
+              style={{
+                width: "100%",
+                height: "100%",
+                border: 0,
+                transform: "translate3d(0, 0, 0)",
+                WebkitTransform: "translate3d(0, 0, 0)"
+              }}
               allow="fullscreen; autoplay; encrypted-media; camera; microphone; payment; display-capture; clipboard-read; clipboard-write; web-share; accelerometer; gyroscope"
               allowFullScreen
             />
@@ -596,7 +658,7 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
               <span>LAUNCH FILL SCREEN</span>
             </button>
             <a
-              href={game.url}
+              href={game.fallbackUrl || game.url}
               target="_blank"
               rel="noopener noreferrer"
               className="px-5 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white font-mono font-bold text-xs uppercase flex items-center gap-2"

@@ -25,7 +25,8 @@ export type PageView =
   | "vtubers"
   | "googleplus"
   | "extragames"
-  | "zerozone";
+  | "zerozone"
+  | "exclusiveanimes";
 
 export type LanguageCode =
   | "en"

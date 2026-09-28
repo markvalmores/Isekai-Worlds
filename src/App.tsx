@@ -19,6 +19,7 @@ import { ProfileDashboard } from "./components/ProfileDashboard";
 import { VrViewPortal } from "./components/VrViewPortal";
 import { HardwareEngine } from "./components/HardwareEngine";
 import { WatchAnimePortal } from "./components/WatchAnimePortal";
+import { ExclusiveAnimesTab } from "./components/ExclusiveAnimesTab";
 import { RadioGaga } from "./components/RadioGaga";
 import { RadioGagaAMV } from "./components/AmvDashboard";
 import { PlayGamesDashboard } from "./components/PlayGamesDashboard";
@@ -295,6 +296,7 @@ export default function App() {
       vr: "3D VR Portal Space",
       hardware: "RTX & AI Frame Gen Engine",
       watch: "Watch Anime Online",
+      exclusiveanimes: "Exclusive Animes (Muse Asia)",
       radio: "Radio Gaga Broadcast",
       amv: "Anime Music Videos",
       games: "Arcade Games Portal",
@@ -793,6 +795,10 @@ export default function App() {
 
         {currentPage === "watch" && (
           <WatchAnimePortal />
+        )}
+
+        {currentPage === "exclusiveanimes" && (
+          <ExclusiveAnimesTab />
         )}
 
         {currentPage === "radio" && (

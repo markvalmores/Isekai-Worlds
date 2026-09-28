@@ -86,9 +86,10 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
   const [isMobileDevice, setIsMobileDevice] = useState<boolean>(false);
   const [isPortrait, setIsPortrait] = useState<boolean>(false);
-  const [engineMode, setEngineMode] = useState<"proxy" | "direct">("proxy");
+  const [iframeError, setIframeError] = useState<boolean>(false);
 
-  const activeIframeSrc = engineMode === "proxy" ? "/api/happymeal-game/?locale=en-PH" : game.url;
+  // Directly load official Happy Meal Game URL
+  const activeIframeSrc = game.url;
 
   useEffect(() => {
     const handleDeviceCheck = () => {
@@ -211,6 +212,7 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
   const handleRefreshIframe = () => {
     sfx.playClick();
     setIsLoadingIframe(true);
+    setIframeError(false);
     setIframeKey(Date.now());
   };
 
@@ -376,29 +378,19 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
 
             {/* Right: Fill Screen, Fullscreen, Engine Selector, Reload, Guide, Direct Link */}
             <div className="flex items-center gap-2 flex-wrap">
-              {/* Engine Toggle: Safe Mobile Engine vs Direct CDN */}
-              <button
-                onClick={() => {
-                  sfx.playClick();
-                  setEngineMode((prev) => (prev === "proxy" ? "direct" : "proxy"));
-                  setIsLoadingIframe(true);
-                  setIframeKey(Date.now());
-                }}
-                className={`px-3 py-2 rounded-xl border font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-all shadow-sm ${
-                  engineMode === "proxy"
-                    ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
-                    : "bg-slate-950 border-slate-800 text-slate-400 hover:text-white"
-                }`}
-                title={
-                  engineMode === "proxy"
-                    ? "Mobile-Safe Engine Active (en-PH dictionary fixed). Click to test Direct CDN."
-                    : "Direct CDN Active (https://spm30776.happymealdigital.com/?locale=en-PH). Click to switch to Mobile-Safe Engine."
-                }
+              {/* Direct Official Link Button */}
+              <a
+                href={game.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => sfx.playWarp()}
+                className="px-3 py-2 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-300 font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-all shadow-sm"
+                title={`Official URL: ${game.url}`}
               >
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span className="hidden sm:inline">{engineMode === "proxy" ? "Mobile Safe: en-PH" : "Direct: en-PH"}</span>
-                <span className="sm:hidden">{engineMode === "proxy" ? "Safe" : "Direct"}</span>
-              </button>
+                <span className="hidden sm:inline">Official Game Link</span>
+                <span className="sm:hidden">Game</span>
+              </a>
 
               {/* Fill Screen Mode Toggle */}
               <button
@@ -545,7 +537,7 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
             )}
 
             {/* Iframe Loading Placeholder */}
-            {isLoadingIframe && (
+            {isLoadingIframe && !iframeError && (
               <div className="absolute inset-0 z-20 bg-slate-950/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center space-y-4">
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-red-600 to-amber-500 flex items-center justify-center shadow-lg shadow-red-500/30 animate-pulse">
                   <Gamepad2 className="w-8 h-8 text-white animate-bounce" />
@@ -560,7 +552,7 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
                 </div>
                 <div className="flex items-center gap-2">
                   <a
-                    href={game.fallbackUrl || game.url}
+                    href={game.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono text-emerald-400 hover:text-white flex items-center gap-1.5"
@@ -571,13 +563,56 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
               </div>
             )}
 
+            {/* Iframe Fallback/Error state */}
+            {iframeError && (
+              <div className="absolute inset-0 z-30 bg-slate-950/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center space-y-4">
+                <div className="w-16 h-16 rounded-2xl bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-400 shadow-lg">
+                  <Gamepad2 className="w-8 h-8" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-lg font-black text-white uppercase tracking-wider font-mono">
+                    Direct Launch Required
+                  </h3>
+                  <p className="text-xs text-slate-300 max-w-md">
+                    McDonald&apos;s Happy Meal game can be played directly via the official link below:
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <a
+                    href={game.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => sfx.playWarp()}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-mono font-bold text-xs uppercase flex items-center gap-2 shadow-lg active:scale-95"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span>Launch Game ({game.url})</span>
+                  </a>
+                  <button
+                    onClick={handleRefreshIframe}
+                    className="px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 hover:text-white font-mono font-bold text-xs uppercase flex items-center gap-1.5"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    <span>Retry Embed</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* THE GAME IFRAME */}
             <iframe
               key={iframeKey}
               ref={iframeRef}
               src={activeIframeSrc}
               title={game.title}
-              onLoad={() => setIsLoadingIframe(false)}
+              onLoad={() => {
+                setIsLoadingIframe(false);
+                setIframeError(false);
+              }}
+              onError={() => {
+                setIsLoadingIframe(false);
+                setIframeError(true);
+              }}
               className="w-full h-full border-0 bg-slate-950"
               style={{
                 width: "100%",

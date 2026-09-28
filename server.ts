@@ -2823,15 +2823,55 @@ app.post("/api/community/posts/:id/comments", (req, res) => {
 // ==========================================
 const HAPPY_MEAL_REMOTE = "https://spm30776.happymealdigital.com";
 
+let cachedMergedEnPhLocale: any = null;
+async function getMergedEnPhLocale() {
+  if (cachedMergedEnPhLocale) return cachedMergedEnPhLocale;
+  try {
+    const [usRes, phRes] = await Promise.all([
+      fetch(`${HAPPY_MEAL_REMOTE}/static/locale/en-US.json`),
+      fetch(`${HAPPY_MEAL_REMOTE}/static/locale/en-PH.json`)
+    ]);
+    const usData = await usRes.json();
+    const phData = await phRes.json();
+    // Deep merge en-US keys into en-PH so that DISCLAIMER, INTERRUPTER_ORIENTATION,
+    // SPLASH, etc., are never undefined on mobile phones or desktop when locale=en-PH is used
+    cachedMergedEnPhLocale = {
+      ...usData,
+      ...phData,
+      GENERAL: {
+        ...usData.GENERAL,
+        ...phData.GENERAL,
+        languageName: "English (Philippines)",
+        locale: "en-PH",
+        region: "PH"
+      }
+    };
+    return cachedMergedEnPhLocale;
+  } catch (err) {
+    console.error("[HappyMeal Locale Merge Error]:", err);
+    return null;
+  }
+}
+
 app.use("/api/happymeal-game", async (req, res) => {
   try {
     let subPath = req.url || "/";
     if (!subPath.startsWith("/")) subPath = `/${subPath}`;
 
-    // Ensure en-US locale query param is present on root/entry requests
+    // Intercept en-PH.json to prevent mobile black screen crash caused by missing dictionaries
+    if (subPath.includes("en-PH.json")) {
+      const merged = await getMergedEnPhLocale();
+      if (merged) {
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Content-Type", "application/json; charset=utf-8");
+        return res.json(merged);
+      }
+    }
+
+    // Default to en-PH locale query param if none provided
     const targetUrl = new URL(subPath, HAPPY_MEAL_REMOTE);
     if (!targetUrl.searchParams.has("locale")) {
-      targetUrl.searchParams.set("locale", "en-US");
+      targetUrl.searchParams.set("locale", "en-PH");
     }
 
     const response = await fetch(targetUrl.toString(), {
@@ -2870,6 +2910,17 @@ app.use("/api/happymeal-game", async (req, res) => {
 app.use("/static", async (req, res, next) => {
   try {
     const subPath = req.url.startsWith("/") ? req.url : `/${req.url}`;
+
+    // Intercept en-PH.json at /static/locale/en-PH.json as well
+    if (subPath.includes("en-PH.json")) {
+      const merged = await getMergedEnPhLocale();
+      if (merged) {
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Content-Type", "application/json; charset=utf-8");
+        return res.json(merged);
+      }
+    }
+
     const targetUrl = `${HAPPY_MEAL_REMOTE}/static${subPath}`;
     const response = await fetch(targetUrl);
     if (!response.ok) {

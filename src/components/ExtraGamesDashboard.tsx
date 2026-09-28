@@ -50,15 +50,15 @@ const HAPPY_MEAL_GAME: ExtraGameItem = {
   title: "Spider-Man: Brand New Day McDonald's Happy Meal Game",
   nameAlias: "Spider-Man: Brand New Day McDonald's Happy Meal Game",
   category: "Happy Meal Games",
-  url: "/api/happymeal-game/?locale=en-US",
-  fallbackUrl: "https://spm30776.happymealdigital.com/?locale=en-US",
+  url: "https://spm30776.happymealdigital.com/?locale=en-PH",
+  fallbackUrl: "https://spm30776.happymealdigital.com/?locale=en-PH",
   coverUrl: "https://images.unsplash.com/photo-1635863138275-d9b33299680b?w=800&auto=format&fit=crop&q=80",
   bannerUrl: "https://images.unsplash.com/photo-1604200213928-ba3cf4fc8436?w=1200&auto=format&fit=crop&q=80",
   description: "Official McDonald's Happy Meal digital game experience for Spider-Man: Brand New Day! Web-sling through city rooftops, dodge obstacles, collect spider power tokens, and complete superhero challenges directly in your browser with responsive touch and keyboard controls.",
   developer: "McDonald's Happy Meal Digital / Marvel",
   releaseYear: "2024",
   rating: 5.0,
-  tags: ["Happy Meal", "Spider-Man", "Marvel", "McDonald's", "Action", "Web-Slinger", "HTML5", "Brand New Day"],
+  tags: ["Happy Meal", "Spider-Man", "Marvel", "McDonald's", "Action", "Web-Slinger", "HTML5", "Brand New Day", "en-PH"],
   difficulty: "Superhero",
   featured: true,
   isHappyMeal: true
@@ -86,6 +86,9 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
   const [isMobileDevice, setIsMobileDevice] = useState<boolean>(false);
   const [isPortrait, setIsPortrait] = useState<boolean>(false);
+  const [engineMode, setEngineMode] = useState<"proxy" | "direct">("proxy");
+
+  const activeIframeSrc = engineMode === "proxy" ? "/api/happymeal-game/?locale=en-PH" : game.url;
 
   useEffect(() => {
     const handleDeviceCheck = () => {
@@ -371,8 +374,32 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
               </div>
             </div>
 
-            {/* Right: Fill Screen, Fullscreen, Reload, Guide, Direct Link */}
+            {/* Right: Fill Screen, Fullscreen, Engine Selector, Reload, Guide, Direct Link */}
             <div className="flex items-center gap-2 flex-wrap">
+              {/* Engine Toggle: Safe Mobile Engine vs Direct CDN */}
+              <button
+                onClick={() => {
+                  sfx.playClick();
+                  setEngineMode((prev) => (prev === "proxy" ? "direct" : "proxy"));
+                  setIsLoadingIframe(true);
+                  setIframeKey(Date.now());
+                }}
+                className={`px-3 py-2 rounded-xl border font-mono text-xs font-bold uppercase flex items-center gap-1.5 transition-all shadow-sm ${
+                  engineMode === "proxy"
+                    ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
+                    : "bg-slate-950 border-slate-800 text-slate-400 hover:text-white"
+                }`}
+                title={
+                  engineMode === "proxy"
+                    ? "Mobile-Safe Engine Active (en-PH dictionary fixed). Click to test Direct CDN."
+                    : "Direct CDN Active (https://spm30776.happymealdigital.com/?locale=en-PH). Click to switch to Mobile-Safe Engine."
+                }
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span className="hidden sm:inline">{engineMode === "proxy" ? "Mobile Safe: en-PH" : "Direct: en-PH"}</span>
+                <span className="sm:hidden">{engineMode === "proxy" ? "Safe" : "Direct"}</span>
+              </button>
+
               {/* Fill Screen Mode Toggle */}
               <button
                 onClick={() => {
@@ -548,7 +575,7 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
             <iframe
               key={iframeKey}
               ref={iframeRef}
-              src={game.url}
+              src={activeIframeSrc}
               title={game.title}
               onLoad={() => setIsLoadingIframe(false)}
               className="w-full h-full border-0 bg-slate-950"
@@ -674,7 +701,8 @@ export const ExtraGamesDashboard: React.FC<ExtraGamesDashboardProps> = ({
       <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center gap-3">
         <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
         <p className="text-xs text-slate-300 leading-relaxed">
-          <strong>Happy Meal Digital Game Notice:</strong> The official McDonald&apos;s Happy Meal game is directly loaded from <code>https://spm30776.happymealdigital.com/?locale=en-US</code>. You can play directly inside the fill-screen container or click Full Screen to expand to true fullscreen mode.
+          <strong>Happy Meal Digital Game Notice:</strong> The official McDonald&apos;s Happy Meal game is directly loaded from{" "}
+          <code className="text-amber-400 font-mono">https://spm30776.happymealdigital.com/?locale=en-PH</code>. You can play directly inside the fill-screen container or click Full Screen to expand to true fullscreen mode.
         </p>
       </div>
     </div>

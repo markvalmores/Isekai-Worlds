@@ -1481,7 +1481,7 @@ app.get("/api/exclusive-animes/episodes", async (req, res) => {
                     duration,
                     thumbnail: `https://img.youtube.com/vi/${vId}/mqdefault.jpg`,
                     url: `https://www.youtube.com/watch?v=${vId}&list=${playlistId}`,
-                    embedUrl: `https://www.youtube.com/embed/${vId}?list=${playlistId}&autoplay=1&enablejsapi=1`
+                    embedUrl: `https://www.youtube.com/embed/${vId}?autoplay=1&enablejsapi=1`
                   });
                 }
               }
@@ -1499,7 +1499,7 @@ app.get("/api/exclusive-animes/episodes", async (req, res) => {
                     duration,
                     thumbnail: `https://img.youtube.com/vi/${vId}/mqdefault.jpg`,
                     url: `https://www.youtube.com/watch?v=${vId}&list=${playlistId}`,
-                    embedUrl: `https://www.youtube.com/embed/${vId}?list=${playlistId}&autoplay=1&enablejsapi=1`
+                    embedUrl: `https://www.youtube.com/embed/${vId}?autoplay=1&enablejsapi=1`
                   });
                 }
               }

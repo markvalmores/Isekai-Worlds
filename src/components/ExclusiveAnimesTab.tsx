@@ -53,7 +53,11 @@ export function ExclusiveAnimesTab() {
   const [sortOrder, setSortOrder] = useState<"a-z" | "z-a" | "rating" | "episodes">("a-z");
   
   const spotlightDefaultItem = useMemo(() => {
-    return EXCLUSIVE_ANIMES_DATA.find(item => item.playlistId === "PLwLSw1_eDZl1G_FbMxbzZY5Ut5RWO4bUv" || item.videoId === "mFfYe9ph7dQ") || EXCLUSIVE_ANIMES_DATA[0];
+    return EXCLUSIVE_ANIMES_DATA.find(item => 
+      item.originalUrl === "https://www.youtube.com/playlist?list=PLwLSw1_eDZl1G_FbMxbzZY5Ut5RWO4bUv" ||
+      item.playlistId === "PLwLSw1_eDZl1G_FbMxbzZY5Ut5RWO4bUv" || 
+      item.videoId === "mFfYe9ph7dQ"
+    ) || EXCLUSIVE_ANIMES_DATA[0];
   }, []);
 
   const [activeVideo, setActiveVideo] = useState<ExclusiveAnimeItem>(spotlightDefaultItem);
@@ -308,7 +312,7 @@ export function ExclusiveAnimesTab() {
 
   const handleCopyLink = () => {
     sfx.playClick();
-    const link = activeEpisode?.url || activeVideo.originalUrl;
+    const link = activeVideo.originalUrl || (activeVideo.playlistId ? `https://www.youtube.com/playlist?list=${activeVideo.playlistId}` : activeEpisode?.url);
     navigator.clipboard.writeText(link);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
@@ -408,9 +412,21 @@ export function ExclusiveAnimesTab() {
             <h2 className="text-xl sm:text-2xl font-black text-white tracking-wide uppercase line-clamp-1">
               {activeEpisode ? activeEpisode.title : activeVideo.title}
             </h2>
-            <p className="text-xs text-slate-400 font-mono">
-              Series: <strong className="text-rose-300">{activeVideo.title}</strong>
-            </p>
+            <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
+              <span className="text-slate-400">Series:</span>
+              <strong className="text-rose-300">{activeVideo.title}</strong>
+              <span className="text-slate-600 hidden sm:inline">•</span>
+              <a
+                href={activeVideo.originalUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-amber-400 hover:text-amber-300 underline underline-offset-2 flex items-center gap-1 text-[11px] truncate max-w-xs sm:max-w-md"
+                title={`Open Playlist: ${activeVideo.originalUrl}`}
+              >
+                <span>{activeVideo.originalUrl}</span>
+                <ExternalLink className="w-3 h-3 shrink-0" />
+              </a>
+            </div>
           </div>
 
           {/* Quick Actions: Favorite, Copy, YouTube Tab, Fullscreen Episode Selector */}
@@ -438,19 +454,19 @@ export function ExclusiveAnimesTab() {
             <button
               onClick={handleCopyLink}
               className="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 hover:text-white transition-all"
-              title="Copy Episode Link"
+              title="Copy Playlist / Episode Link"
             >
               {copiedLink ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
             </button>
 
             <a
-              href={activeEpisode?.url || activeVideo.originalUrl}
+              href={activeVideo.originalUrl || (activeVideo.playlistId ? `https://www.youtube.com/playlist?list=${activeVideo.playlistId}` : activeEpisode?.url)}
               target="_blank"
               rel="noreferrer"
-              className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-white text-xs font-mono font-bold flex items-center gap-1.5 transition-all"
-              title="Watch on Official YouTube Page"
+              className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-white text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-sm"
+              title={`Watch Official Playlist (${activeVideo.originalUrl})`}
             >
-              <span>YouTube</span>
+              <span>YouTube Playlist</span>
               <ExternalLink className="w-3.5 h-3.5 text-rose-400" />
             </a>
           </div>

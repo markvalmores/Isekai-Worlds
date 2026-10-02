@@ -4599,7 +4599,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
     "id": "muse-asia-275",
     "title": "That Time I Got Reincarnated as a Slime",
     "publisher": "Muse Asia",
-    "originalUrl": "https://www.youtube.com/watch?v=mFfYe9ph7dQ&list=PLwLSw1_eDZl1G_FbMxbzZY5Ut5RWO4bUv",
+    "originalUrl": "https://www.youtube.com/playlist?list=PLwLSw1_eDZl1G_FbMxbzZY5Ut5RWO4bUv",
     "videoId": "mFfYe9ph7dQ",
     "playlistId": "PLwLSw1_eDZl1G_FbMxbzZY5Ut5RWO4bUv",
     "thumbnail": "https://img.youtube.com/vi/mFfYe9ph7dQ/maxresdefault.jpg",

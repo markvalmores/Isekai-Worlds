@@ -74,6 +74,7 @@ export function ExclusiveAnimesTab() {
   const [isEpisodeModalOpen, setIsEpisodeModalOpen] = useState<boolean>(false);
   const [playlistSearch, setPlaylistSearch] = useState<string>("");
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
+  const [episodeBatchRange, setEpisodeBatchRange] = useState<string>("all");
 
   const playerContainerRef = useRef<HTMLDivElement>(null);
 
@@ -223,17 +224,41 @@ export function ExclusiveAnimesTab() {
     return "";
   }, [activeVideo, activeEpisode, currentEpisodeIndex]);
 
-  // Filter episodes by search inside the active anime
+  // Batch ranges for series with many episodes (e.g. Reborn with 203 episodes)
+  const batchRanges = useMemo(() => {
+    if (episodes.length <= 40) return [];
+    const ranges: { id: string; label: string; start: number; end: number }[] = [
+      { id: "all", label: `All (${episodes.length})`, start: 1, end: episodes.length }
+    ];
+    const step = 50;
+    for (let i = 0; i < episodes.length; i += step) {
+      const start = i + 1;
+      const end = Math.min(i + step, episodes.length);
+      ranges.push({ id: `${start}-${end}`, label: `${start} - ${end}`, start, end });
+    }
+    return ranges;
+  }, [episodes.length]);
+
+  // Filter episodes by search and range inside the active anime
   const filteredEpisodes = useMemo(() => {
-    if (!episodeSearch.trim()) return episodes;
+    let list = episodes;
+    if (episodeBatchRange !== "all") {
+      const [startStr, endStr] = episodeBatchRange.split("-");
+      const start = parseInt(startStr, 10);
+      const end = parseInt(endStr, 10);
+      if (!isNaN(start) && !isNaN(end)) {
+        list = list.filter(ep => ep.episodeNumber >= start && ep.episodeNumber <= end);
+      }
+    }
+    if (!episodeSearch.trim()) return list;
     const q = episodeSearch.toLowerCase().trim();
-    return episodes.filter(ep => 
+    return list.filter(ep => 
       ep.title.toLowerCase().includes(q) ||
       ep.episodeNumber.toString() === q ||
       `ep ${ep.episodeNumber}`.includes(q) ||
       `episode ${ep.episodeNumber}`.includes(q)
     );
-  }, [episodes, episodeSearch]);
+  }, [episodes, episodeSearch, episodeBatchRange]);
 
   // Filter other playlists for playlist browser tab
   const relatedPlaylists = useMemo(() => {
@@ -305,6 +330,8 @@ export function ExclusiveAnimesTab() {
     sfx.playWarp();
     setActiveVideo(item);
     setCurrentEpisodeIndex(0);
+    setEpisodeBatchRange("all");
+    setEpisodeSearch("");
     if (scroll && playerContainerRef.current) {
       playerContainerRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
@@ -685,6 +712,25 @@ export function ExclusiveAnimesTab() {
                     </button>
                   )}
                 </div>
+
+                {/* Batch Range filter pills for large series */}
+                {batchRanges.length > 0 && (
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-slate-800 shrink-0">
+                    {batchRanges.map(range => (
+                      <button
+                        key={range.id}
+                        onClick={() => { sfx.playClick(); setEpisodeBatchRange(range.id); }}
+                        className={`px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold whitespace-nowrap transition-all ${
+                          episodeBatchRange === range.id
+                            ? "bg-rose-600 text-white shadow-sm ring-1 ring-rose-400"
+                            : "bg-slate-950 text-slate-400 border border-slate-800 hover:text-white"
+                        }`}
+                      >
+                        {range.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
 
                 {isLoadingEpisodes ? (
                   <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-3">
@@ -1172,10 +1218,30 @@ export function ExclusiveAnimesTab() {
               </div>
             </div>
 
+            {/* Batch Range filter pills for large series in modal */}
+            {batchRanges.length > 0 && (
+              <div className="px-5 py-2.5 bg-slate-950/70 border-b border-slate-800 flex items-center gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-800">
+                <span className="text-[10px] font-mono uppercase font-bold text-slate-400 shrink-0">Episode Range:</span>
+                {batchRanges.map(range => (
+                  <button
+                    key={range.id}
+                    onClick={() => { sfx.playClick(); setEpisodeBatchRange(range.id); }}
+                    className={`px-3 py-1 rounded-xl text-xs font-mono font-bold whitespace-nowrap transition-all ${
+                      episodeBatchRange === range.id
+                        ? "bg-rose-600 text-white shadow-md ring-1 ring-rose-400"
+                        : "bg-slate-900 text-slate-400 border border-slate-800 hover:text-white"
+                    }`}
+                  >
+                    {range.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
             {/* Modal Body: Episode Cards */}
             <div className="flex-1 overflow-y-auto p-5 scrollbar-thin scrollbar-thumb-slate-800">
               {episodeViewMode === "grid" ? (
-                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
+                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2.5">
                   {filteredEpisodes.map((ep, idx) => {
                     const originalIdx = episodes.findIndex(e => e.id === ep.id);
                     const isCurrent = originalIdx === currentEpisodeIndex;

@@ -1,12 +1,12 @@
 export interface ExclusiveAnimeItem {
   id: string;
   title: string;
-  publisher: "Muse Asia" | "Exclusive Animes";
+  publisher: "Muse Asia";
   originalUrl: string;
   videoId: string;
   playlistId: string;
   thumbnail: string;
-  tags: ("SUB" | "DUB" | "Seasons" | "Movies" | "OVA" | "OAD" | "Full Series" | "Limited-Time" | "Extras")[];
+  tags: ("SUB" | "DUB" | "Full Series" | "Seasons" | "Movies" | "OVA" | "OAD" | "Limited-Time" | "Extras")[];
   episodesCount: number;
   rating: string;
   year: string;
@@ -27,7 +27,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 22,
+    "episodesCount": 25,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official (Dub) One-Punch Man legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -44,7 +44,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Extras"
     ],
-    "episodesCount": 12,
+    "episodesCount": 13,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official 👻🎃 Junji Ito Collection legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -62,7 +62,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 22,
+    "episodesCount": 12,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official 7th Time Loop: The Villainess Enjoys a Carefree Life Married to Her Worst Enemy! legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -80,7 +80,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 21,
+    "episodesCount": 24,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official A Certain Magical Index legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -98,7 +98,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 12,
+    "episodesCount": 75,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official A Certain Magical Index legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -116,7 +116,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 12,
+    "episodesCount": 25,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official A Certain Magical Index II legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -134,7 +134,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 12,
+    "episodesCount": 24,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official A Certain Scientific Railgun legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -152,7 +152,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 24,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official A Certain Scientific Railgun S legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -170,7 +170,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 12,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official A Gatherer's Adventure in Isekai legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -188,7 +188,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 20,
+    "episodesCount": 12,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official A Journey Through Another World legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -206,7 +206,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 23,
+    "episodesCount": 12,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official A Nobody's Way Up to an Exploration Hero legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -224,7 +224,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 22,
+    "episodesCount": 12,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official A Playthrough of a Certain Dude's VRMMO Life legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -242,7 +242,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 18,
+    "episodesCount": 12,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official A Sign of Affection legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -260,7 +260,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 20,
+    "episodesCount": 24,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official A3! legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -278,7 +278,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 21,
+    "episodesCount": 25,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Accel World legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -296,7 +296,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 21,
+    "episodesCount": 64,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Ace of Diamond Act II legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -314,7 +314,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 13,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Ace of the Diamond actⅡ -Second Season legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -332,7 +332,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Limited-Time",
       "Full Series"
     ],
-    "episodesCount": 16,
+    "episodesCount": 21,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official (Limited-Time Broadcast) Agents of the Four Seasons Dance of Spring legally on Muse Asia!"
@@ -350,7 +350,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 12,
+    "episodesCount": 50,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Ahiru no Sora legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -368,7 +368,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 17,
+    "episodesCount": 12,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Alice & Zoroku legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -386,7 +386,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 12,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Always a Catch! legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -404,7 +404,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 12,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official And You Thought There Is Never a Girl Online? legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -422,7 +422,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 22,
+    "episodesCount": 13,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Apocalypse Bringer Mynoghra legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -440,7 +440,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 18,
+    "episodesCount": 3,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official ARIA The AVVENIRE legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -476,7 +476,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 20,
+    "episodesCount": 12,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Armor Shop for Ladies & Gentlemen 2 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -512,7 +512,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 37,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Ascendance of a Bookworm legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -530,7 +530,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 17,
+    "episodesCount": 2,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Ascendance of a Bookworm S3 - Opening Theme - Ano Hi no Kotoba (JPN / ENG Lyrics) legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -548,7 +548,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 23,
+    "episodesCount": 12,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Asobi Asobase - Workshop of Fun legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -566,7 +566,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 28,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official ASSASSINATION CLASSROOM legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -583,7 +583,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Full Series"
     ],
-    "episodesCount": 12,
+    "episodesCount": 28,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Assassination Classroom legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -601,7 +601,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 23,
+    "episodesCount": 103,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Attack on Titan legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -618,7 +618,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Full Series"
     ],
-    "episodesCount": 17,
+    "episodesCount": 103,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Attack on Titan legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -636,7 +636,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 8,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Attack on Titan The Final Season Part 2 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -672,7 +672,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 17,
+    "episodesCount": 13,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official BanG Dream! 3rd Season legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -690,7 +690,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 23,
+    "episodesCount": 13,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official BanG Dream! Ave Mujica legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -707,7 +707,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Movies"
     ],
-    "episodesCount": 15,
+    "episodesCount": 3,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official BanG Dream! Episode of Roselia Ⅰ：Promise Movie legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -724,7 +724,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Extras"
     ],
-    "episodesCount": 20,
+    "episodesCount": 14,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official BanG Dream! It's MyGO!!!!! legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -741,7 +741,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Full Series"
     ],
-    "episodesCount": 15,
+    "episodesCount": 13,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official BanG Dream! YUME∞MITA legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -759,7 +759,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 12,
+    "episodesCount": 13,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Beast Tamer legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -777,7 +777,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 60,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official BEELZEBUB legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -795,7 +795,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 12,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Beheneko: The Elf-Girl's Cat is Secretly an S-Ranked Monster! legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -813,7 +813,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 23,
+    "episodesCount": 12,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Berserk of Gluttony legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -831,7 +831,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 21,
+    "episodesCount": 13,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official BLACK BULLET legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -848,7 +848,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Full Series"
     ],
-    "episodesCount": 16,
+    "episodesCount": 12,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official BLACK TORCH legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -866,7 +866,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 22,
+    "episodesCount": 24,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Blast of Tempest legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -884,7 +884,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 12,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official BlazBlue Alter Memory legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -920,7 +920,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 18,
+    "episodesCount": 24,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official BOFURI: I Don’t Want to Get Hurt, so I’ll Max Out My Defense. Season 2 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -938,7 +938,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 3,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Burn the Witch legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -956,7 +956,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 16,
+    "episodesCount": 13,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Campfire Cooking in Another World legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -974,7 +974,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 24,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Campfire Cooking in Another World with My Absurd Skill legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -992,7 +992,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 21,
+    "episodesCount": 25,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official CANDY CARIES legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1010,7 +1010,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 16,
+    "episodesCount": 14,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Cautious Hero: The Hero Is Overpowered but Overly Cautious legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1028,7 +1028,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 20,
+    "episodesCount": 35,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Cells at Work! legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1046,7 +1046,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 24,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Chained Soldier legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1064,7 +1064,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 21,
+    "episodesCount": 36,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Chained Soldier Season 2 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1082,7 +1082,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 12,
+    "episodesCount": 13,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Cheer Boys!! legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1100,7 +1100,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 16,
+    "episodesCount": 12,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Chillin' in Another World with Level 2 Super Cheat Powers legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1117,7 +1117,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Full Series"
     ],
-    "episodesCount": 19,
+    "episodesCount": 51,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Classroom of the Elite legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1134,7 +1134,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Extras"
     ],
-    "episodesCount": 21,
+    "episodesCount": 53,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Classroom of the Elite (PV) legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1152,7 +1152,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 20,
+    "episodesCount": 13,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Classroom of the Elite 4th Season legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1170,7 +1170,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 25,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Classroom of the Elite Season 2 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1188,7 +1188,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 17,
+    "episodesCount": 25,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Classroom of the Elite Season 3 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1206,7 +1206,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 17,
+    "episodesCount": 12,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Combatants Will Be Dispatched! legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1224,7 +1224,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 16,
+    "episodesCount": 13,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Cop Craft legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1241,7 +1241,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Movies"
     ],
-    "episodesCount": 13,
+    "episodesCount": 14,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Crayon Shinchan: The Storm Called The Jungle Movie legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1259,7 +1259,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 12,
+    "episodesCount": 29,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official DAN DA DAN legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1277,7 +1277,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 21,
+    "episodesCount": 24,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official DAN DA DAN legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1295,7 +1295,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 12,
+    "episodesCount": 24,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Danganronpa 3: The End of Hope’s Peak High School – Future Arc legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1313,7 +1313,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 13,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official DANGANRONPA The Animation legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1331,7 +1331,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 16,
+    "episodesCount": 29,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Dark Gathering legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1349,7 +1349,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 12,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Date A Live V legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1366,7 +1366,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Movies"
     ],
-    "episodesCount": 15,
+    "episodesCount": 14,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Demon Slayer: Kimetsu no Yaiba Infinity Castle I Movie legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1401,7 +1401,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Extras"
     ],
-    "episodesCount": 19,
+    "episodesCount": 12,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Dr. Ramune -Mysterious Disease Specialist legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1418,7 +1418,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Full Series"
     ],
-    "episodesCount": 21,
+    "episodesCount": 12,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Draw This, Then Die! legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1436,7 +1436,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 23,
+    "episodesCount": 12,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Easygoing Territory Defense by the Optimistic Lord legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1454,7 +1454,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 12,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Even Given the Worthless \"Appraiser\" Class, I'm Actually the Strongest legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1472,7 +1472,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 16,
+    "episodesCount": 12,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Failure Frame: I Became the Strongest and Annihilated Everything with Low-Level Spells legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1490,7 +1490,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 18,
+    "episodesCount": 211,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Fairy Tail legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1508,7 +1508,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 15,
+    "episodesCount": 16,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Fairy Tail legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1526,7 +1526,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 17,
+    "episodesCount": 25,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Fairy Tail 100 Years Quest legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1543,7 +1543,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Extras"
     ],
-    "episodesCount": 21,
+    "episodesCount": 35,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Frieren: Beyond Journey's End legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1561,7 +1561,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 20,
+    "episodesCount": 28,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Frieren: Beyond Journey's End legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1579,7 +1579,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 20,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Frieren: Beyond Journey's End legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1596,7 +1596,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Full Series"
     ],
-    "episodesCount": 20,
+    "episodesCount": 35,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Frieren: Beyond Journey's End legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1614,7 +1614,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 23,
+    "episodesCount": 12,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official From Bureaucrat to Villainess: Dad's Been Reincarnated! legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1632,7 +1632,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 18,
+    "episodesCount": 13,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official FUUTO PI legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1650,7 +1650,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 15,
+    "episodesCount": 12,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Girlfriend, Girlfriend legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1668,7 +1668,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 20,
+    "episodesCount": 12,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Girlfriend, Girlfriend Season 2 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1686,7 +1686,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 21,
+    "episodesCount": 12,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Girls’ Frontline legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1704,7 +1704,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 16,
+    "episodesCount": 12,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Girls' Last Tour legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1722,7 +1722,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 16,
+    "episodesCount": 26,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Goblin Slayer legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1740,7 +1740,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 16,
+    "episodesCount": 12,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Goblin Slayer II legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1758,7 +1758,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 15,
+    "episodesCount": 12,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Grimoire of Zero legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1776,7 +1776,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 20,
+    "episodesCount": 13,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official HAIGAKURA legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1794,7 +1794,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 12,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Hand Shakers legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1812,7 +1812,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 15,
+    "episodesCount": 13,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Heaven’s Design Team legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1830,7 +1830,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 15,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official HETALIA World Stars legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1848,7 +1848,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 23,
+    "episodesCount": 14,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Higehiro: After Being Rejected, I Shaved and Took in a High School Runaway legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1866,7 +1866,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 20,
+    "episodesCount": 12,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Hina Logic - from Luck & Logic legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1884,7 +1884,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 18,
+    "episodesCount": 12,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Hitoribocchi no Marumaruseikatsu legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1902,7 +1902,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 150,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official HUNTER×HUNTER legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1920,7 +1920,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 12,
+    "episodesCount": 211,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official HUNTER×HUNTER (Election Arc) legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1938,7 +1938,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 21,
+    "episodesCount": 23,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Hyouka legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1956,7 +1956,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 18,
+    "episodesCount": 14,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official I Got a CHEAT SKILL in ANOTHER WORLD and Became UNRIVALED in the REAL WORLD, Too legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1974,7 +1974,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 12,
+    "episodesCount": 25,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official I Left My A-Rank Party legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -1992,7 +1992,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 20,
+    "episodesCount": 12,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official I PARRY EVERYTHING legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2010,7 +2010,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 12,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official I Want to Escape from Princess Lessons legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2028,7 +2028,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 23,
+    "episodesCount": 24,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official I Was Reincarnated as the 7th Prince legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2045,7 +2045,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Extras"
     ],
-    "episodesCount": 23,
+    "episodesCount": 14,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official I, TSUSHIMA (PV) legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2063,7 +2063,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 15,
+    "episodesCount": 93,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official I, TSUSHIMA (Web Version) legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2081,7 +2081,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 22,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official I'm the Evil Lord of an Intergalactic Empire! legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2099,7 +2099,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 22,
+    "episodesCount": 12,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official I've Been Killing Slimes for 300 Years and Maxed Out My Level legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2117,7 +2117,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 16,
+    "episodesCount": 24,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official I've Been Killing Slimes for 300 Years and Maxed Out My Level legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2135,7 +2135,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 12,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official I've Been Killing Slimes for 300 Years and Maxed Out My Level Season 2 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2153,7 +2153,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 12,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official I★CHU legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2171,7 +2171,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 22,
+    "episodesCount": 12,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official If It's for My Daughter, I'd Even Defeat a Demon Lord legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2207,7 +2207,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 40,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official In/Spectre legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2225,7 +2225,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 16,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official In/Spectre - Mini Animation 14 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2243,7 +2243,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 13,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Insomniacs after school legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2261,7 +2261,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 22,
+    "episodesCount": 13,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Ippon again! legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2279,7 +2279,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 23,
+    "episodesCount": 13,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official IRODUKU: The World in Colors legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2297,7 +2297,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 21,
+    "episodesCount": 37,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Is the Order a Rabbit? legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2315,7 +2315,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 21,
+    "episodesCount": 13,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Isekai Office Worker legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2333,7 +2333,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 21,
+    "episodesCount": 12,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official ISEKAI QUARTET3 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2351,7 +2351,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 18,
+    "episodesCount": 11,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official ISEKAI QUARTET3 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2369,7 +2369,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 17,
+    "episodesCount": 211,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official It must hurt...Mushoku Tensei: Jobless Reincarnation Season 3 Anime Highlight legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2386,7 +2386,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Full Series"
     ],
-    "episodesCount": 15,
+    "episodesCount": 152,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official JoJo's Bizarre Adventure legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2404,7 +2404,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 15,
+    "episodesCount": 26,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official JoJo's Bizarre Adventure (S1): Phantom Blood legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2422,7 +2422,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 15,
+    "episodesCount": 39,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official JoJo's Bizarre Adventure (S3): Diamond is Unbreakable legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2440,7 +2440,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 17,
+    "episodesCount": 39,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official JoJo's Bizarre Adventure (S4): Golden Wind legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2458,7 +2458,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 12,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Just Because! legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2476,7 +2476,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 22,
+    "episodesCount": 24,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official KAGINADO legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2494,7 +2494,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 19,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Kaguya-sama: Love is War -Ultra Romantic- / Opening Theme - GIRI GIRI (JPN / ENG Lyrics) legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2511,7 +2511,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Full Series"
     ],
-    "episodesCount": 18,
+    "episodesCount": 12,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official KAIJU GIRL CARAMELISE legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2547,7 +2547,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 15,
+    "episodesCount": 203,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Katekyo Hitman Reborn! legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2565,7 +2565,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 17,
+    "episodesCount": 12,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Kemono Jihen legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2583,7 +2583,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 36,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Kuma Kuma Kuma Bear legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2601,7 +2601,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 12,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Kumamiko - Girl meets Bear legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2619,7 +2619,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 12,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Lapis Re：LiGHTs legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2637,7 +2637,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 12,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Last Period: The Journey To The End of The Despair legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2655,7 +2655,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 20,
+    "episodesCount": 24,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Let This Grieving Soul Retire legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2673,7 +2673,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 12,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Loner Life in Another World legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2691,7 +2691,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 30,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Lord of Mysteries: The Clown legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2709,7 +2709,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 12,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Lord of Vermilion: The Crimson King legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2727,7 +2727,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 12,
+    "episodesCount": 27,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Lucifer and Biscuit Hammer legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2745,7 +2745,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 12,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official LUCK & LOGIC legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2763,7 +2763,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 14,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Luminous Witches legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2781,7 +2781,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 16,
+    "episodesCount": 13,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Made in Abyss legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2799,7 +2799,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 18,
+    "episodesCount": 15,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Made in Abyss: The Golden City of the Scorching Sun legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2817,7 +2817,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 23,
+    "episodesCount": 13,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official MAGATSU WAHRHEIT ZUERST legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2835,7 +2835,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 12,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Magical Warfare legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2853,7 +2853,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 23,
+    "episodesCount": 13,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official MARRIAGETOXIN legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2871,7 +2871,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 17,
+    "episodesCount": 12,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Matoi the Sacred Slayer legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2889,7 +2889,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 12,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Mieruko-Chan legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2907,7 +2907,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 13,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Minami Kamakura High School Girls Cycling Club legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2925,7 +2925,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 13,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Mob Psycho 100 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2943,7 +2943,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 18,
+    "episodesCount": 12,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Mob Psycho 100 III legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2961,7 +2961,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 16,
+    "episodesCount": 14,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official MOMENTARY LILY legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2979,7 +2979,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 20,
+    "episodesCount": 13,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Momokuri legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -2997,7 +2997,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 12,
+    "episodesCount": 29,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official MORIARTY THE PATRIOT legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3015,7 +3015,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 23,
+    "episodesCount": 12,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Muhyo & Roji's Bureau of Supernatural Investigation 2 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3033,7 +3033,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 22,
+    "episodesCount": 12,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Muse Asia Anime legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3051,7 +3051,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 63,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Mushoku Tensei jobless reincarnation legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3069,7 +3069,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 23,
+    "episodesCount": 48,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Mushoku Tensei jobless reincarnation legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3086,7 +3086,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Full Series"
     ],
-    "episodesCount": 20,
+    "episodesCount": 63,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Mushoku Tensei: Jobless Reincarnation legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3104,7 +3104,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 18,
+    "episodesCount": 49,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Mushoku Tensei: Jobless Reincarnation Season 2 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3122,7 +3122,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 23,
+    "episodesCount": 211,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Mushoku Tensei: Jobless Reincarnation Season 3 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3139,7 +3139,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Extras"
     ],
-    "episodesCount": 12,
+    "episodesCount": 31,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Mushoku Tensei: Jobless Reincarnation Season 3 (PV) legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3157,7 +3157,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 16,
+    "episodesCount": 24,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Muv-Luv Alternative legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3175,7 +3175,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 57,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official My Dress-Up Darling Season 2  Ending Theme - 「Kawaii Kaiwai」 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3193,7 +3193,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 23,
+    "episodesCount": 24,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official My Instant Death Ability is Overpowered legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3211,7 +3211,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 15,
+    "episodesCount": 13,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official My Next Life as a VILLAINESS: ALL ROUTES LEAD TO DOOM! X legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3229,7 +3229,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 20,
+    "episodesCount": 12,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official My Senpai is Annoying legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3247,7 +3247,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 20,
+    "episodesCount": 12,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official My Status as an Assassin Obviously Exceeds the Hero's legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3265,7 +3265,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 15,
+    "episodesCount": 23,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official My Unique Skill Makes Me OP even at Level 1 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3283,7 +3283,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 20,
+    "episodesCount": 26,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Nagi-Asu: A Lull in the Sea legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3301,7 +3301,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 21,
+    "episodesCount": 12,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official NEW GAME! legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3319,7 +3319,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 15,
+    "episodesCount": 12,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Ningen Fushin: Adventurers Who Don't Believe in Humanity Will Save the World legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3337,7 +3337,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 17,
+    "episodesCount": 12,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official NO GUNS LIFE legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3355,7 +3355,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 12,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official NO GUNS LIFE S2 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3373,7 +3373,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 14,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Noblesse: Awakening legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3390,7 +3390,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Full Series"
     ],
-    "episodesCount": 20,
+    "episodesCount": 36,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official One-Punch Man legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3408,7 +3408,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 36,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official One-Punch Man legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3426,7 +3426,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 18,
+    "episodesCount": 12,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official One-Punch Man legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3444,7 +3444,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 12,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Osamake: Romcom Where The Childhood Friend Won't Lose legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3462,7 +3462,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 16,
+    "episodesCount": 12,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Our Dating Story: The Experienced You and The Inexperienced Me legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3480,7 +3480,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 26,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Ouran High School Host Club legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3498,7 +3498,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 12,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official OUTBURST DREAMER BOYS legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3516,7 +3516,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 23,
+    "episodesCount": 14,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Parallel World Pharmacy legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3534,7 +3534,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 16,
+    "episodesCount": 15,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Police in a Pod legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3552,7 +3552,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 22,
+    "episodesCount": 14,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Private Tutor to the Duke's Daughter legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3588,7 +3588,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 23,
+    "episodesCount": 24,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official PUI PUI MOLCAR (PUI PUI CAVY-CAR) legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3606,7 +3606,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 20,
+    "episodesCount": 23,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Pui Pui Molcar Driving School legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3624,7 +3624,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 22,
+    "episodesCount": 24,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Ragna Crimson legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3642,7 +3642,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 20,
+    "episodesCount": 12,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Re:Monster legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3660,7 +3660,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 18,
+    "episodesCount": 24,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Re:Monster legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3677,7 +3677,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Full Series"
     ],
-    "episodesCount": 13,
+    "episodesCount": 84,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Re:ZERO -Starting Life in Another World- legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3695,7 +3695,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 17,
+    "episodesCount": 26,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Re:ZERO -Starting Life in Another World- Director's Cut legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3713,7 +3713,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 86,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Re:ZERO -Starting Life in Another World- Director's Cut legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3731,7 +3731,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "OVA",
       "OAD"
     ],
-    "episodesCount": 18,
+    "episodesCount": 2,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Re:ZERO -Starting Life in Another World- Memory Snow (OVA) legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3749,7 +3749,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 21,
+    "episodesCount": 25,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Re:ZERO -Starting Life in Another World- Season 2 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3767,7 +3767,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 31,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Re:ZERO -Starting Life in Another World- Season 3 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3785,7 +3785,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 15,
+    "episodesCount": 35,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Re:ZERO -Starting Life in Another World- Season 4 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3803,7 +3803,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 12,
+    "episodesCount": 24,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Reborn to Master the Blade: From Hero-King to Extraordinary Squire ♀ legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3821,7 +3821,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 44,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Rent-a-Girlfriend legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3839,7 +3839,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 13,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Riddle Story of Devil legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3857,7 +3857,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 12,
+    "episodesCount": 25,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Rilakkuma legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3875,7 +3875,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 20,
+    "episodesCount": 12,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Rokudo's Bad Girls legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3893,7 +3893,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 12,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official RUMBLE GARANNDOLL legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3911,7 +3911,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 23,
+    "episodesCount": 12,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Sabikui Bisco legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3929,7 +3929,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "OVA",
       "OAD"
     ],
-    "episodesCount": 19,
+    "episodesCount": 13,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official SAIYUKI RELOAD -ZEROIN legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3947,7 +3947,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 12,
+    "episodesCount": 24,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Sasaki and Peeps legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3965,7 +3965,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 12,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official School Babysitters (Gakuen Babysitters) legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -3983,7 +3983,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 15,
+    "episodesCount": 24,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Scum of the Brave legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4001,7 +4001,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 23,
+    "episodesCount": 13,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official SELECTION PROJECT legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4019,7 +4019,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 18,
+    "episodesCount": 12,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Senryu Girl legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4037,7 +4037,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 15,
+    "episodesCount": 16,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Servamp legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4055,7 +4055,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 12,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Shachibato! President, It's Time for Battle! legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4072,7 +4072,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Full Series"
     ],
-    "episodesCount": 23,
+    "episodesCount": 52,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Shangri-La Frontier legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4090,7 +4090,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 17,
+    "episodesCount": 52,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Shangri-La Frontier legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4108,7 +4108,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 22,
+    "episodesCount": 25,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official She professed herself pupil of the wise man - Opening Theme - Ready Set Go!! (JPN / ENG Lyrics) legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4126,7 +4126,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 16,
+    "episodesCount": 12,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official SHIBOYUGI:  Playing Death Games to Put Food on the Table legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4162,7 +4162,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 12,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official SHY legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4179,7 +4179,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Full Series"
     ],
-    "episodesCount": 17,
+    "episodesCount": 24,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Skeleton Knight in Another World legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4196,7 +4196,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Extras"
     ],
-    "episodesCount": 19,
+    "episodesCount": 15,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Skeleton Knight in Another World Season 2 (PV) legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4232,7 +4232,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 211,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Snowball Earthshorts legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4249,7 +4249,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Full Series"
     ],
-    "episodesCount": 15,
+    "episodesCount": 50,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official SPY×FAMILY legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4267,7 +4267,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 16,
+    "episodesCount": 50,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official SPY×FAMILY legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4285,7 +4285,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 23,
+    "episodesCount": 38,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official SPY×FAMILY legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4321,7 +4321,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 20,
+    "episodesCount": 13,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official SPY×FAMILY legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4339,7 +4339,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 23,
+    "episodesCount": 12,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Stardust Telepath legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4357,7 +4357,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 15,
+    "episodesCount": 24,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Sugar Apple Fairy Tale legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4375,7 +4375,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 18,
+    "episodesCount": 12,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Super Cub legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4393,7 +4393,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 14,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Suppose a Kid from the Last Dungeon Boonies Moved to a Starter Town? legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4411,7 +4411,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 12,
+    "episodesCount": 13,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Tada Never Falls In Love legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4429,7 +4429,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 16,
+    "episodesCount": 12,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Taisho Otome Fairy tale legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4447,7 +4447,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 13,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Talentless Nana legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4465,7 +4465,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 21,
+    "episodesCount": 12,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Tearmoon Empire legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4500,7 +4500,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Full Series"
     ],
-    "episodesCount": 20,
+    "episodesCount": 113,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official That Time I Got Reincarnated as a Slime legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4518,7 +4518,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 18,
+    "episodesCount": 25,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official That Time I Got Reincarnated as a Slime legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4536,7 +4536,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 21,
+    "episodesCount": 26,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official That Time I Got Reincarnated as a Slime legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4554,7 +4554,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 18,
+    "episodesCount": 124,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official That Time I Got Reincarnated as a Slime legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4572,7 +4572,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 17,
+    "episodesCount": 78,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official That Time I Got Reincarnated as a Slime legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4590,7 +4590,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 12,
+    "episodesCount": 26,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official That Time I Got Reincarnated as a Slime legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4608,7 +4608,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 22,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official That Time I Got Reincarnated as a Slime (Now Playing Spotlight) legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4626,7 +4626,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "OVA",
       "OAD"
     ],
-    "episodesCount": 15,
+    "episodesCount": 5,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official That Time I Got Reincarnated as a Slime - OAD 01 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4644,7 +4644,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 16,
+    "episodesCount": 12,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official That Time I Got Reincarnated as a Slime: The Slime Diaries legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4662,7 +4662,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 17,
+    "episodesCount": 3,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official That Time I Got Reincarnated As A Slime: Visions of Coleus legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4679,7 +4679,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Full Series"
     ],
-    "episodesCount": 23,
+    "episodesCount": 36,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official The 100 Girlfriends Who Really, Really, Really, Really, REALLY Love You legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4697,7 +4697,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 21,
+    "episodesCount": 24,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official The Aquatope on White Sand legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4715,7 +4715,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 12,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official The Case Files of Jeweler Richard legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4733,7 +4733,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 16,
+    "episodesCount": 14,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official The Dawn of the Witch legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4750,7 +4750,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Extras"
     ],
-    "episodesCount": 23,
+    "episodesCount": 26,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official The Detective is Already Dead (PV) legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4768,7 +4768,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 18,
+    "episodesCount": 15,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official The Devil Is A Part-Timer! legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4786,7 +4786,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 20,
+    "episodesCount": 24,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official The DEVIL Is A Part-Timer! Season 2 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4803,7 +4803,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Full Series"
     ],
-    "episodesCount": 21,
+    "episodesCount": 14,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official The Exiled Heavy Knight Knows How to Game the System legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4821,7 +4821,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 20,
+    "episodesCount": 14,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official The Fated Magical Princess: Who Made Me a Princess legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4839,7 +4839,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 12,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official The genius prince's guide to raising a nation out of debt legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4857,7 +4857,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 13,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official THE GOD OF HIGH SCHOOL legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4875,7 +4875,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 21,
+    "episodesCount": 12,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official The Great Cleric: White-Collar Survival in Another World legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4893,7 +4893,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 16,
+    "episodesCount": 13,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official The Greatest Demon Lord Is Reborn as a Typical Nobody - Opening Theme (JPN / ENG Lyrics) legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4911,7 +4911,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 20,
+    "episodesCount": 12,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official The Helpful Fox Senko-san legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4929,7 +4929,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 15,
+    "episodesCount": 23,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official The Magical Revolution of the Reincarnated Princess and the Genius Young Lady legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4947,7 +4947,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 24,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official The Most Heretical Last Boss Queen: From Villainess to Savior legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4965,7 +4965,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 12,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official The Most Heretical Last Boss Queen: From Villainess to Savior Season 2 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -4983,7 +4983,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 22,
+    "episodesCount": 12,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official The Most Notorious “Talker” Runs the World’s Greatest Clan legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5001,7 +5001,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 15,
+    "episodesCount": 12,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official THE NEW GATE legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5019,7 +5019,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 20,
+    "episodesCount": 13,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official The Ones Within (Naka no Hito Genome [Jikkyouchuu]) legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5037,7 +5037,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 18,
+    "episodesCount": 24,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official The Ossan Newbie Adventurer legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5055,7 +5055,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 13,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official The Ryuo's Work Is Never Done! legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5073,7 +5073,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 12,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official The Saintʼs Magic Power is Omnipotent legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5091,7 +5091,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 12,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official The Saintʼs Magic Power is Omnipotent Season2 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5108,7 +5108,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Full Series"
     ],
-    "episodesCount": 17,
+    "episodesCount": 76,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official The Seven Deadly Sins legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5126,7 +5126,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 12,
+    "episodesCount": 76,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official The Seven Deadly Sins legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5144,7 +5144,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 12,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official The Shy Hero and the Assassin Princesses legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5162,7 +5162,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 12,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official The Unwanted Undead Adventurer legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5179,7 +5179,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Full Series"
     ],
-    "episodesCount": 12,
+    "episodesCount": 13,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official THE WORLD IS DANCING legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5197,7 +5197,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 12,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official The World's Finest Assassin Gets Reincarnated in Another World as an Aristocrat legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5214,7 +5214,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Full Series"
     ],
-    "episodesCount": 21,
+    "episodesCount": 12,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official The World’s Strongest Rearguard legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5232,7 +5232,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 19,
+    "episodesCount": 13,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official The Wrong Way to Use Healing Magic legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5250,7 +5250,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 17,
+    "episodesCount": 14,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Theatre of Darkness S10 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5268,7 +5268,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 15,
+    "episodesCount": 12,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official This Art Club Has a Problem legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5285,7 +5285,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Extras"
     ],
-    "episodesCount": 12,
+    "episodesCount": 40,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Tokyo Revengers - Special Premiere legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5303,7 +5303,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 23,
+    "episodesCount": 3,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official UniteUp! -Uni:Birth legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5320,7 +5320,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Full Series"
     ],
-    "episodesCount": 19,
+    "episodesCount": 12,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Unlimited Gacha legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5338,7 +5338,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 16,
+    "episodesCount": 15,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official UQ Holder! legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5356,7 +5356,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 20,
+    "episodesCount": 39,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Ushio and Tora legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5392,7 +5392,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 15,
+    "episodesCount": 13,
     "rating": "4.9",
     "year": "2023-2026",
     "description": "Watch official Wasteful Days of High School Girls (Joshi Kousei no Mudazukai) legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5409,7 +5409,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Full Series"
     ],
-    "episodesCount": 23,
+    "episodesCount": 85,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Welcome To Demon School! Iruma-kun legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5427,7 +5427,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 47,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Welcome to Demon School! Iruma-kun legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5445,7 +5445,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 14,
+    "episodesCount": 21,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Welcome To Demon School! Iruma-kun Season 2 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5463,7 +5463,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 18,
+    "episodesCount": 21,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Welcome To Demon School! Iruma-kun Season 3 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5481,7 +5481,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 24,
     "rating": "4.5",
     "year": "2023-2026",
     "description": "Watch official Welcome To Demon School! Iruma-kun Season 4 legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5499,7 +5499,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 25,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Wistoria: Wand and Sword legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5516,7 +5516,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "SUB",
       "Extras"
     ],
-    "episodesCount": 15,
+    "episodesCount": 13,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official Wistoria: Wand and Sword - Season 1 Special Recap legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5534,7 +5534,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 12,
     "rating": "4.6",
     "year": "2023-2026",
     "description": "Watch official Zom 100: Bucket List of the Dead legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5552,7 +5552,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 13,
+    "episodesCount": 12,
     "rating": "4.8",
     "year": "2023-2026",
     "description": "Watch official Zom 100: Bucket List of the Dead legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
@@ -5570,7 +5570,7 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 15,
+    "episodesCount": 12,
     "rating": "4.7",
     "year": "2023-2026",
     "description": "Watch official ZOMBIE LAND SAGA REVENGE legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."

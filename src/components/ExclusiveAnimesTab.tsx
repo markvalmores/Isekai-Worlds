@@ -53,7 +53,7 @@ export function ExclusiveAnimesTab() {
   const [sortOrder, setSortOrder] = useState<"a-z" | "z-a" | "rating" | "episodes">("a-z");
   
   const spotlightDefaultItem = useMemo(() => {
-    return EXCLUSIVE_ANIMES_DATA.find(item => item.playlistId === "PLwLSw1_eDZl0YZIflIt1EK0dcjLuMuxLd") || EXCLUSIVE_ANIMES_DATA[0];
+    return EXCLUSIVE_ANIMES_DATA.find(item => item.playlistId === "PLwLSw1_eDZl1G_FbMxbzZY5Ut5RWO4bUv" || item.videoId === "mFfYe9ph7dQ") || EXCLUSIVE_ANIMES_DATA[0];
   }, []);
 
   const [activeVideo, setActiveVideo] = useState<ExclusiveAnimeItem>(spotlightDefaultItem);

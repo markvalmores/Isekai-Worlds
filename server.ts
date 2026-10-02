@@ -1416,6 +1416,16 @@ app.get("/api/amv/playlist", async (req, res) => {
 
 // 2e. Exclusive Animes Episode List & Playlist Scraper Endpoint
 const animePlaylistCache = new Map<string, { timestamp: number; data: any }>();
+let verifiedEpisodesMap: Record<string, { id: string; title: string; duration?: string }[]> = {};
+try {
+  const mapPath = path.resolve(process.cwd(), "src/data/exclusiveAnimesEpisodesMap.json");
+  if (fs.existsSync(mapPath)) {
+    verifiedEpisodesMap = JSON.parse(fs.readFileSync(mapPath, "utf-8"));
+    console.log(`[Exclusive Animes] Loaded ${Object.keys(verifiedEpisodesMap).length} verified playlists from episodes map`);
+  }
+} catch (e) {
+  console.warn("Could not read exclusiveAnimesEpisodesMap.json:", e);
+}
 
 app.get("/api/exclusive-animes/episodes", async (req, res) => {
   try {
@@ -1430,6 +1440,25 @@ app.get("/api/exclusive-animes/episodes", async (req, res) => {
 
     const playlistId = rawPlaylistId || "";
     const cacheKey = playlistId || videoId;
+
+    // Check preloaded verified episode map first (contains all 311 playlists with 7500+ exact episodes)
+    if (playlistId && verifiedEpisodesMap[playlistId]?.length) {
+      const episodes = verifiedEpisodesMap[playlistId].map((ep, idx) => ({
+        id: ep.id,
+        episodeNumber: idx + 1,
+        title: ep.title,
+        duration: ep.duration || "24:00",
+        thumbnail: `https://img.youtube.com/vi/${ep.id}/mqdefault.jpg`,
+        url: `https://www.youtube.com/watch?v=${ep.id}&list=${playlistId}`,
+        embedUrl: `https://www.youtube.com/embed/${ep.id}?autoplay=1&enablejsapi=1`
+      }));
+      return res.json({
+        playlistId,
+        title,
+        totalEpisodes: episodes.length,
+        episodes
+      });
+    }
 
     // Cache for 30 minutes
     const cached = animePlaylistCache.get(cacheKey);

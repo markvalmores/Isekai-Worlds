@@ -34,6 +34,7 @@ import {
   Info
 } from "lucide-react";
 import { EXCLUSIVE_ANIMES_DATA, ExclusiveAnimeItem } from "../data/exclusiveAnimesData";
+import ALL_VERIFIED_EPISODES_RAW from "../data/exclusiveAnimesEpisodesMap.json";
 import { sfx } from "../utils/sfx";
 
 export interface AnimeEpisode {
@@ -46,33 +47,8 @@ export interface AnimeEpisode {
   embedUrl: string;
 }
 
-// Seeded exact YouTube episode video IDs so episodes never repeat or reset to episode 1
-const KNOWN_PLAYLIST_EPISODES: Record<string, { id: string; title: string }[]> = {
-  "PLwLSw1_eDZl1G_FbMxbzZY5Ut5RWO4bUv": [
-    { id: "mFfYe9ph7dQ", title: "That Time I Got Reincarnated as a Slime - Episode 73 (S4E01) [English Sub]" },
-    { id: "x2BfWpX3-r0", title: "That Time I Got Reincarnated as a Slime - Episode 74 (S4E02) [English Sub]" },
-    { id: "d0__ZbRGvZ8", title: "That Time I Got Reincarnated as a Slime - Episode 75 (S4E03) [English Sub]" },
-    { id: "vpip3UJSMLI", title: "That Time I Got Reincarnated as a Slime - Episode 76 (S4E04) [English Sub]" },
-    { id: "xJe0OMk8YMI", title: "That Time I Got Reincarnated as a Slime - Episode 77 (S4E05) [English Sub]" },
-    { id: "RUw0fxLlLic", title: "That Time I Got Reincarnated as a Slime - Episode 78 (S4E06) [English Sub]" },
-    { id: "NixHd7wrtv8", title: "That Time I Got Reincarnated as a Slime - Episode 79 (S4E07) [English Sub]" },
-    { id: "_lEj5AZqZ44", title: "That Time I Got Reincarnated as a Slime - Episode 80 (S4E08) [English Sub]" },
-    { id: "rtTSRvtq0GM", title: "That Time I Got Reincarnated as a Slime - Episode 81 (S4E09) [English Sub]" },
-    { id: "U27e0ugeQhY", title: "That Time I Got Reincarnated as a Slime - Episode 82 (S4E10) [English Sub]" },
-    { id: "VzgYAJYUvlk", title: "That Time I Got Reincarnated as a Slime - Episode 83 (S4E11) [English Sub]" },
-    { id: "MwEUlYHfj94", title: "That Time I Got Reincarnated as a Slime - Episode 84 (S4E12) [English Sub]" },
-    { id: "Bk7B8RqSzSk", title: "That Time I Got Reincarnated as a Slime - Episode 85 (S4E13) [English Sub]" },
-    { id: "_xQ3_Es7vKA", title: "That Time I Got Reincarnated as a Slime - Episode 86 (S4E14) [English Sub]" },
-    { id: "A_pVLkQe9DE", title: "That Time I Got Reincarnated as a Slime - Episode 87 (S4E15) [English Sub]" },
-    { id: "Tl1-Q05Df08", title: "That Time I Got Reincarnated as a Slime - Episode 88 (S4E16) [English Sub]" },
-    { id: "b5DhRKEfKpA", title: "That Time I Got Reincarnated as a Slime - Episode 89 (S4E17) [English Sub]" },
-    { id: "LTLOPgxNQgs", title: "That Time I Got Reincarnated as a Slime - Episode 90 (S4E18) [English Sub]" },
-    { id: "8_C_fKtAw3s", title: "That Time I Got Reincarnated as a Slime - Episode 91 (S4E19) [English Sub]" },
-    { id: "eKDYuY6Cc8M", title: "That Time I Got Reincarnated as a Slime - Episode 92 (S4E20) [English Sub]" },
-    { id: "N-is6tn0cgI", title: "That Time I Got Reincarnated as a Slime - Episode 93 (S4E21) [English Sub]" },
-    { id: "_cFuYrJeFPc", title: "That Time I Got Reincarnated as a Slime - Episode 94 (S4E22) [English Sub]" }
-  ]
-};
+// Complete map of verified exact YouTube episode IDs for all 311 playlists (7,500+ episodes)
+const ALL_VERIFIED_EPISODES = ALL_VERIFIED_EPISODES_RAW as Record<string, { id: string; title: string; duration?: string }[]>;
 
 export function ExclusiveAnimesTab() {
   const [selectedPublisher, setSelectedPublisher] = useState<"All" | "Muse Asia">("Muse Asia");
@@ -152,24 +128,25 @@ export function ExclusiveAnimesTab() {
   // Fetch or generate episodes whenever active anime series changes
   useEffect(() => {
     let isCancelled = false;
-    setIsLoadingEpisodes(true);
     setCurrentEpisodeIndex(0);
 
-    // If known seeded episode list exists, populate immediately
-    if (activeVideo.playlistId && KNOWN_PLAYLIST_EPISODES[activeVideo.playlistId]) {
-      const knownList = KNOWN_PLAYLIST_EPISODES[activeVideo.playlistId].map((item, idx) => ({
+    // 1. Instant synchronous check from verified episodes map (covers all 311 playlists with 7,500+ exact episodes)
+    if (activeVideo.playlistId && ALL_VERIFIED_EPISODES[activeVideo.playlistId]?.length) {
+      const verifiedList: AnimeEpisode[] = ALL_VERIFIED_EPISODES[activeVideo.playlistId].map((item, idx) => ({
         id: item.id,
         episodeNumber: idx + 1,
-        title: item.title,
-        duration: "24:00",
+        title: item.title || `${activeVideo.title} - Episode ${(idx + 1).toString().padStart(2, "0")}`,
+        duration: item.duration || "24:00",
         thumbnail: `https://img.youtube.com/vi/${item.id}/mqdefault.jpg`,
         url: `https://www.youtube.com/watch?v=${item.id}&list=${activeVideo.playlistId}`,
         embedUrl: `https://www.youtube.com/embed/${item.id}?autoplay=1&enablejsapi=1`
       }));
-      setEpisodes(knownList);
+      setEpisodes(verifiedList);
       setIsLoadingEpisodes(false);
       return;
     }
+
+    setIsLoadingEpisodes(true);
 
     const loadEpisodes = async () => {
       try {
@@ -230,19 +207,21 @@ export function ExclusiveAnimesTab() {
   // Calculate current embed URL for active episode
   const currentEmbedUrl = useMemo(() => {
     if (!activeVideo) return "";
-    // CRITICAL FIX: Embed the specific episode's unique videoId directly.
-    // If `?list=` is passed to a YouTube iframe, YouTube ignores the video ID and always starts the playlist from episode 1!
+    // 1. Direct episode playback: embed the specific episode's unique videoId directly.
+    // NEVER pass `?list=` to individual video embeds, because YouTube iframe embeds will ignore the video ID and reset to playlist item 0!
     if (activeEpisode && activeEpisode.id && activeEpisode.id.length === 11 && !activeEpisode.id.startsWith("ep-")) {
       return `https://www.youtube.com/embed/${activeEpisode.id}?autoplay=1&enablejsapi=1`;
     }
+    // 2. Playlist index playback: if the episode has an index-based ID, embed the playlist queued at that index
+    if (activeVideo.playlistId) {
+      return `https://www.youtube.com/embed/videoseries?list=${activeVideo.playlistId}&index=${currentEpisodeIndex}&autoplay=1&enablejsapi=1`;
+    }
+    // 3. Fallback to main series video ID
     if (activeVideo.videoId && activeVideo.videoId.length === 11) {
       return `https://www.youtube.com/embed/${activeVideo.videoId}?autoplay=1&enablejsapi=1`;
     }
-    if (activeVideo.playlistId) {
-      return `https://www.youtube.com/embed/videoseries?list=${activeVideo.playlistId}&autoplay=1&enablejsapi=1`;
-    }
     return "";
-  }, [activeVideo, activeEpisode]);
+  }, [activeVideo, activeEpisode, currentEpisodeIndex]);
 
   // Filter episodes by search inside the active anime
   const filteredEpisodes = useMemo(() => {

@@ -219,10 +219,10 @@ export function CommandPaletteModal({
     {
       id: "nav-series",
       category: "Navigation",
-      label: "Go to Series (SmashyStream)",
+      label: "Go to Series (WatchSeries)",
       description: "Watch trending TV shows and series with popup ad blocking",
       icon: <Tv className="w-4 h-4 text-amber-400" />,
-      keywords: ["series", "shows", "smashystream", "tv", "episodes", "stream"],
+      keywords: ["series", "shows", "watchseries", "tv", "episodes", "stream"],
       action: () => { setCurrentPage("series"); onClose(); }
     },
     {

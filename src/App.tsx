@@ -298,7 +298,7 @@ export default function App() {
       vr: "3D VR Portal Space",
       hardware: "RTX & AI Frame Gen Engine",
       watch: "Watch Anime Online",
-      series: "Series (SmashyStream)",
+      series: "Series (WatchSeries)",
       reelsdrama: "Reels Drama (mewatch Series)",
       exclusiveanimes: "Exclusive Animes (Muse Asia)",
       radio: "Radio Gaga Broadcast",

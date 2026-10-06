@@ -42,6 +42,14 @@ export const HomeHeroView: React.FC<HomeHeroViewProps> = ({
 }) => {
   const portalCards = [
     {
+      id: "exclusivepage" as PageView,
+      title: "Exclusive Page",
+      desc: "Isekai Worlds 1, Isekai Worlds 2 & Zero Zone connected portals",
+      icon: <Sparkles className="w-6 h-6 text-amber-400" />,
+      badge: "EXCLUSIVE",
+      bgGradient: "from-amber-600/30 to-purple-600/30",
+    },
+    {
       id: "wallpapers" as PageView,
       title: "4K Anime Wallpapers",
       desc: "Ultra HD Isekai & Fantasy background art gallery",

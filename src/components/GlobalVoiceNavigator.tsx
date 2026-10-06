@@ -76,6 +76,8 @@ export const GlobalVoiceNavigator: React.FC<GlobalVoiceNavigatorProps> = ({
     cinemax: "cinemax",
     movies: "cinemax",
     cinema: "cinemax",
+    exclusive: "exclusivepage",
+    "exclusive page": "exclusivepage",
     series: "series",
     shows: "series",
     novahd: "series",

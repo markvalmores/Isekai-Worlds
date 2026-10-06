@@ -19,6 +19,7 @@ import { ProfileDashboard } from "./components/ProfileDashboard";
 import { VrViewPortal } from "./components/VrViewPortal";
 import { HardwareEngine } from "./components/HardwareEngine";
 import { WatchAnimePortal } from "./components/WatchAnimePortal";
+import { ExclusivePageTab } from "./components/ExclusivePageTab";
 import { SeriesTab } from "./components/SeriesTab";
 import { ReelsDramaTab } from "./components/ReelsDramaTab";
 import { ExclusiveAnimesTab } from "./components/ExclusiveAnimesTab";
@@ -285,6 +286,7 @@ export default function App() {
 
     const names: Record<PageView, string> = {
       home: "Portal Hub",
+      exclusivepage: "Exclusive Page",
       community: "AniCommunity Feed",
       achievements: "Milestones & Achievements",
       wallpapers: "4K Anime Wallpapers",
@@ -698,6 +700,10 @@ export default function App() {
             activeSeconds={activeSeconds}
             userRank={userRank}
           />
+        )}
+
+        {currentPage === "exclusivepage" && (
+          <ExclusivePageTab />
         )}
 
         {currentPage === "community" && (

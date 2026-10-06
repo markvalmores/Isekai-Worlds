@@ -101,6 +101,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   const navItems: { id: PageView; labelKey: string; icon: React.ReactNode }[] = [
     { id: "home", labelKey: "home", icon: <Compass className="w-4 h-4" /> },
+    { id: "exclusivepage", labelKey: "exclusivepage", icon: <Sparkles className="w-4 h-4 text-amber-400" /> },
     { id: "community", labelKey: "community", icon: <MessageSquare className="w-4 h-4 text-purple-400" /> },
     { id: "achievements", labelKey: "achievements", icon: <Award className="w-4 h-4 text-amber-400" /> },
     { id: "wallpapers", labelKey: "wallpapers", icon: <ImageIcon className="w-4 h-4" /> },

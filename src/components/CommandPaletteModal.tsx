@@ -163,6 +163,15 @@ export function CommandPaletteModal({
       action: () => { setCurrentPage("home"); onClose(); }
     },
     {
+      id: "nav-exclusivepage",
+      category: "Navigation",
+      label: "Go to Exclusive Page",
+      description: "Isekai Worlds 1, Isekai Worlds 2, and Zero Zone portals",
+      icon: <Sparkles className="w-4 h-4 text-amber-400" />,
+      keywords: ["exclusive", "exclusive page", "isekai worlds 1", "isekai worlds 2", "zero zone", "01tune", "wix"],
+      action: () => { setCurrentPage("exclusivepage"); onClose(); }
+    },
+    {
       id: "nav-wallpapers",
       category: "Navigation",
       label: "Go to 4K Anime Wallpapers",

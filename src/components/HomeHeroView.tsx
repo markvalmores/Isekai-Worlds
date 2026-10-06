@@ -8,6 +8,7 @@ import {
   Trophy,
   Image as ImageIcon,
   Film,
+  Tv,
   Tv2,
   Eye,
   Cpu,
@@ -54,6 +55,14 @@ export const HomeHeroView: React.FC<HomeHeroViewProps> = ({
       icon: <Film className="w-6 h-6 text-rose-400" />,
       badge: "UPDATED",
       bgGradient: "from-purple-600/30 to-red-600/30",
+    },
+    {
+      id: "series" as PageView,
+      title: "Series & TV Shows",
+      desc: "SmashyStream series multiverse with popup ad block shield",
+      icon: <Tv className="w-6 h-6 text-amber-400" />,
+      badge: "SMASHY",
+      bgGradient: "from-amber-600/30 to-yellow-600/30",
     },
     {
       id: "media" as PageView,

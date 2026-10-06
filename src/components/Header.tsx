@@ -110,6 +110,7 @@ export const Header: React.FC<HeaderProps> = ({
     { id: "dictionary", labelKey: "dictionary", icon: <BookA className="w-4 h-4 text-emerald-400 animate-pulse" /> },
     { id: "media", labelKey: "media", icon: <Tv2 className="w-4 h-4" /> },
     { id: "watch", labelKey: "watch", icon: <Tv className="w-4 h-4" /> },
+    { id: "series", labelKey: "series", icon: <Film className="w-4 h-4 text-amber-400 animate-pulse" /> },
     { id: "exclusiveanimes", labelKey: "exclusiveanimes", icon: <Tv className="w-4 h-4 text-rose-400 animate-pulse" /> },
     { id: "radio", labelKey: "radio", icon: <Radio className="w-4 h-4" /> },
     { id: "amv", labelKey: "amv", icon: <Sparkles className="w-4 h-4 text-rose-500" /> },

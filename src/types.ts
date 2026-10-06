@@ -13,6 +13,7 @@ export type PageView =
   | "vr"
   | "hardware"
   | "watch"
+  | "series"
   | "radio"
   | "amv"
   | "games"

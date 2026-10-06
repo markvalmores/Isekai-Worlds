@@ -217,6 +217,15 @@ export function CommandPaletteModal({
       action: () => { setCurrentPage("watch"); onClose(); }
     },
     {
+      id: "nav-series",
+      category: "Navigation",
+      label: "Go to Series (SmashyStream)",
+      description: "Watch trending TV shows and series with popup ad blocking",
+      icon: <Tv className="w-4 h-4 text-amber-400" />,
+      keywords: ["series", "shows", "smashystream", "tv", "episodes", "stream"],
+      action: () => { setCurrentPage("series"); onClose(); }
+    },
+    {
       id: "nav-radio",
       category: "Navigation",
       label: "Go to Radio Gaga J-Pop Broadcast",

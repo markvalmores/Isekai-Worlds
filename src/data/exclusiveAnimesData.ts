@@ -69,12 +69,12 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
   },
   {
     "id": "muse-asia-123",
-    "title": "A Certain Magical Index",
+    "title": "Toaru Majutsu no Index (Season 1)",
     "publisher": "Muse Asia",
-    "originalUrl": "https://www.youtube.com/watch?v=JsJQlVNKcH0&list=PLwLSw1_eDZl1_y0Egv3OLQDJfK2hIx3Vc",
-    "videoId": "JsJQlVNKcH0",
-    "playlistId": "PLwLSw1_eDZl1_y0Egv3OLQDJfK2hIx3Vc",
-    "thumbnail": "https://img.youtube.com/vi/JsJQlVNKcH0/hqdefault.jpg",
+    "originalUrl": "https://www.youtube.com/show/VLPLOFQCX0gGnWA?season=1&sbp=CgExGgAqC1gzS2Zhb2Z0cVpFQAFKDVBTYkM4d2xCVGZfdDQ%253D",
+    "videoId": "X3KfaoftqZE",
+    "playlistId": "PLOFQCX0gGnWA_S1",
+    "thumbnail": "https://img.youtube.com/vi/X3KfaoftqZE/hqdefault.jpg",
     "tags": [
       "SUB",
       "Full Series",
@@ -83,43 +83,43 @@ export const EXCLUSIVE_ANIMES_DATA: ExclusiveAnimeItem[] = [
     "episodesCount": 24,
     "rating": "4.7",
     "year": "2023-2026",
-    "description": "Watch official A Certain Magical Index legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
+    "description": "Watch official Toaru Majutsu no Index Season 1 legally on Muse PH / Muse Asia! Full series episodes with HD stream quality."
   },
   {
     "id": "muse-asia-251",
-    "title": "A Certain Magical Index",
+    "title": "Toaru Majutsu no Index III (Season 3)",
     "publisher": "Muse Asia",
-    "originalUrl": "https://www.youtube.com/watch?v=JsJQlVNKcH0&list=PLwLSw1_eDZl2e2Wj7kDCZ2D5DdGceUsj7",
-    "videoId": "JsJQlVNKcH0",
-    "playlistId": "PLwLSw1_eDZl2e2Wj7kDCZ2D5DdGceUsj7",
-    "thumbnail": "https://img.youtube.com/vi/JsJQlVNKcH0/hqdefault.jpg",
+    "originalUrl": "https://www.youtube.com/show/VLPLOFQCX0gGnWA?season=3&sbp=CgEzGgAqC1gzS2Zhb2Z0cVpFQAFKDVBTRFNRQ0dBNDBUams%253D",
+    "videoId": "6EbHn56S_mY",
+    "playlistId": "PLOFQCX0gGnWA_S3",
+    "thumbnail": "https://img.youtube.com/vi/6EbHn56S_mY/hqdefault.jpg",
     "tags": [
       "SUB",
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 75,
+    "episodesCount": 26,
     "rating": "4.5",
     "year": "2023-2026",
-    "description": "Watch official A Certain Magical Index legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
+    "description": "Watch official Toaru Majutsu no Index Season 3 legally on Muse PH / Muse Asia! Full series episodes with HD stream quality."
   },
   {
     "id": "muse-asia-122",
-    "title": "A Certain Magical Index II",
+    "title": "Toaru Majutsu no Index II (Season 2)",
     "publisher": "Muse Asia",
-    "originalUrl": "https://www.youtube.com/watch?v=3Vu6tC63FGk&list=PLwLSw1_eDZl2cJtt6H_rYQoBf9rpMXphM",
-    "videoId": "3Vu6tC63FGk",
-    "playlistId": "PLwLSw1_eDZl2cJtt6H_rYQoBf9rpMXphM",
-    "thumbnail": "https://img.youtube.com/vi/3Vu6tC63FGk/hqdefault.jpg",
+    "originalUrl": "https://www.youtube.com/show/VLPLOFQCX0gGnWA?season=2&sbp=CgEyGgAqC1gzS2Zhb2Z0cVpFQAFKDVBTZHJTNzFjZGhOdGs%253D",
+    "videoId": "yQGIkCrtk34",
+    "playlistId": "PLOFQCX0gGnWA_S2",
+    "thumbnail": "https://img.youtube.com/vi/yQGIkCrtk34/hqdefault.jpg",
     "tags": [
       "SUB",
       "Full Series",
       "Seasons"
     ],
-    "episodesCount": 25,
+    "episodesCount": 24,
     "rating": "4.6",
     "year": "2023-2026",
-    "description": "Watch official A Certain Magical Index II legally on Muse Asia! Full series episodes, official audio tracks, HD stream quality, and promotional specials."
+    "description": "Watch official Toaru Majutsu no Index Season 2 legally on Muse PH / Muse Asia! Full series episodes with HD stream quality."
   },
   {
     "id": "muse-asia-124",

@@ -76,6 +76,10 @@ export const GlobalVoiceNavigator: React.FC<GlobalVoiceNavigatorProps> = ({
     cinemax: "cinemax",
     movies: "cinemax",
     cinema: "cinemax",
+    series: "series",
+    shows: "series",
+    smashy: "series",
+    smashystream: "series",
     history: "history",
     logs: "history"
   };

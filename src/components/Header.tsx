@@ -106,29 +106,29 @@ export const Header: React.FC<HeaderProps> = ({
     { id: "wallpapers", labelKey: "wallpapers", icon: <ImageIcon className="w-4 h-4" /> },
     { id: "gifs", labelKey: "gifs", icon: <Film className="w-4 h-4" /> },
     { id: "cosplay", labelKey: "cosplay", icon: <Camera className="w-4 h-4 text-pink-400" /> },
-    { id: "vocaloid", labelKey: "vocaloid", icon: <Disc3 className="w-4 h-4 text-teal-400 group-hover:animate-spin" /> },
-    { id: "karaoke", labelKey: "karaoke", icon: <Mic className="w-4 h-4 text-pink-400 animate-pulse" /> },
-    { id: "dictionary", labelKey: "dictionary", icon: <BookA className="w-4 h-4 text-emerald-400 animate-pulse" /> },
+    { id: "vocaloid", labelKey: "vocaloid", icon: <Disc3 className="w-4 h-4 text-teal-400" /> },
+    { id: "karaoke", labelKey: "karaoke", icon: <Mic className="w-4 h-4 text-pink-400" /> },
+    { id: "dictionary", labelKey: "dictionary", icon: <BookA className="w-4 h-4 text-emerald-400" /> },
     { id: "media", labelKey: "media", icon: <Tv2 className="w-4 h-4" /> },
     { id: "watch", labelKey: "watch", icon: <Tv className="w-4 h-4" /> },
-    { id: "series", labelKey: "series", icon: <Film className="w-4 h-4 text-amber-400 animate-pulse" /> },
-    { id: "reelsdrama", labelKey: "reelsdrama", icon: <PlaySquare className="w-4 h-4 text-pink-400 animate-pulse" /> },
-    { id: "exclusiveanimes", labelKey: "exclusiveanimes", icon: <Tv className="w-4 h-4 text-rose-400 animate-pulse" /> },
+    { id: "series", labelKey: "series", icon: <Film className="w-4 h-4 text-amber-400" /> },
+    { id: "reelsdrama", labelKey: "reelsdrama", icon: <PlaySquare className="w-4 h-4 text-pink-400" /> },
+    { id: "exclusiveanimes", labelKey: "exclusiveanimes", icon: <Tv className="w-4 h-4 text-rose-400" /> },
     { id: "radio", labelKey: "radio", icon: <Radio className="w-4 h-4" /> },
     { id: "amv", labelKey: "amv", icon: <Sparkles className="w-4 h-4 text-rose-500" /> },
     { id: "cinemax", labelKey: "movies", icon: <Clapperboard className="w-4 h-4" /> },
     { id: "games", labelKey: "games", icon: <Gamepad2 className="w-4 h-4 text-emerald-400" /> },
-    { id: "extragames", labelKey: "extraGames", icon: <Flame className="w-4 h-4 text-rose-400 animate-pulse" /> },
+    { id: "extragames", labelKey: "extraGames", icon: <Flame className="w-4 h-4 text-rose-400" /> },
     { id: "roms", labelKey: "roms", icon: <HardDrive className="w-4 h-4 text-purple-400" /> },
-    { id: "cards", labelKey: "cards", icon: <Layers className="w-4 h-4 text-amber-400 animate-pulse" /> },
-    { id: "vercel", labelKey: "vercel", icon: <Globe className="w-4 h-4 text-cyan-400 animate-pulse" /> },
-    { id: "zerozone", labelKey: "zerozone", icon: <Smartphone className="w-4 h-4 text-emerald-400 animate-pulse" /> },
+    { id: "cards", labelKey: "cards", icon: <Layers className="w-4 h-4 text-amber-400" /> },
+    { id: "vercel", labelKey: "vercel", icon: <Globe className="w-4 h-4 text-cyan-400" /> },
+    { id: "zerozone", labelKey: "zerozone", icon: <Smartphone className="w-4 h-4 text-emerald-400" /> },
     { id: "leaderboard", labelKey: "leaderboard", icon: <Trophy className="w-4 h-4" /> },
     { id: "profile", labelKey: "profile", icon: <UserCheck className="w-4 h-4" /> },
     { id: "vr", labelKey: "vr", icon: <Eye className="w-4 h-4" /> },
     { id: "hardware", labelKey: "hardware", icon: <Cpu className="w-4 h-4" /> },
-    { id: "vtubers", labelKey: "vtubers", icon: <Radio className="w-4 h-4 text-pink-400 animate-pulse" /> },
-    { id: "googleplus", labelKey: "googleplus", icon: <Globe className="w-4 h-4 text-blue-400 animate-pulse" /> },
+    { id: "vtubers", labelKey: "vtubers", icon: <Radio className="w-4 h-4 text-pink-400" /> },
+    { id: "googleplus", labelKey: "googleplus", icon: <Globe className="w-4 h-4 text-blue-400" /> },
   ];
 
   const handleNavClick = (page: PageView) => {
@@ -188,7 +188,7 @@ export const Header: React.FC<HeaderProps> = ({
       }`}>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[11px] sm:text-xs">
           <span className="inline-flex items-center gap-1.5 text-emerald-400 font-mono font-bold bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-full">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0"></span>
+            <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
             <span>{liveActiveUsers} Active Right Now</span>
           </span>
 
@@ -217,12 +217,12 @@ export const Header: React.FC<HeaderProps> = ({
               }}
               className={`flex items-center gap-1.5 px-3 py-0.5 rounded-full font-bold transition-all hover:scale-105 shadow-sm ${
                 settings.webAppWallpaperEnabled
-                  ? "bg-purple-600 border border-purple-400 text-white animate-pulse shadow-purple-600/40"
+                  ? "bg-purple-600 border border-purple-400 text-white shadow-purple-600/40"
                   : "bg-cyan-500/20 border border-cyan-400/50 text-cyan-300 hover:bg-cyan-500/30"
               }`}
               title="Change Custom Web App Wallpapers & Live Backgrounds (MP4, GIF, 4K)"
             >
-              <Camera className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+              <Camera className="w-3.5 h-3.5 text-cyan-400" />
               <span>Wallpaper</span>
             </button>
           )}
@@ -234,7 +234,7 @@ export const Header: React.FC<HeaderProps> = ({
                 sfx.playClick();
                 openDailyModal();
               }}
-              className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-500/20 border border-indigo-400/50 text-indigo-300 hover:scale-105 transition-all font-bold animate-pulse"
+              className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-500/20 border border-indigo-400/50 text-indigo-300 hover:scale-105 transition-all font-bold"
               title="Claim Daily Login Bonus"
             >
               <Gift className="w-3.5 h-3.5 text-indigo-400" />
@@ -284,7 +284,7 @@ export const Header: React.FC<HeaderProps> = ({
               }}
               className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full font-bold transition-all ${
                 isAdmin
-                  ? "bg-red-500 border border-red-400 text-slate-950 animate-bounce shadow-md"
+                  ? "bg-red-500 border border-red-400 text-slate-950 shadow-md"
                   : "bg-red-500/20 border border-red-500/50 text-red-400 hover:bg-red-500/30"
               }`}
               title="Admin Access & God Mode"
@@ -303,7 +303,7 @@ export const Header: React.FC<HeaderProps> = ({
             className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-300 hover:scale-105 transition-all font-bold"
             title="Daily Missions & Earn Isekai Coins"
           >
-            <Coins className="w-3.5 h-3.5 text-amber-400 animate-bounce" />
+            <Coins className="w-3.5 h-3.5 text-amber-400" />
             <span>{settings.isekaiCoins} Coins</span>
             <Gift className="w-3 h-3 text-yellow-300" />
           </button>

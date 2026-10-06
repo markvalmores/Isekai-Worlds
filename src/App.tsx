@@ -298,7 +298,7 @@ export default function App() {
       vr: "3D VR Portal Space",
       hardware: "RTX & AI Frame Gen Engine",
       watch: "Watch Anime Online",
-      series: "Series (WatchSeries)",
+      series: "Series (NovaHD)",
       reelsdrama: "Reels Drama (mewatch Series)",
       exclusiveanimes: "Exclusive Animes (Muse Asia)",
       radio: "Radio Gaga Broadcast",
@@ -317,16 +317,9 @@ export default function App() {
     };
 
     setTargetPageName(names[page] || "Isekai Realm");
-    setIsTransitioning(true);
-
-    setTimeout(() => {
-      setCurrentPage(page);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }, 400);
-
-    setTimeout(() => {
-      setIsTransitioning(false);
-    }, 800);
+    // Instant, silky-smooth tab navigation with zero screen-blink or modal flicker
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // Cloud Sync state and handlers
@@ -657,15 +650,15 @@ export default function App() {
         <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
           {isGold ? (
             <>
-              <div className="absolute -top-40 -left-40 w-96 h-96 bg-amber-500/30 rounded-full blur-[120px] animate-pulse" />
-              <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-yellow-400/25 rounded-full blur-[150px] animate-pulse" />
-              <div className="absolute -bottom-40 left-1/3 w-96 h-96 bg-amber-600/30 rounded-full blur-[120px] animate-pulse" />
+              <div className="absolute -top-40 -left-40 w-96 h-96 bg-amber-500/20 rounded-full blur-[120px]" />
+              <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-yellow-400/15 rounded-full blur-[150px]" />
+              <div className="absolute -bottom-40 left-1/3 w-96 h-96 bg-amber-600/20 rounded-full blur-[120px]" />
             </>
           ) : (
             <>
-              <div className="absolute -top-40 -left-40 w-96 h-96 bg-blue-600/20 rounded-full blur-[120px] animate-pulse" />
-              <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[150px] animate-pulse" />
-              <div className="absolute -bottom-40 left-1/3 w-96 h-96 bg-red-600/20 rounded-full blur-[120px] animate-pulse" />
+              <div className="absolute -top-40 -left-40 w-96 h-96 bg-blue-600/15 rounded-full blur-[120px]" />
+              <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-purple-600/15 rounded-full blur-[150px]" />
+              <div className="absolute -bottom-40 left-1/3 w-96 h-96 bg-red-600/15 rounded-full blur-[120px]" />
             </>
           )}
         </div>

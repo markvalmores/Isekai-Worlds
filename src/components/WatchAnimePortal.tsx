@@ -166,7 +166,7 @@ export function parseVideoUrl(urlStr: string): EmbedInfo {
 }
 
 export function WatchAnimePortal() {
-  const [activeTab, setActiveTab] = useState<"cinema" | "gateway">("cinema");
+  const [activeTab, setActiveTab] = useState<"cinema" | "gateway">("gateway");
   const [customUrl, setCustomUrl] = useState("");
   const [customTitle, setCustomTitle] = useState("");
 
@@ -313,24 +313,25 @@ export function WatchAnimePortal() {
         {/* Tab Selector */}
         <div className="flex bg-slate-950/60 p-1 rounded-2xl border border-indigo-500/15 relative z-10">
           <button
+            onClick={() => { sfx.playClick(); setActiveTab("gateway"); }}
+            className={`px-4 py-2 text-xs font-bold uppercase font-mono tracking-wider rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
+              activeTab === "gateway"
+                ? "bg-gradient-to-r from-purple-600 to-rose-600 text-white shadow-lg shadow-purple-900/30"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+            <span>AnimeOnsen Direct Gateway</span>
+          </button>
+          <button
             onClick={() => { sfx.playClick(); setActiveTab("cinema"); }}
-            className={`px-4 py-2 text-xs font-bold uppercase font-mono tracking-wider rounded-xl transition-all ${
+            className={`px-4 py-2 text-xs font-bold uppercase font-mono tracking-wider rounded-xl transition-all cursor-pointer ${
               activeTab === "cinema"
                 ? "bg-gradient-to-r from-purple-600 to-rose-600 text-white shadow-lg shadow-purple-900/30"
                 : "text-slate-400 hover:text-white"
             }`}
           >
             Cinema Player
-          </button>
-          <button
-            onClick={() => { sfx.playClick(); setActiveTab("gateway"); }}
-            className={`px-4 py-2 text-xs font-bold uppercase font-mono tracking-wider rounded-xl transition-all flex items-center gap-2 ${
-              activeTab === "gateway"
-                ? "bg-gradient-to-r from-purple-600 to-rose-600 text-white shadow-lg shadow-purple-900/30"
-                : "text-slate-400 hover:text-white"
-            }`}
-          >
-            AnimeOnsen Direct Gateway
           </button>
         </div>
       </div>

@@ -72,11 +72,9 @@ if (rootElement) {
   try {
     const root = createRoot(rootElement);
     root.render(
-      <StrictMode>
-        <ErrorBoundary fallbackTitle="Isekai Worlds Auto-Recovery Active">
-          <App />
-        </ErrorBoundary>
-      </StrictMode>,
+      <ErrorBoundary fallbackTitle="Isekai Worlds Auto-Recovery Active">
+        <App />
+      </ErrorBoundary>,
     );
     console.log('[Isekai Engine] Root rendered successfully.');
   } catch (mountErr: any) {

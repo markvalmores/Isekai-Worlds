@@ -2,36 +2,36 @@
   "syncKey": "default-user",
   "allProfiles": [
     {
+      "bannerUrl": "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1200&auto=format&fit=crop&q=80",
+      "country": "GLOBAL",
       "avatarUrl": "https://images.unsplash.com/photo-1563089145-599997674d42?w=400&auto=format&fit=crop&q=80",
-      "username": "RyuReaper_853",
-      "accentColor": "#a855f7",
-      "badge": "Mythic Champion",
       "favAnime": "Jujutsu Kaisen / Demon Slayer",
       "bannerGradient": "from-purple-600 via-indigo-600 to-pink-600",
-      "country": "GLOBAL",
-      "id": "u-1790503388338-p45rg",
+      "title": "Archmage of the Abyss",
       "joinedDate": "2026",
+      "accentColor": "#a855f7",
+      "username": "RyuReaper_853",
+      "badge": "Mythic Champion",
       "bio": "Netrunning through cyberpunk neon cities and streaming live anime.",
       "customStatus": "Exploring Isekai Worlds as RyuReaper_853...",
-      "title": "Archmage of the Abyss",
-      "bannerUrl": "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1200&auto=format&fit=crop&q=80"
+      "id": "u-1790503388338-p45rg"
     }
   ],
   "activeProfileId": "u-1790503388338-p45rg",
   "profile": {
+    "bannerUrl": "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1200&auto=format&fit=crop&q=80",
+    "country": "GLOBAL",
     "avatarUrl": "https://images.unsplash.com/photo-1563089145-599997674d42?w=400&auto=format&fit=crop&q=80",
-    "username": "RyuReaper_853",
-    "accentColor": "#a855f7",
-    "badge": "Mythic Champion",
     "favAnime": "Jujutsu Kaisen / Demon Slayer",
     "bannerGradient": "from-purple-600 via-indigo-600 to-pink-600",
-    "country": "GLOBAL",
-    "id": "u-1790503388338-p45rg",
+    "title": "Archmage of the Abyss",
     "joinedDate": "2026",
+    "accentColor": "#a855f7",
+    "username": "RyuReaper_853",
+    "badge": "Mythic Champion",
     "bio": "Netrunning through cyberpunk neon cities and streaming live anime.",
     "customStatus": "Exploring Isekai Worlds as RyuReaper_853...",
-    "title": "Archmage of the Abyss",
-    "bannerUrl": "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1200&auto=format&fit=crop&q=80"
+    "id": "u-1790503388338-p45rg"
   },
   "settings": {
     "darkMode": true,
@@ -44,7 +44,7 @@
     "reducedMotion": false,
     "ambientSound": false,
     "isGoldMode": false,
-    "isekaiCoins": 6743,
+    "isekaiCoins": 7143,
     "unlockedGoldPermanently": false,
     "webAppWallpaperEnabled": true,
     "webAppWallpaperUrl": "https://assets.mixkit.co/videos/preview/mixkit-cyberpunk-city-street-with-neon-lights-41560-large.mp4",
@@ -60,6 +60,6 @@
   "watchHistory": null,
   "adminState": null,
   "dailyRewardsState": null,
-  "activeSeconds": 6360,
-  "lastSynced": "2026-10-02T14:04:43.474Z"
+  "activeSeconds": 2760,
+  "lastSynced": "2026-10-06T02:16:27.508Z"
 }

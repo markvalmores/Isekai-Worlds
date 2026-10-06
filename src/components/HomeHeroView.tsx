@@ -60,9 +60,9 @@ export const HomeHeroView: React.FC<HomeHeroViewProps> = ({
     {
       id: "series" as PageView,
       title: "Series & TV Shows",
-      desc: "WatchSeries TV shows multiverse with popup ad block shield",
+      desc: "NovaHD series multiverse with built-in adblock shield",
       icon: <Tv className="w-6 h-6 text-amber-400" />,
-      badge: "WATCHSERIES",
+      badge: "NOVAHD",
       bgGradient: "from-amber-600/30 to-yellow-600/30",
     },
     {

@@ -1,21 +1,21 @@
 {
   "allProfiles": [
     {
+      "bannerUrl": "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1200&auto=format&fit=crop&q=80",
+      "country": "GLOBAL",
       "avatarUrl": "https://images.unsplash.com/photo-1563089145-599997674d42?w=400&auto=format&fit=crop&q=80",
-      "username": "RyuReaper_853",
-      "accentColor": "#a855f7",
-      "badge": "Mythic Champion",
       "favAnime": "Jujutsu Kaisen / Demon Slayer",
       "bannerGradient": "from-purple-600 via-indigo-600 to-pink-600",
-      "country": "GLOBAL",
-      "id": "u-1790503388338-p45rg",
+      "title": "Archmage of the Abyss",
       "joinedDate": "2026",
+      "accentColor": "#a855f7",
+      "username": "RyuReaper_853",
+      "badge": "Mythic Champion",
       "bio": "Netrunning through cyberpunk neon cities and streaming live anime.",
       "customStatus": "Exploring Isekai Worlds as RyuReaper_853...",
-      "title": "Archmage of the Abyss",
-      "bannerUrl": "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1200&auto=format&fit=crop&q=80"
+      "id": "u-1790503388338-p45rg"
     }
   ],
   "activeProfileId": "u-1790503388338-p45rg",
-  "lastUpdated": "2026-10-02T14:04:43.474Z"
+  "lastUpdated": "2026-10-06T02:16:27.508Z"
 }

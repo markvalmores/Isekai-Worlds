@@ -21,7 +21,8 @@ import {
   Globe,
   Radio,
   Clock,
-  Smartphone
+  Smartphone,
+  PlaySquare
 } from "lucide-react";
 
 interface HomeHeroViewProps {
@@ -63,6 +64,14 @@ export const HomeHeroView: React.FC<HomeHeroViewProps> = ({
       icon: <Tv className="w-6 h-6 text-amber-400" />,
       badge: "SMASHY",
       bgGradient: "from-amber-600/30 to-yellow-600/30",
+    },
+    {
+      id: "reelsdrama" as PageView,
+      title: "Reels Drama Hub",
+      desc: "mewatch trending short-form drama, Asian series & originals",
+      icon: <PlaySquare className="w-6 h-6 text-pink-400" />,
+      badge: "MEWATCH",
+      bgGradient: "from-pink-600/30 to-rose-600/30",
     },
     {
       id: "media" as PageView,

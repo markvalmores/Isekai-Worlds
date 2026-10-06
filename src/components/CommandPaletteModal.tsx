@@ -226,6 +226,15 @@ export function CommandPaletteModal({
       action: () => { setCurrentPage("series"); onClose(); }
     },
     {
+      id: "nav-reelsdrama",
+      category: "Navigation",
+      label: "Go to Reels Drama (mewatch)",
+      description: "Stream hit Asian dramas, short-form reels, and Mediacorp series",
+      icon: <Film className="w-4 h-4 text-pink-400" />,
+      keywords: ["reels", "drama", "mewatch", "reels drama", "shows", "series", "mediacorp"],
+      action: () => { setCurrentPage("reelsdrama"); onClose(); }
+    },
+    {
       id: "nav-radio",
       category: "Navigation",
       label: "Go to Radio Gaga J-Pop Broadcast",

@@ -20,6 +20,7 @@ import { VrViewPortal } from "./components/VrViewPortal";
 import { HardwareEngine } from "./components/HardwareEngine";
 import { WatchAnimePortal } from "./components/WatchAnimePortal";
 import { SeriesTab } from "./components/SeriesTab";
+import { ReelsDramaTab } from "./components/ReelsDramaTab";
 import { ExclusiveAnimesTab } from "./components/ExclusiveAnimesTab";
 import { RadioGaga } from "./components/RadioGaga";
 import { RadioGagaAMV } from "./components/AmvDashboard";
@@ -298,6 +299,7 @@ export default function App() {
       hardware: "RTX & AI Frame Gen Engine",
       watch: "Watch Anime Online",
       series: "Series (SmashyStream)",
+      reelsdrama: "Reels Drama (mewatch Series)",
       exclusiveanimes: "Exclusive Animes (Muse Asia)",
       radio: "Radio Gaga Broadcast",
       amv: "Anime Music Videos",
@@ -801,6 +803,10 @@ export default function App() {
 
         {currentPage === "series" && (
           <SeriesTab />
+        )}
+
+        {currentPage === "reelsdrama" && (
+          <ReelsDramaTab />
         )}
 
         {currentPage === "exclusiveanimes" && (
